@@ -1,0 +1,6 @@
+/builds/*/*
+
+!/builds/*/bin
+!/builds/*/src
+
+

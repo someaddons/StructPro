@@ -1,0 +1,4 @@
+python unpack_all.py
+sh install_all.sh
+client/server classpath: v -> v_main
+sh build_all.sh
