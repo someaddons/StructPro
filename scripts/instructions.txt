@@ -1,0 +1,5 @@
+python unpack_all.py
+sh install_all.sh
+Open idea -> select import -> select gradle file
+client/server classpath: v -> v_main
+sh build_all.sh
