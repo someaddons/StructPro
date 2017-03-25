@@ -1,11 +1,12 @@
-package com.ternsip.structpro.WorldCache;
+package com.ternsip.structpro.Logic;
 
-import com.ternsip.structpro.Structure.Structure;
+import com.ternsip.structpro.Structure.Structure.Biome;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.monster.*;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.projectile.EntityWitherSkull;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -13,17 +14,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings({"WeakerAccess", "deprecation"})
 public class Mobs {
 
     /* All Mobs that have eggs for each biome */
-    private static final HashMap<Structure.Biome, ArrayList<Class<? extends Entity>>> mobsBiome = new HashMap<Structure.Biome, ArrayList<Class<? extends Entity>>>(){{
-        for (Structure.Biome biome : Structure.Biome.values()) {
+    @SuppressWarnings({"unchecked"})
+    private static final HashMap<Biome, ArrayList<Class<? extends Entity>>> mobsBiome = new HashMap<Biome, ArrayList<Class<? extends Entity>>>(){{
+        for (Biome biome : Biome.values()) {
             put(biome, new ArrayList<Class<? extends Entity>>());
             Collections.addAll(get(biome), EntitySkeleton.class, EntityZombie.class, EntitySpider.class, EntityCreeper.class);
         }
-        Collections.addAll(get(Structure.Biome.NETHER), EntityGhast.class, EntityPigZombie.class, EntityWitherSkull.class, EntityBlaze.class);
-        Collections.addAll(get(Structure.Biome.SNOW),  EntityPolarBear.class, EntitySnowman.class);
-        Collections.addAll(get(Structure.Biome.END), EntityEnderman.class);
+        Collections.addAll(get(Biome.NETHER), EntityGhast.class, EntityPigZombie.class, EntityWitherSkull.class, EntityBlaze.class);
+        Collections.addAll(get(Biome.SNOW),  EntityPolarBear.class, EntitySnowman.class);
+        Collections.addAll(get(Biome.END), EntityEnderman.class);
     }};
 
     /* Village mobs */
@@ -34,11 +37,11 @@ public class Mobs {
     /* All mobs that have eggs */
     private static final ArrayList<Class<? extends Entity>> mobs = new ArrayList<Class<? extends Entity>>() {{
         for (Map.Entry<String, EntityList.EntityEggInfo> e : EntityList.ENTITY_EGGS.entrySet()) {
-            add(EntityList.getClassFromID(EntityList.getIDFromString(e.getKey())));
+            add(EntityList.getClassFromID(EntityList.getIDFromString(e.getValue().spawnedID)));
         }
     }};
 
-    public static ArrayList<Class<? extends Entity>> select(Structure.Biome biome) {
+    public static ArrayList<Class<? extends Entity>> select(Biome biome) {
         return mobsBiome.get(biome);
     }
 
@@ -49,7 +52,7 @@ public class Mobs {
     public static Class<? extends Entity> selectByName(String name) {
         for (Class<? extends Entity> mob : mobs) {
             String mobName = classToName(mob);
-            if (mobName.equalsIgnoreCase(name)) {
+            if (mobName.equalsIgnoreCase(name) || mobName.equalsIgnoreCase(name)) {
                 return mob;
             }
         }
@@ -67,8 +70,7 @@ public class Mobs {
     }
 
     public static Entity construct(World world, Class<? extends Entity> mob) {
-        String mobName = EntityList.getEntityStringFromClass(mob);
-        return EntityList.createEntityByName(mobName, world);
+        return EntityList.createEntityByName(classToName(mob), world);
     }
 
 }

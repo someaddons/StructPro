@@ -1,11 +1,9 @@
 package com.ternsip.structpro.WorldCache;
 
-import net.minecraft.block.Block;
+import com.ternsip.structpro.Logic.Mobs;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -13,6 +11,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 /* Memoize world block communication */
+@SuppressWarnings({"WeakerAccess", "unused", "deprecation"})
 public class WorldCache {
 
     /* Holds World -> ChunkCache */
@@ -49,12 +48,20 @@ public class WorldCache {
         return getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).getBlockState(x, y, z);
     }
 
+    public static void setTileEntity(World world, int x, int y, int z, TileEntity tileEntity) {
+        getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).setTileEntity(x, y, z, tileEntity);
+    }
+
     public static TileEntity getTileEntity(World world, int x, int y, int z) {
         return getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).getTileEntity(x, y, z);
     }
 
-    public static void setTileEntity(World world, int x, int y, int z, TileEntity tileEntity) {
-        getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).setTileEntity(x, y, z, tileEntity);
+    public static int getHeight(World world, int x, int z) {
+        return getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).getHeight(x, z);
+    }
+
+    public static int getBottomHeight(World world, int x, int z) {
+        return getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).getBottomHeight(x, z);
     }
 
     public static void setBlockState(World world, BlockPos blockPos, IBlockState blockState) {
@@ -71,14 +78,6 @@ public class WorldCache {
 
     public static TileEntity getTileEntity(World world, BlockPos blockPos) {
         return getTileEntity(world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
-    }
-
-    public static int getHeight(World world, int x, int z) {
-        return getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).getHeight(x, z);
-    }
-
-    public static int getBottomHeight(World world, int x, int z) {
-        return getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).getBottomHeight(x, z);
     }
 
     /* Unload obsoleted data */
@@ -102,30 +101,6 @@ public class WorldCache {
 
     public static int getDimensionID(World world) {
         return world.provider.getDimension();
-    }
-
-    public static int blockID(Block block) {
-        return Block.getIdFromBlock(block);
-    }
-
-    public static Item ItemByName(String name) {
-        return Item.REGISTRY.getObject(new ResourceLocation(name));
-    }
-
-    public static int itemMaxMeta(Item item) {
-        return item.getMaxDamage();
-    }
-
-    public static int itemMaxStack(Item item) {
-        return item.getItemStackLimit();
-    }
-
-    public static IBlockState blockState(Block block, int meta) {
-        IBlockState result = block.getDefaultState();
-        try {
-            result = block.getStateFromMeta(meta);
-        } catch (Throwable ignored) {}
-        return result;
     }
 
 }

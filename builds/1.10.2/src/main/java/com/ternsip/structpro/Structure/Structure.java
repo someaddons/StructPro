@@ -1,20 +1,21 @@
 package com.ternsip.structpro.Structure;
 
-import com.ternsip.structpro.Logic.Loader;
-import com.ternsip.structpro.WorldCache.WorldCache;
+import com.ternsip.structpro.Logic.Blocks;
+import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashMap;
 
 /* Holds schematic-extended information and can load/spawn/calibrate it */
 public class Structure extends Blueprint {
 
     /* Structure version */
-    private static final int VERSION = 102;
+    private static final int VERSION = 103;
 
     public Method getMethod() {
         return method;
@@ -153,8 +154,8 @@ public class Structure extends Blueprint {
             for (Biome biome : Biome.values()) {
                 double count = 0, frequency = 0;
                 for (Block block : bioBlocks.get(biome)) {
-                    count += counts[WorldCache.blockID(block)];
-                    frequency += frequencies[WorldCache.blockID(block)];
+                    count += counts[Blocks.blockID(block)];
+                    frequency += frequencies[Blocks.blockID(block)];
                 }
                 bioCounts.put(biome, count);
                 bioFrequencies.put(biome, frequency);
@@ -207,11 +208,11 @@ public class Structure extends Blueprint {
 
     }
 
-    protected long schemaLen;
-    protected Method method;
-    protected Biome biome;
-    protected int lift;
-    protected BitSet skin;
+    private long schemaLen;
+    Method method;
+    Biome biome;
+    int lift;
+    BitSet skin;
 
     Structure() {}
 
@@ -254,7 +255,7 @@ public class Structure extends Blueprint {
 
     private NBTTagCompound getData() {
         NBTTagCompound result = new NBTTagCompound();
-        result.setByteArray("Skin", skin.toByteArray());
+        result.setByteArray("Skin", Utils.toByteArray(skin));
         return result;
     }
 
@@ -272,7 +273,7 @@ public class Structure extends Blueprint {
     }
 
     private void readData(NBTTagCompound data) throws IOException {
-        skin = BitSet.valueOf(data.getByteArray("Skin"));
+        skin = Utils.toBitSet(data.getByteArray("Skin"));
     }
 
     private void readFlags(NBTTagCompound flags) throws IOException {
@@ -293,15 +294,11 @@ public class Structure extends Blueprint {
     private int calcLift() {
         int[][] level = new int[width][length];
         int[][] levelMax = new int[width][length];
-        boolean[] liquid = Loader.liquid;
-        boolean[] soil = Loader.soil;
         boolean dry = method != Method.UNDERWATER;
         for (int index = 0; index < blocks.length; ++index) {
-            if (blocks[index] >= 0 && blocks[index] < 256) {
-                if (soil[blocks[index]] || (dry && liquid[blocks[index]])) {
-                    level[getX(index)][getZ(index)] += 1;
-                    levelMax[getX(index)][getZ(index)] = getY(index) + 1;
-                }
+            if (Blocks.isCardinal(blocks[index]) || (dry && Blocks.isLiquid(blocks[index]))) {
+                level[getX(index)][getZ(index)] += 1;
+                levelMax[getX(index)][getZ(index)] = getY(index) + 1;
             }
         }
         long borders = 0, totals = 0;
@@ -332,7 +329,7 @@ public class Structure extends Blueprint {
             }
         }};
         for (Block block : skipBlocks) {
-            int blockID = WorldCache.blockID(block);
+            int blockID = Blocks.blockID(block);
             if (blockID >= 0 && blockID < 256) {
                 skip[blockID] = true;
             }

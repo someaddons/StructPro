@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 
 /* Reflects information about cuboid stereometric state in the world. */
+@SuppressWarnings({"WeakerAccess", "unused"})
 class Posture {
 
     private int posX, posY, posZ;
@@ -32,13 +33,6 @@ class Posture {
         update();
     }
 
-    void shift(int dx, int dy, int dz) {
-        this.posX += dx;
-        this.posY += dy;
-        this.posZ += dz;
-        update();
-    }
-
     private void update() {
         this.sizeX = width;
         this.sizeY = height;
@@ -46,12 +40,10 @@ class Posture {
         if (rotateY % 2 > 0) {
             int tmp = sizeX; sizeX = sizeZ; sizeZ = tmp;
         }
-        if (rotateX % 2 > 0) {
-            //int tmp = sizeY; sizeY = sizeZ; sizeZ = tmp;
-        }
-        if (rotateZ % 2 > 0) {
-            //int tmp = sizeX; sizeX = sizeY; sizeY = tmp;
-        }
+        /*
+        if (rotateX % 2 > 0) { int tmp = sizeY; sizeY = sizeZ; sizeZ = tmp;}
+        if (rotateZ % 2 > 0) {int tmp = sizeX; sizeX = sizeY; sizeY = tmp;}
+        */
         this.endX = posX + sizeX - 1;
         this.endY = posY + sizeY - 1;
         this.endZ = posZ + sizeZ - 1;

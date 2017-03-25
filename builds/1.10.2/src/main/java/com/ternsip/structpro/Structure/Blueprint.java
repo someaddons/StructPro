@@ -10,10 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-/**
- * Schematic - Classical Minecraft schematic storage
- * Provide data access and world control
- */
+/* Schematic - Classical Minecraft schematic storage. Provide data access and world control */
 class Blueprint {
 
     /* Tag file size limit in bytes */
@@ -69,7 +66,9 @@ class Blueprint {
 
     static void writeTags(File file, NBTTagCompound tag) throws IOException {
         if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
+            if (!file.getParentFile().mkdirs()) {
+                throw new IOException("Can't create path: " + file.getParent());
+            }
         }
         FileOutputStream fos = new FileOutputStream(file);
         try {

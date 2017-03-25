@@ -2,21 +2,24 @@ package com.ternsip.structpro.Utils;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class Utils {
 
-    public static String join(String[] args, String delimeter) {
+    public static String join(String[] args, String delimiter) {
         StringBuilder sb = new StringBuilder();
-        for (String arg : args) {
-            sb.append(arg).append(delimeter);
+        for (int i = 0; i < args.length - 1; ++i) {
+            sb.append(args[i]).append(delimiter);
         }
+        sb.append(args[args.length - 1]);
         return sb.toString();
+    }
+
+    public static String[] toArray(HashSet<String> set) {
+        return set.toArray(new String[set.size()]);
     }
 
     public static HashMap<String, String> extractVariables(String string) {
@@ -30,31 +33,41 @@ public class Utils {
         return result;
     }
 
-    public static byte[] shortArrToByteArr(short[] arr) {
+    public static byte[] toByteArray(short[] arr) {
         byte[] byteBlocks = new byte[arr.length * 2];
         ByteBuffer.wrap(byteBlocks).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(arr);
         return byteBlocks;
     }
 
-    public static short[] byteArrToShortArr(byte[] arr) {
+    public static short[] toShortArray(byte[] arr) {
         short[] shortBlocks = new short[arr.length / 2];
         ByteBuffer.wrap(arr).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shortBlocks);
         return shortBlocks;
     }
 
-    public static ArrayList<Integer> stringToArray(String array) {
-        ArrayList<Integer> result = new ArrayList<Integer>();
-        for(String stringValue : Arrays.asList(array.split("\\s*,\\s*"))) {
-            try {result.add(Integer.parseInt(stringValue));} catch(NumberFormatException ignored) {}
+    public static byte[] toByteArray(BitSet bits) {
+        byte[] result = new byte[(bits.length() + 7) / 8];
+        for (int i = 0; i < bits.length(); ++i) {
+            if (bits.get(i)) {
+                result[result.length - i / 8 - 1] |= 1 << (i % 8);
+            }
         }
         return result;
     }
 
-    public static String arrayToString(ArrayList<Integer> array) {
-        String result = "";
-        for(Integer integerValue : array) {
-            result += (result.isEmpty() ? "": ", ") + integerValue.toString();
+    public static BitSet toBitSet(byte[] bytes) {
+        BitSet result = new BitSet(bytes.length * 8);
+        for (int i = 0; i < bytes.length * 8; i++) {
+            if ((bytes[bytes.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+                result.set(i);
+            }
         }
+        return result;
+    }
+
+    public static HashSet<String> tokenize(String array, String delimiter) {
+        HashSet<String> result = new HashSet<String>();
+        result.addAll(Arrays.asList(array.split("\\s*" + delimiter + "\\s*")));
         return result;
     }
 

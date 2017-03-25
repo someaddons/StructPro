@@ -15,7 +15,7 @@ import java.util.HashMap;
 public class Structure extends Blueprint {
 
     /* Structure version */
-    private static final int VERSION = 102;
+    private static final int VERSION = 103;
 
     public Method getMethod() {
         return method;

@@ -1,7 +1,5 @@
 package com.ternsip.structpro.Logic;
 
-import com.ternsip.structpro.Structure.Projector;
-import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
@@ -16,18 +14,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Chat commands class
- */
+/* Chat commands class */
+@SuppressWarnings({"NullableProblems"})
 public class Commands implements ICommand {
 
-    private static final String commandName = "structpro";
-    private static final String commandUsage = "/structpro <help|paste>";
-    private static final ArrayList<String> commandAliases = new ArrayList<String>(){{add("/structpro");add("/spro");}};
-
-    private static final String cmdPasteHelp = "PASTE SCHEMATIC: /structpro paste " +
-            "name=<string> posX=<int> posY=<int> posZ=<int> rotateX=<int> " +
-            "rotateY=<int> rotateZ=<int> flipX=<bool> flipY=<bool> flipZ=<bool> village=<bool>";
+    private static final String name = "structpro";
+    private static final String usage = "/structpro <help|paste>";
+    private static final ArrayList<String> aliases = new ArrayList<String>(){{add("/structpro");}};
 
     @Override
     public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
@@ -51,30 +44,30 @@ public class Commands implements ICommand {
 
     @Override
     public String getCommandName() {
-        return commandName;
+        return name;
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return commandUsage;
+        return usage;
     }
 
     @Override
     public List<String> getCommandAliases() {
-        return commandAliases;
+        return aliases;
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length <= 0) {
-            cmdHelp(server, sender);
+            Evaluator.cmdHelp();
             return;
         }
         String cmd = args[0].toLowerCase();
         HashMap<String, String> vars = Utils.extractVariables(Utils.join(args, " "));
         if (cmd.equals("paste")) {
             Random random = new Random();
-            String name = null;
+            String name = "";
             int posX = sender.getPosition().getX();
             int posY = sender.getPosition().getY();
             int posZ = sender.getPosition().getZ();
@@ -102,50 +95,15 @@ public class Commands implements ICommand {
             if (vars.containsKey("flipy")) flipY = Boolean.parseBoolean(vars.get("flipy"));
             if (vars.containsKey("flipz")) flipZ = Boolean.parseBoolean(vars.get("flipz"));
             if (vars.containsKey("village")) village = Boolean.parseBoolean(vars.get("village"));
-            cmdPaste(server, sender, name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, village);
+            feedback(sender, Evaluator.cmdPaste(sender.getEntityWorld(), name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, village));
         }
         if (cmd.equals("help")) {
-            cmdHelp(server, sender);
+            feedback(sender, Evaluator.cmdHelp());
         }
-    }
-
-    /* Paste schematic that has most similar name */
-    private void cmdPaste(MinecraftServer server, ICommandSender sender,
-                          String name, int posX, int posY, int posZ,
-                          int rotateX, int rotateY, int rotateZ,
-                          boolean flipX, boolean flipY, boolean flipZ,
-                          boolean village) throws CommandException {
-        Storage storage = Loader.storage;
-        long seed = System.currentTimeMillis();
-        if (village) {
-            ArrayList<Projector> projectors = name == null ? Utils.select(storage.getVillages(), seed) : storage.selectVillage(name);
-            if (projectors == null || projectors.size() == 0) {
-                feedback(sender, "No matching villages");
-                return;
-            }
-            Report report = Distributor.spawnVillage(sender.getEntityWorld(), projectors, posX / 16, posZ / 16, new Random(seed));
-            report.print();
-            feedback(sender, report.toString());
-        } else {
-            Projector projector = name == null ? Utils.select(storage.select(), seed) : Utils.select(storage.select(name), seed);
-            if (projector == null) {
-                feedback(sender, "No matching structures");
-                return;
-            }
-            Report report = projector.paste(sender.getEntityWorld(), posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, 0);
-            report.print();
-            feedback(sender, report.toString());
-        }
-    }
-
-    /* Print command help information */
-    private void cmdHelp(MinecraftServer server, ICommandSender sender) throws CommandException {
-        feedback(sender, cmdPasteHelp);
-        feedback(sender, "You can pass arguments by name");
     }
 
     /* Send chat feedback to sender */
-    private void feedback(ICommandSender sender, String message) {
+    private static void feedback(ICommandSender sender, String message) {
         sender.addChatMessage(new TextComponentString(message));
     }
 

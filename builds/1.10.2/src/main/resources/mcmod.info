@@ -3,7 +3,7 @@
   "modid": "structpro",
   "name": "StructPro",
   "description": "World structure generation",
-  "version": "${version}",
+  "version": "",
   "mcversion": "${mcversion}",
   "url": "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/2469638-structpro-mod-schematic-spawning-system",
   "updateUrl": "",

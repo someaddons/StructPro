@@ -1,11 +1,10 @@
 package com.ternsip.structpro.WorldCache;
 
-import com.ternsip.structpro.Logic.Loader;
+import com.ternsip.structpro.Logic.Blocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketChunkData;
 import net.minecraft.tileentity.TileEntity;
@@ -34,9 +33,6 @@ class Chunkster {
     private int chunkStartX;
     private int chunkStartY;
     private int chunkStartZ;
-    private int chunkEndX;
-    private int chunkEndY;
-    private int chunkEndZ;
     private boolean needToUpdate;
     private Timer timer;
 
@@ -48,9 +44,6 @@ class Chunkster {
         chunkStartX = chunkX * CHUNK_SIZE_X;
         chunkStartY = 0;
         chunkStartZ = chunkZ * CHUNK_SIZE_Z;
-        chunkEndX = chunkStartX + CHUNK_SIZE_X - 1;
-        chunkEndY = CHUNK_SIZE_Y - 1;
-        chunkEndZ = chunkStartZ + CHUNK_SIZE_Z - 1;
         needToUpdate = false;
         timer = new Timer();
         track();
@@ -63,20 +56,18 @@ class Chunkster {
         IBlockState[] traceData = new IBlockState[CHUNK_SIZE_Y];
         storage = chunk.getBlockStorageArray();
         if (storage[CHUNK_PARTS - 1] == null) {
-            for (int sy = chunkStartY; sy < chunkEndY; sy += 16) {
+            for (int sy = chunkStartY; sy < CHUNK_SIZE_Y; sy += 16) {
                 traceData[sy] = chunk.getBlockState(new BlockPos(0, sy, 0));
-                chunk.setBlockState(new BlockPos(0, sy, 0), Blocks.OBSIDIAN.getDefaultState());
+                chunk.setBlockState(new BlockPos(0, sy, 0), Blocks.state(Blocks.OBSIDIAN));
             }
             storage = chunk.getBlockStorageArray();
-            for (int sy = chunkStartY; sy < chunkEndY; sy += 16) {
+            for (int sy = chunkStartY; sy < CHUNK_SIZE_Y; sy += 16) {
                 chunk.setBlockState(new BlockPos(0, sy, 0), traceData[sy]);
             }
         }
     }
 
     private void trackHeight() {
-        boolean[] overlook = Loader.overlook;
-        boolean[] liquid = Loader.liquid;
         String dimName = WorldCache.getDimensionName(world);
         int startHeight = 255;
         startHeight = dimName.equalsIgnoreCase("Nether") ? 63 : startHeight;
@@ -85,8 +76,8 @@ class Chunkster {
             for (int cz = 0, wz = chunkStartZ; cz < CHUNK_SIZE_Z; ++wz, ++cz) {
                 int hg = startHeight;
                 while (hg > 0) {
-                    int blockID = WorldCache.blockID(getBlockState(wx, hg, wz).getBlock());
-                    if (blockID >= 0 && blockID < 256 && overlook[blockID]) {
+                    int blockID = Blocks.blockID(getBlockState(wx, hg, wz).getBlock());
+                    if (Blocks.isOverlook(blockID)) {
                         --hg;
                     } else {
                         break;
@@ -94,8 +85,8 @@ class Chunkster {
                 }
                 heights[cx][cz] = hg + 1;
                 while (hg > 0) {
-                    int blockID = WorldCache.blockID(getBlockState(wx, hg, wz).getBlock());
-                    if (blockID >= 0 && blockID < 256 && (overlook[blockID] || liquid[blockID])) {
+                    int blockID = Blocks.blockID(getBlockState(wx, hg, wz).getBlock());
+                    if (Blocks.isOverlook(blockID) || Blocks.isLiquid(blockID)) {
                         --hg;
                     } else {
                         break;
@@ -113,11 +104,11 @@ class Chunkster {
                 boolean grassed = false;
                 for (int wy = Math.min(heights[cx][cz], 255); wy >= 0; --wy) {
                     Block block = getBlockState(wx, wy, wz).getBlock();
-                    if (block == Blocks.GRASS && Loader.soil[WorldCache.blockID(prevBlock)]) {
-                        setBlockState(wx, wy, wz, Blocks.DIRT.getDefaultState());
+                    if (block == Blocks.GRASS && Blocks.isSoil(Blocks.blockID(prevBlock))) {
+                        setBlockState(wx, wy, wz, Blocks.state(Blocks.DIRT));
                     }
-                    if (!grassed && block == Blocks.DIRT && Loader.overlook[WorldCache.blockID(prevBlock)]) {
-                        setBlockState(wx, wy, wz, Blocks.GRASS.getDefaultState());
+                    if (!grassed && block == Blocks.DIRT && Blocks.isOverlook(Blocks.blockID(prevBlock))) {
+                        setBlockState(wx, wy, wz, Blocks.state(Blocks.GRASS));
                         grassed = true;
                     }
                     prevBlock = block;
@@ -135,24 +126,28 @@ class Chunkster {
     }
 
     void setBlockState(int wx, int wy, int wz, IBlockState blockState) {
-        removeTileEntity(wx, wy, wz);
-        storage[wy / CHUNK_PART_Y].set(wx - chunkStartX, wy % CHUNK_PART_Y, wz - chunkStartZ, blockState);
-        needToUpdate = true;
+        if (wy >= 0 && wy < CHUNK_SIZE_Y) {
+            removeTileEntity(wx, wy, wz);
+            storage[wy / CHUNK_PART_Y].set(wx - chunkStartX, wy % CHUNK_PART_Y, wz - chunkStartZ, blockState);
+            needToUpdate = true;
+        }
     }
 
     IBlockState getBlockState(int wx, int wy, int wz) {
-        return storage[wy / CHUNK_PART_Y].get(wx - chunkStartX, wy % CHUNK_PART_Y, wz - chunkStartZ);
+        return (wy < 0 || wy >= CHUNK_SIZE_Y) ? Blocks.state(Blocks.AIR) : storage[wy / CHUNK_PART_Y].get(wx - chunkStartX, wy % CHUNK_PART_Y, wz - chunkStartZ);
     }
 
     TileEntity getTileEntity(int wx, int wy, int wz) {
-        return world.getTileEntity(new BlockPos(wx, wy, wz));
+        return (wy < 0 || wy >= CHUNK_SIZE_Y) ? null : world.getTileEntity(new BlockPos(wx, wy, wz));
     }
 
     void setTileEntity(int wx, int wy, int wz, TileEntity tileEntity) {
-        world.setTileEntity(new BlockPos(wx, wy, wz), tileEntity);
+        if (wy >= 0 && wy < CHUNK_SIZE_Y) {
+            world.setTileEntity(new BlockPos(wx, wy, wz), tileEntity);
+        }
     }
 
-    void removeTileEntity(int wx, int wy, int wz) {
+    private void removeTileEntity(int wx, int wy, int wz) {
         world.removeTileEntity(new BlockPos(wx, wy, wz));
     }
 
@@ -175,7 +170,7 @@ class Chunkster {
         needToUpdate = false;
     }
 
-    public Timer getTimer() {
+    Timer getTimer() {
         return timer;
     }
 }

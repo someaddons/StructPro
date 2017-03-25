@@ -9,30 +9,30 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-class Storage {
+class Structures {
 
-    private ArrayList<Projector> projectors = new ArrayList<Projector>();
+    private static ArrayList<Projector> projectors = new ArrayList<Projector>();
 
     /* All possible projectors for each type of method */
-    private HashMap<Method, ArrayList<Projector>> methodProjectors = new HashMap<Method, ArrayList<Projector>>(){{
+    private static HashMap<Method, ArrayList<Projector>> methodProjectors = new HashMap<Method, ArrayList<Projector>>(){{
         for (Method method : Method.values()) {
             put(method, new ArrayList<Projector>());
         }
     }};
 
     /* All possible projectors for each type of biome */
-    private HashMap<Biome, ArrayList<Projector>> biomeProjectors = new HashMap<Biome, ArrayList<Projector>>(){{
+    private static HashMap<Biome, ArrayList<Projector>> biomeProjectors = new HashMap<Biome, ArrayList<Projector>>(){{
         for (Biome biome : Biome.values()) {
             put(biome, new ArrayList<Projector>());
         }
     }};
 
     /* Villages structures */
-    private HashMap<String, Integer> villageIndices = new HashMap<String, Integer>();
-    private ArrayList<ArrayList<Projector>> villages = new ArrayList<ArrayList<Projector>>();
+    private static HashMap<String, Integer> villageIndices = new HashMap<String, Integer>();
+    private static ArrayList<ArrayList<Projector>> villages = new ArrayList<ArrayList<Projector>>();
 
     /* Load structure from file */
-    void loadStructure(File file) {
+    static void loadStructure(File file) {
         try {
             final Projector projector = new Projector(file);
             projectors.add(projector);
@@ -49,7 +49,7 @@ class Storage {
             int width = projector.getWidth();
             int height = projector.getHeight();
             int length = projector.getLength();
-            if (Loader.additionalOutput) {
+            if (Configurator.additionalOutput) {
                 new Report()
                         .add("LOAD", file.getPath())
                         .add("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]")
@@ -59,7 +59,7 @@ class Storage {
                         .print();
             }
         } catch (IOException ioe) {
-            if (Loader.additionalOutput) {
+            if (Configurator.additionalOutput) {
                 new Report()
                         .add("CAN'T LOAD SCHEMATIC", file.getPath())
                         .add("ERROR", ioe.getMessage())
@@ -69,7 +69,7 @@ class Storage {
     }
 
     /* Sort village structures by size */
-    void sortVillages() {
+    static void sortVillages() {
         for (ArrayList<Projector> village : villages) {
             Collections.sort(village, new Comparator<Projector>(){
                 @Override
@@ -83,23 +83,23 @@ class Storage {
         }
     }
 
-    /* Select all structures */
-    ArrayList<Projector> select() {
-        return projectors;
+    /* Returns all projectors  */
+    static ArrayList<Projector> select() {
+        return select("");
     }
 
     /* Select structures by biome */
-    ArrayList<Projector> select(Biome biome) {
+    static ArrayList<Projector> select(Biome biome) {
         return biomeProjectors.get(biome);
     }
 
     /* Select structures by method */
-    ArrayList<Projector> select(Method method) {
+    static ArrayList<Projector> select(Method method) {
         return methodProjectors.get(method);
     }
 
     /* Select structures that matches any method */
-    ArrayList<Projector> select(Method[] methods) {
+    static ArrayList<Projector> select(Method[] methods) {
         ArrayList<Projector> result = new ArrayList<Projector>();
         for (Method method : methods) {
             result.addAll(select(method));
@@ -108,7 +108,7 @@ class Storage {
     }
 
     /* Select structures that matches any method */
-    ArrayList<Projector> select(Biome[] biomes) {
+    static ArrayList<Projector> select(Biome[] biomes) {
         ArrayList<Projector> result = new ArrayList<Projector>();
         for (Biome biome : biomes) {
             result.addAll(select(biome));
@@ -117,9 +117,12 @@ class Storage {
     }
 
     /* Returns suitable projectors for file name */
-    ArrayList<Projector> select(String name) {
+    static ArrayList<Projector> select(String name) {
+        if (name.isEmpty()) {
+            return projectors;
+        }
         ArrayList<Projector> result = new ArrayList<Projector>();
-        for (Projector projector : select()) {
+        for (Projector projector : projectors) {
             if (projector.getOriginFile().getPath().toLowerCase().contains(name.toLowerCase())) {
                 result.add(projector);
             }
@@ -127,17 +130,22 @@ class Storage {
         return result;
     }
 
-    /* Select village by name */
-    ArrayList<Projector> selectVillage(String name) {
+    /* Select villages by name */
+    static ArrayList<ArrayList<Projector>> selectVillages(String name) {
+        if (name.isEmpty()) {
+            return villages;
+        }
+        ArrayList<ArrayList<Projector>> result = new ArrayList<ArrayList<Projector>>();
         for (HashMap.Entry<String, Integer> entry : villageIndices.entrySet()) {
             if (entry.getKey().toLowerCase().contains(name)) {
-                return villages.get(entry.getValue());
+                result.add(villages.get(entry.getValue()));
             }
         }
-        return null;
+        return result;
     }
 
-    ArrayList<ArrayList<Projector>> getVillages() {
-        return villages;
+    /* Select all villages */
+    static ArrayList<ArrayList<Projector>> selectVillages() {
+        return selectVillages("");
     }
 }

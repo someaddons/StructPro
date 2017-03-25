@@ -10,29 +10,31 @@ import net.minecraft.world.World;
 
 import java.util.*;
 
-/* Assign array of clusters to biome map and distribute relative spawn chance */
-class Distributor extends Loader {
+/* Distributes world things generation */
+class Distributor extends Configurator {
 
     /* Structures spawn sets in attempting order */
     private static ArrayList<ArrayList<Projector>> spawnOrder = new ArrayList<ArrayList<Projector>>(){{
-            add(storage.select(new Method[]{Method.BASIC, Method.UNDERWATER, Method.AFLOAT, Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(storage.select(new Method[]{Method.BASIC}));
-            add(storage.select(new Method[]{Method.BASIC}));
-            add(storage.select(new Method[]{Method.BASIC}));
-            add(storage.select(new Method[]{Method.UNDERWATER}));
-            add(storage.select(new Method[]{Method.AFLOAT}));
-            add(storage.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(storage.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(storage.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(storage.select(new Biome[]{Biome.NETHER}));
-            add(storage.select(new Biome[]{Biome.SNOW}));
-            add(storage.select(new Biome[]{Biome.END}));
+            add(Structures.select(new Method[]{Method.BASIC, Method.UNDERWATER, Method.AFLOAT, Method.SKY, Method.HILL, Method.UNDERGROUND}));
+            add(Structures.select(new Method[]{Method.BASIC}));
+            add(Structures.select(new Method[]{Method.BASIC}));
+            add(Structures.select(new Method[]{Method.BASIC}));
+            add(Structures.select(new Method[]{Method.UNDERWATER}));
+            add(Structures.select(new Method[]{Method.AFLOAT}));
+            add(Structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+            add(Structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+            add(Structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+            add(Structures.select(new Biome[]{Biome.NETHER}));
+            add(Structures.select(new Biome[]{Biome.SNOW}));
+            add(Structures.select(new Biome[]{Biome.END}));
     }};
 
     /* Process chunk generations */
-    void structGen(World world, int chunkX, int chunkZ) {
+    static void structGen(World world, int chunkX, int chunkZ) {
         Random random = getRandom(world, chunkX, chunkZ);
-        if (spawnDimensions.contains(WorldCache.getDimensionID(world))) {
+        String dimID = String.valueOf(WorldCache.getDimensionID(world));
+        String dimName = String.valueOf(WorldCache.getDimensionName(world));
+        if (spawnDimensions.contains(dimID) || spawnDimensions.contains(dimName)) {
             int drops = (int) density + (random.nextDouble() <= (density - (int) density) ? 1 : 0);
             for (int drop = 0; drop < drops; ++drop) {
                 boolean spawned = false;
@@ -47,10 +49,10 @@ class Distributor extends Loader {
                 }
             }
         }
-        if (storage.getVillages().size() > 0 && villageDimensions.contains(WorldCache.getDimensionID(world))) {
+        if (Structures.selectVillages().size() > 0 && (villageDimensions.contains(dimID) || villageDimensions.contains(dimName))) {
             int drops = (int) densityVillage + (random.nextDouble() <= (densityVillage - (int) densityVillage) ? 1 : 0);
             for (int drop = 0; drop < drops; ++drop) {
-                spawnVillage(world, Utils.select(storage.getVillages(), random.nextLong()), chunkX, chunkZ, random).print();
+                spawnVillage(world, Utils.select(Structures.selectVillages(), random.nextLong()), chunkX, chunkZ, random).print();
             }
         }
     }

@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
         name = Structpro.MODNAME,
         version = Structpro.VERSION,
         acceptableRemoteVersions = "*")
+@SuppressWarnings({"WeakerAccess"})
 public class Structpro {
 
     public static final String MODID = "structpro";

@@ -1,13 +1,14 @@
 package com.ternsip.structpro.Structure;
 
-import com.ternsip.structpro.Logic.Loader;
-import com.ternsip.structpro.WorldCache.Mobs;
+import com.ternsip.structpro.Logic.Blocks;
+import com.ternsip.structpro.Logic.Items;
+import com.ternsip.structpro.Logic.Configurator;
+import com.ternsip.structpro.Logic.Mobs;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
 import com.ternsip.structpro.WorldCache.WorldCache;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -28,10 +29,9 @@ import java.util.Collections;
 import java.util.Random;
 
 /*
-* Projector is wrapper for blueprint for better storing and pasting
+* Projector is wrapper for structure for better storing and pasting
 * It provides file-cache on structures for minimizing RAM and maximizing performance
-*
-* */
+*/
 public class Projector extends Structure {
 
     /* Directory for dump files */
@@ -120,7 +120,8 @@ public class Projector extends Structure {
             }
         }
 
-        if (Loader.spawnMobs) {
+        /* Populate generated structure */
+        if (Configurator.spawnMobs) {
             populate(world, posture, seed);
         }
 
@@ -138,18 +139,16 @@ public class Projector extends Structure {
         count = village ? count : count * 2;
         int maxTries = 16 + count * count;
         for (int i = 0; i < maxTries && count > 0; ++i) {
-            int dx = random.nextInt(width);
-            int dy = random.nextInt(height);
-            int dz = random.nextInt(length);
+            int dx = random.nextInt(width), dy = random.nextInt(height), dz = random.nextInt(length);
             int index = getIndex(dx, dy, dz);
-            BlockPos blockPos1 = posture.getWorldPos(dx, dy, dz);
-            BlockPos blockPos2 = new BlockPos(blockPos1.getX(), blockPos1.getY() + 1, blockPos1.getZ());
-            if (!world.isAirBlock(blockPos1) || !world.isAirBlock(blockPos2) || skin.get(index)) {
+            BlockPos blockPosFloor = posture.getWorldPos(dx, dy, dz);
+            BlockPos blockPosTop = new BlockPos(blockPosFloor.getX(), blockPosFloor.getY() + 1, blockPosFloor.getZ());
+            if (!world.isAirBlock(blockPosFloor) || !world.isAirBlock(blockPosTop) || skin.get(index)) {
                 continue;
             }
             Class<? extends Entity> mob = Utils.select(mobs, random.nextLong());
             if (mob != null) {
-                WorldCache.spawnEntity(world, mob, blockPos1);
+                WorldCache.spawnEntity(world, mob, blockPosFloor);
             }
             --count;
         }
@@ -159,35 +158,22 @@ public class Projector extends Structure {
     private void pasteBlock(World world, int index, Posture posture, Random random) {
         int x = getX(index), y = getY(index), z = getZ(index);
         BlockPos worldPos = posture.getWorldPos(x, y, z);
-        if (worldPos.getY() > 255 || worldPos.getY() < 0) {
+        Block block = Blocks.idToBlock(blocks[index]);
+        if (block == null) {
             return;
         }
-        int blockID = blocks[index];
-        Block block = null;
-        int metaData = 0;
-        if (blockID >= 0 && blockID < 256) {
-            blockID = Loader.blockReplaces[blockID];
-            block = Loader.vanillaBlocks[blockID];
-        }
-        if (block == null) {
-            if (Loader.allowOnlyVanillaBlocks) {
-                return;
-            }
-            block = Block.getBlockById(blockID);
-        } else {
-            metaData = posture.getWorldMeta(block, meta[index]);
-        }
-        WorldCache.setBlockState(world, worldPos, WorldCache.blockState(block, metaData));
+        int metaData = posture.getWorldMeta(block, meta[index]);
+        WorldCache.setBlockState(world, worldPos, Blocks.state(block, metaData));
         processTile(WorldCache.getTileEntity(world, worldPos), index, random);
     }
 
     /* Process block after spawning */
     private void processBlock(World world, int index, Posture posture, Random random) {
         int x = getX(index), y = getY(index), z = getZ(index);
-        if (blocks[index] < 0 || blocks[index] >= 256 || !Loader.cardinalBlocks[blocks[index]] || y < lift) {
+        if (!Blocks.isVanillaID(blocks[index]) || !Blocks.isCardinal(blocks[index]) || y < lift) {
             return;
         }
-        double radius = Loader.cardinalBlocksRadius;
+        double radius = Blocks.cardinalRadius;
         int shift = (int) radius;
         for (int dx = -shift; dx <= shift; ++dx) {
             for (int dz = -shift; dz <= shift; ++dz) {
@@ -195,13 +181,10 @@ public class Projector extends Structure {
                     if (Math.sqrt(dx * dx + dy * dy / 4.0 + dz * dz) <= radius) {
                         int nx = x + dx, ny = y + dy, nz = z + dz;
                         BlockPos worldPos = posture.getWorldPos(nx, ny, nz);
-                        if (worldPos.getY() > 255 || worldPos.getY() < 0) {
-                            break;
-                        }
-                        int blockID = WorldCache.blockID(WorldCache.getBlockState(world, worldPos).getBlock());
-                        if (Loader.soil[blockID] || Loader.overlook[blockID]) {
+                        int blockID = Blocks.blockID(WorldCache.getBlockState(world, worldPos).getBlock());
+                        if (Blocks.isSoil(blockID) || Blocks.isOverlook(blockID)) {
                             if (nx < 0 || nx >= width || ny < 0 || ny >= height || nz < 0 || nz >= length) {
-                                WorldCache.setBlockState(world, worldPos, Blocks.AIR.getDefaultState());
+                                WorldCache.setBlockState(world, worldPos, Blocks.state(Blocks.AIR));
                             } else {
                                 int nIndex = getIndex(nx, ny, nz);
                                 if (skin.get(nIndex)) {
@@ -221,23 +204,23 @@ public class Projector extends Structure {
             return;
         }
         NBTTagCompound tileTag = tiles[index];
-        if (tile instanceof TileEntityChest && Loader.lootChance >= random.nextDouble()) {
+        if (tile instanceof TileEntityChest && Configurator.lootChance >= random.nextDouble()) {
             ArrayList<ItemStack> forceItems = new ArrayList<ItemStack>();
-            if (Loader.nativeLoot && tileTag != null) {
+            if (Configurator.nativeLoot && tileTag != null) {
                 NBTTagList items = tileTag.getTagList("Items", Constants.NBT.TAG_COMPOUND);
                 for (int i = 0; i < items.tagCount(); ++i) {
                     NBTTagCompound stackTag = items.getCompoundTagAt(i);
-                    Item item = WorldCache.ItemByName(stackTag.getString("id"));
+                    Item item = Items.ItemByName(stackTag.getString("id"));
                     byte cnt = items.getCompoundTagAt(i).getByte("Count");
                     int dmg = items.getCompoundTagAt(i).getShort("Damage");
-                    if (item != null && cnt > 0 && cnt <= WorldCache.itemMaxStack(item) && dmg >= 0 && dmg <= WorldCache.itemMaxMeta(item)) {
+                    if (item != null && cnt > 0 && cnt <= Items.itemMaxStack(item) && dmg >= 0 && dmg <= Items.itemMaxMeta(item)) {
                         forceItems.add(new ItemStack(item, cnt, dmg));
                     }
                 }
             }
             TileEntityChest chest = (TileEntityChest) tile;
-            int minItems = Math.max(0, Math.min(27, Loader.minChestItems));
-            int maxItems = Math.max(minItems, Math.min(27, Loader.maxChestItems));
+            int minItems = Math.max(0, Math.min(27, Configurator.minChestItems));
+            int maxItems = Math.max(minItems, Math.min(27, Configurator.maxChestItems));
             int itemsCount = minItems + random.nextInt(maxItems - minItems + 1);
             ArrayList<Integer> permutation = new ArrayList<Integer>();
             for (int idx = 0; idx < 27; ++idx) {
@@ -246,13 +229,16 @@ public class Projector extends Structure {
             Collections.shuffle(forceItems, random);
             Collections.shuffle(permutation, random);
             for (int idx = 0; idx < itemsCount; ++idx) {
-                Item item = Loader.items.get(random.nextInt(Loader.items.size()));
-                int stackMeta = random.nextInt(Math.abs(WorldCache.itemMaxMeta(item)) + 1);
+                Item item = Utils.select(Items.select(), random.nextLong());
+                if (item == null) {
+                    continue;
+                }
+                int stackMeta = random.nextInt(Math.abs(Items.itemMaxMeta(item)) + 1);
                 if (idx < forceItems.size()) {
                     item = forceItems.get(idx).getItem();
                     stackMeta = forceItems.get(idx).getItemDamage();
                 }
-                int maxStackSize = Math.max(1, Math.min(Loader.maxChestStackSize, WorldCache.itemMaxStack(item)));
+                int maxStackSize = Math.max(1, Math.min(Configurator.maxChestStackSize, Items.itemMaxStack(item)));
                 int stackSize = 1 + random.nextInt(maxStackSize);
                 chest.setInventorySlotContents(permutation.get(idx), new ItemStack(item, stackSize, stackMeta));
             }
@@ -400,7 +386,7 @@ public class Projector extends Structure {
         boolean hill = method == Projector.Method.HILL;
         double roughness = Math.sqrt(variance);
         double underLiquidRoughness = Math.sqrt(varianceUnderLiquid);
-        double roughnessFactor = Loader.accuracy;
+        double roughnessFactor = Configurator.accuracy;
         if (afloat) {
             if (roughness > 3.0 * roughnessFactor) {
                 throw new IOException("Rough water: " + decimal.format(roughness));
@@ -433,7 +419,7 @@ public class Projector extends Structure {
             posY = Math.min(posY - height, 30 + random.nextInt() % 25);
         } else {
             posY -= lift;
-            posY += Loader.forceLift;
+            posY += Configurator.forceLift;
         }
         posY = Math.max(4, Math.min(posY, 250));
         return new Posture(posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, width, height, length);

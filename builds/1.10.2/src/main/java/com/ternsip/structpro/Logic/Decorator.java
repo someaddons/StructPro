@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.IWorldGenerator;
 
 import java.util.*;
 
-/* This class statically loads blueprints and mod configuration and override generate method @author Ternsip */
+/* Decorate chunk generation process */
 public class Decorator extends Distributor implements IWorldGenerator {
 
     @Override
