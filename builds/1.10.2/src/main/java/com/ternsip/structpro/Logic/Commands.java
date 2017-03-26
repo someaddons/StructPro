@@ -19,7 +19,7 @@ import java.util.Random;
 public class Commands implements ICommand {
 
     private static final String name = "structpro";
-    private static final String usage = "/structpro <help|paste>";
+    private static final String usage = "/structpro <help|paste|save>";
     private static final ArrayList<String> aliases = new ArrayList<String>(){{add("/structpro");}};
 
     @Override
@@ -65,37 +65,39 @@ public class Commands implements ICommand {
         }
         String cmd = args[0].toLowerCase();
         HashMap<String, String> vars = Utils.extractVariables(Utils.join(args, " "));
+        Random random = new Random();
         if (cmd.equals("paste")) {
-            Random random = new Random();
-            String name = "";
-            int posX = sender.getPosition().getX();
-            int posY = sender.getPosition().getY();
-            int posZ = sender.getPosition().getZ();
-            int rotateX = 0;
-            int rotateY = random.nextInt() % 4;
-            int rotateZ = 0;
-            boolean flipX = random.nextBoolean();
-            boolean flipY = false;
-            boolean flipZ = random.nextBoolean();
-            boolean village = false;
-            if (vars.containsKey("name")) name = vars.get("name");
-            if (vars.containsKey("posx")) posX = Integer.parseInt(vars.get("posx"));
-            if (vars.containsKey("posy")) posY = Integer.parseInt(vars.get("posy"));
-            if (vars.containsKey("posz")) posY = Integer.parseInt(vars.get("posz"));
-            if (vars.containsKey("x")) posX = Integer.parseInt(vars.get("x"));
-            if (vars.containsKey("y")) posY = Integer.parseInt(vars.get("y"));
-            if (vars.containsKey("z")) posY = Integer.parseInt(vars.get("z"));
-            if (vars.containsKey("rotatex")) rotateX = Integer.parseInt(vars.get("rotatex"));
-            if (vars.containsKey("rotatey")) rotateY = Integer.parseInt(vars.get("rotatey"));
-            if (vars.containsKey("rotatez")) rotateY = Integer.parseInt(vars.get("rotatez"));
-            if (vars.containsKey("rotx")) rotateX = Integer.parseInt(vars.get("rotx"));
-            if (vars.containsKey("roty")) rotateY = Integer.parseInt(vars.get("roty"));
-            if (vars.containsKey("rotz")) rotateY = Integer.parseInt(vars.get("rotz"));
-            if (vars.containsKey("flipx")) flipX = Boolean.parseBoolean(vars.get("flipx"));
-            if (vars.containsKey("flipy")) flipY = Boolean.parseBoolean(vars.get("flipy"));
-            if (vars.containsKey("flipz")) flipZ = Boolean.parseBoolean(vars.get("flipz"));
-            if (vars.containsKey("village")) village = Boolean.parseBoolean(vars.get("village"));
+            String name = Utils.parseOrDefault(vars, "name", "");
+            int posX = Utils.parseOrDefault(vars, "posx", sender.getPosition().getX());
+            int posY = Utils.parseOrDefault(vars, "posy", sender.getPosition().getY());
+            int posZ = Utils.parseOrDefault(vars, "posz", sender.getPosition().getZ());
+            posX = Utils.parseOrDefault(vars, "x", posX);
+            posY = Utils.parseOrDefault(vars, "y", posY);
+            posZ = Utils.parseOrDefault(vars, "z", posZ);
+            int rotateX = Utils.parseOrDefault(vars, "rotatex", 0);
+            int rotateY = Utils.parseOrDefault(vars, "rotatey", random.nextInt() % 4);
+            int rotateZ = Utils.parseOrDefault(vars, "rotatez", 0);
+            rotateX = Utils.parseOrDefault(vars, "rotx", rotateX);
+            rotateY = Utils.parseOrDefault(vars, "roty", rotateY);
+            rotateZ = Utils.parseOrDefault(vars, "rotz", rotateZ);
+            boolean flipX = Utils.parseOrDefault(vars, "flipx",  random.nextBoolean());
+            boolean flipY = Utils.parseOrDefault(vars, "flipy", false);
+            boolean flipZ = Utils.parseOrDefault(vars, "flipz", random.nextBoolean());
+            boolean village = Utils.parseOrDefault(vars, "village",false);
             feedback(sender, Evaluator.cmdPaste(sender.getEntityWorld(), name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, village));
+        }
+        if (cmd.equals("save")) {
+            String name = Utils.parseOrDefault(vars, "name", "unnamed");
+            int posX = Utils.parseOrDefault(vars, "posx", sender.getPosition().getX());
+            int posY = Utils.parseOrDefault(vars, "posy", sender.getPosition().getY());
+            int posZ = Utils.parseOrDefault(vars, "posz", sender.getPosition().getZ());
+            posX = Utils.parseOrDefault(vars, "x", posX);
+            posY = Utils.parseOrDefault(vars, "y", posY);
+            posZ = Utils.parseOrDefault(vars, "z", posZ);
+            int width = Utils.parseOrDefault(vars, "width", 64);
+            int height = Utils.parseOrDefault(vars, "height", 64);
+            int length = Utils.parseOrDefault(vars, "length", 64);
+            feedback(sender, Evaluator.cmdSave(sender.getEntityWorld(), name, posX, posY, posZ, width, height, length));
         }
         if (cmd.equals("help")) {
             feedback(sender, Evaluator.cmdHelp());

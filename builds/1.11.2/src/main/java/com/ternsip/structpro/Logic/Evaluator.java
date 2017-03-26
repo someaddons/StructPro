@@ -14,10 +14,11 @@ class Evaluator {
 
     /* Paste schematic that has most similar name */
     static String cmdPaste(World world,
-                          String name, int posX, int posY, int posZ,
-                          int rotateX, int rotateY, int rotateZ,
-                          boolean flipX, boolean flipY, boolean flipZ,
-                          boolean village) throws CommandException {
+                           final String name,
+                           int posX, int posY, int posZ,
+                           int rotateX, int rotateY, int rotateZ,
+                           boolean flipX, boolean flipY, boolean flipZ,
+                           boolean village) throws CommandException {
         long seed = System.currentTimeMillis();
         if (village) {
             ArrayList<Projector> projectors = Utils.select(Structures.selectVillages(name), seed);
@@ -28,7 +29,11 @@ class Evaluator {
             report.print();
             return report.toString();
         } else {
-            Projector projector = Utils.select(Structures.select(name), seed);
+            ArrayList<Projector> candidates = new ArrayList<Projector>(){{
+                addAll(Structures.select(name));
+                addAll(Structures.selectSaves(name));
+            }};
+            Projector projector = Utils.select(candidates, seed);
             if (projector == null) {
                 return "No matching structures";
             }
@@ -36,6 +41,13 @@ class Evaluator {
             report.print();
             return report.toString();
         }
+    }
+
+    /* Save schematic */
+    static String cmdSave(World world, String name, int posX, int posY, int posZ, int width, int height, int length) throws CommandException {
+        Report report = Distributor.saveStructure(world, name, posX, posY, posZ, width, height, length);
+        report.print();
+        return report.toString();
     }
 
     /* Print command help information */

@@ -15,7 +15,7 @@ import java.util.HashMap;
 public class Structure extends Blueprint {
 
     /* Structure version */
-    private static final int VERSION = 103;
+    private static final int VERSION = 105;
 
     public Method getMethod() {
         return method;
@@ -296,7 +296,7 @@ public class Structure extends Blueprint {
         int[][] levelMax = new int[width][length];
         boolean dry = method != Method.UNDERWATER;
         for (int index = 0; index < blocks.length; ++index) {
-            if (Blocks.isCardinal(blocks[index]) || (dry && Blocks.isLiquid(blocks[index]))) {
+            if (Blocks.isSoil(blocks[index]) || (dry && Blocks.isLiquid(blocks[index]))) {
                 level[getX(index)][getZ(index)] += 1;
                 levelMax[getX(index)][getZ(index)] = getY(index) + 1;
             }

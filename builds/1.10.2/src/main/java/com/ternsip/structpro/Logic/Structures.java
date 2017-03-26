@@ -12,6 +12,7 @@ import java.util.*;
 class Structures {
 
     private static ArrayList<Projector> projectors = new ArrayList<Projector>();
+    private static ArrayList<Projector> saves = new ArrayList<Projector>();
 
     /* All possible projectors for each type of method */
     private static HashMap<Method, ArrayList<Projector>> methodProjectors = new HashMap<Method, ArrayList<Projector>>(){{
@@ -35,6 +36,10 @@ class Structures {
     static void loadStructure(File file) {
         try {
             final Projector projector = new Projector(file);
+            if (file.getPath().contains(Configurator.schematicsSavesFolder.getPath())) {
+                saves.add(projector);
+                return;
+            }
             projectors.add(projector);
             methodProjectors.get(projector.getMethod()).add(projector);
             biomeProjectors.get(projector.getBiome()).add(projector);
@@ -123,6 +128,20 @@ class Structures {
         }
         ArrayList<Projector> result = new ArrayList<Projector>();
         for (Projector projector : projectors) {
+            if (projector.getOriginFile().getPath().toLowerCase().contains(name.toLowerCase())) {
+                result.add(projector);
+            }
+        }
+        return result;
+    }
+
+    /* Returns suitable saves projectors for file name */
+    static ArrayList<Projector> selectSaves(String name) {
+        if (name.isEmpty()) {
+            return saves;
+        }
+        ArrayList<Projector> result = new ArrayList<Projector>();
+        for (Projector projector : saves) {
             if (projector.getOriginFile().getPath().toLowerCase().contains(name.toLowerCase())) {
                 result.add(projector);
             }

@@ -52,6 +52,11 @@ public class Projector extends Structure {
         }
     }
 
+    public Projector(File file, World world, int posX, int posY, int posZ, int width, int height, int length) throws IOException {
+        originFile = file;
+        loadSchematic(world, posX, posY, posZ, width, height, length);
+    }
+
     private File getDataFile() {
         return new File(DUMP_DIR.getPath(), originFile.getPath().hashCode() + ".dmp");
     }
@@ -181,7 +186,7 @@ public class Projector extends Structure {
                     if (Math.sqrt(dx * dx + dy * dy / 4.0 + dz * dz) <= radius) {
                         int nx = x + dx, ny = y + dy, nz = z + dz;
                         BlockPos worldPos = posture.getWorldPos(nx, ny, nz);
-                        int blockID = Blocks.blockID(WorldCache.getBlockState(world, worldPos).getBlock());
+                        int blockID = Blocks.blockID(WorldCache.getBlockState(world, worldPos));
                         if (Blocks.isSoil(blockID) || Blocks.isOverlook(blockID)) {
                             if (nx < 0 || nx >= width || ny < 0 || ny >= height || nz < 0 || nz >= length) {
                                 WorldCache.setBlockState(world, worldPos, Blocks.state(Blocks.AIR));

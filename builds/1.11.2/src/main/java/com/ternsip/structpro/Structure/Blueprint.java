@@ -1,8 +1,13 @@
 package com.ternsip.structpro.Structure;
 
+import com.ternsip.structpro.Logic.Blocks;
+import com.ternsip.structpro.WorldCache.WorldCache;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
 import java.io.File;
@@ -51,6 +56,55 @@ class Blueprint {
         readSchematic(readTags(file));
     }
 
+    void loadSchematic(World world, int posX, int posY, int posZ, int width, int height, int length) throws IOException {
+        String dimensions = "[W=" + width + ";H=" + height + ";L=" + length + "]";
+        String dimLimit = "[W=" + WIDTH_LIMIT + ";H=" + HEIGHT_LIMIT + ";L=" + LENGTH_LIMIT + "]";
+        if (width <= 0 || height <= 0 || length <= 0) {
+            throw new IOException("Schematic has non-positive dimensions: " + dimensions);
+        }
+        if (width > WIDTH_LIMIT || height > HEIGHT_LIMIT || length > LENGTH_LIMIT) {
+            throw new IOException("Schematic dimensions are too large: " + dimensions + "/" + dimLimit);
+        }
+        int volume = width * height * length;
+        if (volume > VOLUME_LIMIT) {
+            throw new IOException("Schematic is too big: " + volume + "/" + VOLUME_LIMIT);
+        }
+        this.width = width;
+        this.height = height;
+        this.length = length;
+        blocks = new short[volume];
+        meta = new byte[volume];
+        tiles = new NBTTagCompound[volume];
+        int airID = Blocks.blockID(Blocks.AIR);
+        for (int ix = 0, x = posX; ix < width; ++ix, ++x) {
+            for (int iy = 0, y = posY; iy < height; ++iy, ++y) {
+                for (int iz = 0, z = posZ; iz < length; ++iz, ++z) {
+                    IBlockState state = WorldCache.getBlockState(world, x, y, z);
+                    int blockID = Blocks.blockID(state);
+                    int index = getIndex(ix, iy, iz);
+                    if (Blocks.isVanillaID(blockID)) {
+                        blocks[index] = (short) blockID;
+                        meta[index] = (byte) Blocks.getMeta(state);
+                        TileEntity tile = WorldCache.getTileEntity(world, x, y, z);
+                        if (tile != null) {
+                            try {
+                                tile.writeToNBT(tiles[index]);
+                            } catch (Throwable ignored) {}
+                        }
+                    } else {
+                        blocks[index] = (short) airID;
+                        meta[index] = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Save blueprint as schematic */
+    public void saveSchematic(File file) throws IOException {
+        writeTags(file, getSchematic());
+    }
+
     /* Load map tag from file */
     static NBTTagCompound readTags(File file) throws IOException {
         if (file.length() > TAG_FILE_SIZE_LIMIT) {
@@ -65,7 +119,7 @@ class Blueprint {
     }
 
     static void writeTags(File file, NBTTagCompound tag) throws IOException {
-        if (!file.getParentFile().exists()) {
+        if (file.getParentFile() != null && !file.getParentFile().exists()) {
             if (!file.getParentFile().mkdirs()) {
                 throw new IOException("Can't create path: " + file.getParent());
             }
@@ -121,6 +175,31 @@ class Blueprint {
                 tiles[idx] = tile;
             }
         }
+    }
+
+    /* Read Schematic blueprint from tags */
+    private NBTTagCompound getSchematic() throws IOException {
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setString("Materials", "Alpha");
+        tag.setShort("Width", (short) width);
+        tag.setShort("Height", (short) height);
+        tag.setShort("Length", (short) length);
+        tag.setByteArray("AddBlocks", new byte[0]);
+        byte[] blocksID = new byte[blocks.length];
+        for (int i = 0; i < blocks.length; ++i) {
+            blocksID[i] = (byte) blocks[i];
+        }
+        tag.setByteArray("Blocks", blocksID);
+        tag.setByteArray("Data", meta);
+        tiles = new NBTTagCompound[width * height * length];
+        NBTTagList tileEntities = new NBTTagList();
+        for (NBTTagCompound tile : tiles) {
+            if (tile != null) {
+                tileEntities.appendTag(tile);
+            }
+        }
+        tag.setTag("TileEntities", tileEntities);
+        return tag;
     }
 
     /* Combine all 8b-blocksID and 8b-addBlocks to 16b-block */

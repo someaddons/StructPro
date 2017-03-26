@@ -18,6 +18,22 @@ public class Utils {
         return sb.toString();
     }
 
+    public static <K> int parseOrDefault(Map<K, String> map, K key, int defaultValue) {
+        try {
+            return map.containsKey(key) ? Integer.valueOf(map.get(key)) : defaultValue;
+        } catch (Throwable throwable) {
+            return defaultValue;
+        }
+    }
+
+    public static <K> boolean parseOrDefault(Map<K, String> map, K key, boolean defaultValue) {
+        return map.containsKey(key) ? Boolean.valueOf(map.get(key)) : defaultValue;
+    }
+
+    public static <K> String parseOrDefault(Map<K, String> map, K key, String defaultValue) {
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+
     public static String[] toArray(HashSet<String> set) {
         return set.toArray(new String[set.size()]);
     }
@@ -49,7 +65,7 @@ public class Utils {
         byte[] result = new byte[(bits.length() + 7) / 8];
         for (int i = 0; i < bits.length(); ++i) {
             if (bits.get(i)) {
-                result[result.length - i / 8 - 1] |= 1 << (i % 8);
+                result[i / 8] |= 1 << (i % 8);
             }
         }
         return result;
@@ -58,7 +74,7 @@ public class Utils {
     public static BitSet toBitSet(byte[] bytes) {
         BitSet result = new BitSet(bytes.length * 8);
         for (int i = 0; i < bytes.length * 8; i++) {
-            if ((bytes[bytes.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+            if ((bytes[i / 8] & (1 << (i % 8))) > 0) {
                 result.set(i);
             }
         }

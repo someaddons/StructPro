@@ -69,14 +69,14 @@ class Chunkster {
 
     private void trackHeight() {
         String dimName = WorldCache.getDimensionName(world);
-        int startHeight = 255;
+        int startHeight = CHUNK_SIZE_Y - 1;
         startHeight = dimName.equalsIgnoreCase("Nether") ? 63 : startHeight;
         startHeight = dimName.equalsIgnoreCase("End") ? 127 : startHeight;
         for (int cx = 0, wx = chunkStartX; cx < CHUNK_SIZE_X; ++wx, ++cx) {
             for (int cz = 0, wz = chunkStartZ; cz < CHUNK_SIZE_Z; ++wz, ++cz) {
                 int hg = startHeight;
                 while (hg > 0) {
-                    int blockID = Blocks.blockID(getBlockState(wx, hg, wz).getBlock());
+                    int blockID = Blocks.blockID(getBlockState(wx, hg, wz));
                     if (Blocks.isOverlook(blockID)) {
                         --hg;
                     } else {
@@ -85,7 +85,7 @@ class Chunkster {
                 }
                 heights[cx][cz] = hg + 1;
                 while (hg > 0) {
-                    int blockID = Blocks.blockID(getBlockState(wx, hg, wz).getBlock());
+                    int blockID = Blocks.blockID(getBlockState(wx, hg, wz));
                     if (Blocks.isOverlook(blockID) || Blocks.isLiquid(blockID)) {
                         --hg;
                     } else {
@@ -102,8 +102,8 @@ class Chunkster {
             for (int cz = 0, wz = chunkStartZ; cz < CHUNK_SIZE_Z; ++wz, ++cz) {
                 Block prevBlock = Blocks.AIR;
                 boolean grassed = false;
-                for (int wy = Math.min(heights[cx][cz], 255); wy >= 0; --wy) {
-                    Block block = getBlockState(wx, wy, wz).getBlock();
+                for (int wy = Math.min(heights[cx][cz], CHUNK_SIZE_Y - 1); wy >= 0; --wy) {
+                    Block block = Blocks.getBlock(getBlockState(wx, wy, wz));
                     if (block == Blocks.GRASS && Blocks.isSoil(Blocks.blockID(prevBlock))) {
                         setBlockState(wx, wy, wz, Blocks.state(Blocks.DIRT));
                     }
@@ -126,7 +126,7 @@ class Chunkster {
     }
 
     void setBlockState(int wx, int wy, int wz, IBlockState blockState) {
-        if (wy >= 0 && wy < CHUNK_SIZE_Y) {
+        if (isInsideY(wy)) {
             removeTileEntity(wx, wy, wz);
             storage[wy / CHUNK_PART_Y].set(wx - chunkStartX, wy % CHUNK_PART_Y, wz - chunkStartZ, blockState);
             needToUpdate = true;
@@ -134,17 +134,21 @@ class Chunkster {
     }
 
     IBlockState getBlockState(int wx, int wy, int wz) {
-        return (wy < 0 || wy >= CHUNK_SIZE_Y) ? Blocks.state(Blocks.AIR) : storage[wy / CHUNK_PART_Y].get(wx - chunkStartX, wy % CHUNK_PART_Y, wz - chunkStartZ);
+        return isInsideY(wy) ? storage[wy / CHUNK_PART_Y].get(wx - chunkStartX, wy % CHUNK_PART_Y, wz - chunkStartZ) : Blocks.state(Blocks.AIR);
     }
 
     TileEntity getTileEntity(int wx, int wy, int wz) {
-        return (wy < 0 || wy >= CHUNK_SIZE_Y) ? null : world.getTileEntity(new BlockPos(wx, wy, wz));
+        return isInsideY(wy) ? world.getTileEntity(new BlockPos(wx, wy, wz)) : null;
     }
 
     void setTileEntity(int wx, int wy, int wz, TileEntity tileEntity) {
-        if (wy >= 0 && wy < CHUNK_SIZE_Y) {
+        if (isInsideY(wy)) {
             world.setTileEntity(new BlockPos(wx, wy, wz), tileEntity);
         }
+    }
+
+    private boolean isInsideY(int wy) {
+        return wy >= 0 && wy < CHUNK_SIZE_Y;
     }
 
     private void removeTileEntity(int wx, int wy, int wz) {

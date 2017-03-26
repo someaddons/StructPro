@@ -34,6 +34,10 @@ public class Blocks extends net.minecraft.init.Blocks {
         return Block.getIdFromBlock(block);
     }
 
+    public static int blockID(IBlockState block) {
+        return blockID(getBlock(block));
+    }
+
     public static Block idToBlock(int id) {
         return isVanillaID(id) ? vanillaBlocks[blockReplaces[id]] : null;
     }
@@ -72,6 +76,14 @@ public class Blocks extends net.minecraft.init.Blocks {
         for (Block block : blocks) {
             setReplace(block);
         }
+    }
+
+    public static Block getBlock(IBlockState state) {
+        return state.getBlock();
+    }
+
+    public static int getMeta(IBlockState state) {
+        return state.getBlock().getMetaFromState(state);
     }
 
     public static boolean isVanillaID(int blockID) {

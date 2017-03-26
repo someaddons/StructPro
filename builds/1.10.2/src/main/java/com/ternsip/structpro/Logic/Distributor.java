@@ -8,6 +8,8 @@ import com.ternsip.structpro.Utils.Utils;
 import com.ternsip.structpro.WorldCache.WorldCache;
 import net.minecraft.world.World;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /* Distributes world things generation */
@@ -99,6 +101,23 @@ class Distributor extends Configurator {
         int cx = chunkX * 16 + Math.abs(random.nextInt()) % 16;
         int cz = chunkZ * 16 + Math.abs(random.nextInt()) % 16;
         return spawn(world, candidate, cx, 0, cz, random);
+    }
+
+    static Report saveStructure(World world, String name, int posX, int posY, int posZ, int width, int height, int length) {
+        Report report = new Report()
+                .add("WORLD FRAGMENT", name)
+                .add("POS", "[X=" + posX + ";Y=" + posY + ";Z=" + posZ + "]")
+                .add("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]");
+        try {
+            File file = new File(schematicsSavesFolder, name + ".schematic");
+            Projector projector = new Projector(file, world, posX, posY, posZ, width, height, length);
+            projector.saveSchematic(projector.getOriginFile());
+            Structures.loadStructure(projector.getOriginFile());
+            report.add("SAVED", projector.getOriginFile().getPath());
+        } catch (IOException ioe) {
+            report.add("NOT SAVED", ioe.getMessage());
+        }
+        return report;
     }
 
     /* Get random for world chunk */

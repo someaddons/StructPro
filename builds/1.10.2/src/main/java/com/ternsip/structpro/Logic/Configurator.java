@@ -18,6 +18,9 @@ import java.util.Stack;
 @SuppressWarnings({"WeakerAccess", "deprecation"})
 public class Configurator {
 
+    public static final File schematicsFolder = new File("schematics");
+    public static final File schematicsSavesFolder = new File(schematicsFolder,"Saves");
+
     /* Spawn probability per chunk, to not generate set any negative value */
     public static double density = 0.0035;
 
@@ -40,7 +43,7 @@ public class Configurator {
     public static boolean spawnMobs = true;
 
     /* Print additional mod output to console */
-    public static boolean additionalOutput = true;
+    public static boolean additionalOutput = false;
 
     /* Ban modded items from spawning */
     public static boolean onlyVanillaLoot = true;
@@ -190,7 +193,7 @@ public class Configurator {
         }
 
         long startTime = System.currentTimeMillis();
-        loadStructures(new File("schematics"));
+        loadStructures(schematicsFolder);
         long loadTime = (System.currentTimeMillis() - startTime);
         Report report = new Report();
         for (Method method : Method.values()) {
