@@ -53,16 +53,10 @@ class Chunkster {
     }
 
     private void track() {
-        IBlockState[] traceData = new IBlockState[CHUNK_SIZE_Y];
         storage = chunk.getBlockStorageArray();
-        if (storage[CHUNK_PARTS - 1] == null) {
-            for (int sy = chunkStartY; sy < CHUNK_SIZE_Y; sy += 16) {
-                traceData[sy] = chunk.getBlockState(new BlockPos(0, sy, 0));
-                chunk.setBlockState(new BlockPos(0, sy, 0), Blocks.state(Blocks.OBSIDIAN));
-            }
-            storage = chunk.getBlockStorageArray();
-            for (int sy = chunkStartY; sy < CHUNK_SIZE_Y; sy += 16) {
-                chunk.setBlockState(new BlockPos(0, sy, 0), traceData[sy]);
+        for (int i = 0 ; i < CHUNK_PARTS; ++i) {
+            if (storage[i] == Chunk.NULL_BLOCK_STORAGE) {
+                storage[i] = new ExtendedBlockStorage(i << 4, this.world.provider.hasSkyLight());
             }
         }
     }
@@ -117,20 +111,27 @@ class Chunkster {
         }
     }
 
-    int getHeight(int wx, int wz) {
-        return heights[wx - chunkStartX][wz - chunkStartZ];
-    }
-
-    int getBottomHeight(int wx, int wz) {
-        return bottomHeights[wx - chunkStartX][wz - chunkStartZ];
-    }
-
     void setBlockState(int wx, int wy, int wz, IBlockState blockState) {
         if (isInsideY(wy)) {
             removeTileEntity(wx, wy, wz);
             storage[wy / CHUNK_PART_Y].set(wx - chunkStartX, wy % CHUNK_PART_Y, wz - chunkStartZ, blockState);
             needToUpdate = true;
         }
+    }
+
+    void setTileEntity(int wx, int wy, int wz, TileEntity tileEntity) {
+        if (isInsideY(wy)) {
+            world.setTileEntity(new BlockPos(wx, wy, wz), tileEntity);
+            needToUpdate = true;
+        }
+    }
+
+    int getHeight(int wx, int wz) {
+        return heights[wx - chunkStartX][wz - chunkStartZ];
+    }
+
+    int getBottomHeight(int wx, int wz) {
+        return bottomHeights[wx - chunkStartX][wz - chunkStartZ];
     }
 
     IBlockState getBlockState(int wx, int wy, int wz) {
@@ -141,14 +142,8 @@ class Chunkster {
         return isInsideY(wy) ? world.getTileEntity(new BlockPos(wx, wy, wz)) : null;
     }
 
-    void setTileEntity(int wx, int wy, int wz, TileEntity tileEntity) {
-        if (isInsideY(wy)) {
-            world.setTileEntity(new BlockPos(wx, wy, wz), tileEntity);
-        }
-    }
-
     private boolean isInsideY(int wy) {
-        return wy >= 0 && wy < CHUNK_SIZE_Y;
+        return wy >= 0 && wy < CHUNK_SIZE_Y && storage[wy / CHUNK_PART_Y] != Chunk.NULL_BLOCK_STORAGE;
     }
 
     private void removeTileEntity(int wx, int wy, int wz) {

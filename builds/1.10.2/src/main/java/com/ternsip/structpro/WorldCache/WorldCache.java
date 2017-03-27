@@ -17,7 +17,7 @@ public class WorldCache {
     /* Holds World -> ChunkCache */
     private static HashMap<World, ChunkCache> holders = new HashMap<World, ChunkCache>();
 
-    private static Chunkster getChunkster(World world, int chunkX, int chunkZ) {
+    public static Chunkster getChunkster(World world, int chunkX, int chunkZ) {
         if (!holders.containsKey(world)) {
             holders.put(world, new ChunkCache(world));
         }
@@ -81,7 +81,7 @@ public class WorldCache {
     }
 
     /* Unload obsoleted data */
-    private static void unload() {
+    public static void unload() {
         for (HashMap.Entry<World, ChunkCache> entry : holders.entrySet()) {
             entry.getValue().unload();
         }

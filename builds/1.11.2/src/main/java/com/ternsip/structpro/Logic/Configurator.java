@@ -43,7 +43,7 @@ public class Configurator {
     public static boolean spawnMobs = true;
 
     /* Print additional mod output to console */
-    public static boolean additionalOutput = false;
+    public static boolean additionalOutput = true;
 
     /* Ban modded items from spawning */
     public static boolean onlyVanillaLoot = true;
@@ -56,6 +56,9 @@ public class Configurator {
 
     /* Max item stack size for chest loot */
     public static int maxChestStackSize = 12;
+
+    /* Max length in chunks for world to be generated */
+    public static int worldChunkBorder = 4096;
 
     /* Allow spawning structures only in dimensions with given ids, case sensitive */
     public static HashSet<String> spawnDimensions = new HashSet<String>() {{
@@ -80,8 +83,6 @@ public class Configurator {
         add("EMERALD_BLOCK");
         add("WOOL");
         add("BEACON");
-        add("COMMAND");
-        add("SPAWNER");
     }};
 
     /* Exclude items from possible loot */
@@ -134,6 +135,7 @@ public class Configurator {
                 villageDimensions = tokenize(config.getProperty("VILLAGE_DIMENSIONS", combine(villageDimensions)));
                 banBlocks = tokenize(config.getProperty("BAN_BLOCKS", combine(banBlocks)));
                 banItems = tokenize(config.getProperty("BAN_ITEMS", combine(banItems)));
+                worldChunkBorder = (int) Double.parseDouble(config.getProperty("WORLD_CHUNK_BORDER", Double.toString(worldChunkBorder)));
             } finally {
                 fis.close();
             }
@@ -156,6 +158,7 @@ public class Configurator {
             config.setProperty("VILLAGE_DIMENSIONS", combine(villageDimensions));
             config.setProperty("BAN_BLOCKS", combine(banBlocks));
             config.setProperty("BAN_ITEMS", combine(banItems));
+            config.setProperty("WORLD_CHUNK_BORDER", Integer.toString(worldChunkBorder));
             config.store(fos, null);
         } finally {
             fos.close();

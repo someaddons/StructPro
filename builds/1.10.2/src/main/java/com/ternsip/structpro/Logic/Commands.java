@@ -1,6 +1,7 @@
 package com.ternsip.structpro.Logic;
 
 import com.ternsip.structpro.Utils.Utils;
+import com.ternsip.structpro.WorldCache.WorldCache;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
@@ -63,10 +64,11 @@ public class Commands implements ICommand {
             Evaluator.cmdHelp();
             return;
         }
-        String cmd = args[0].toLowerCase();
+        String cmd = args[0];
         HashMap<String, String> vars = Utils.extractVariables(Utils.join(args, " "));
         Random random = new Random();
-        if (cmd.equals("paste")) {
+        WorldCache.unload();
+        if (cmd.equalsIgnoreCase("paste")) {
             String name = Utils.parseOrDefault(vars, "name", "");
             int posX = Utils.parseOrDefault(vars, "posx", sender.getPosition().getX());
             int posY = Utils.parseOrDefault(vars, "posy", sender.getPosition().getY());
@@ -86,7 +88,7 @@ public class Commands implements ICommand {
             boolean village = Utils.parseOrDefault(vars, "village",false);
             feedback(sender, Evaluator.cmdPaste(sender.getEntityWorld(), name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, village));
         }
-        if (cmd.equals("save")) {
+        if (cmd.equalsIgnoreCase("save")) {
             String name = Utils.parseOrDefault(vars, "name", "unnamed");
             int posX = Utils.parseOrDefault(vars, "posx", sender.getPosition().getX());
             int posY = Utils.parseOrDefault(vars, "posy", sender.getPosition().getY());
@@ -99,7 +101,12 @@ public class Commands implements ICommand {
             int length = Utils.parseOrDefault(vars, "length", 64);
             feedback(sender, Evaluator.cmdSave(sender.getEntityWorld(), name, posX, posY, posZ, width, height, length));
         }
-        if (cmd.equals("help")) {
+        if (cmd.equalsIgnoreCase("generate")) {
+            int step = Math.max(1, Utils.parseOrDefault(vars, "step", 8));
+            int radius = Math.max(0, Utils.parseOrDefault(vars, "radius", 16));
+            feedback(sender, Evaluator.cmdGenerate(sender.getEntityWorld(), radius, step));
+        }
+        if (cmd.equalsIgnoreCase("help")) {
             feedback(sender, Evaluator.cmdHelp());
         }
     }

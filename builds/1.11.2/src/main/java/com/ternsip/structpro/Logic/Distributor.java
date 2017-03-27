@@ -34,28 +34,42 @@ class Distributor extends Configurator {
     /* Process chunk generations */
     static void structGen(World world, int chunkX, int chunkZ) {
         Random random = getRandom(world, chunkX, chunkZ);
-        String dimID = String.valueOf(WorldCache.getDimensionID(world));
-        String dimName = String.valueOf(WorldCache.getDimensionName(world));
-        if (spawnDimensions.contains(dimID) || spawnDimensions.contains(dimName)) {
-            int drops = (int) density + (random.nextDouble() <= (density - (int) density) ? 1 : 0);
-            for (int drop = 0; drop < drops; ++drop) {
-                boolean spawned = false;
-                for (ArrayList<Projector> projectors : spawnOrder) {
-                    if (projectors.size() > 0 && spawn(world, Utils.select(projectors, random.nextLong()), chunkX, chunkZ, random)) {
-                        spawned = true;
-                        break;
-                    }
+        for (int drop = getDrops(world, chunkX, chunkZ, false); drop > 0; --drop) {
+            boolean spawned = false;
+            for (ArrayList<Projector> projectors : spawnOrder) {
+                if (projectors.size() > 0 && spawn(world, Utils.select(projectors, random.nextLong()), chunkX, chunkZ, random)) {
+                    spawned = true;
+                    break;
                 }
-                if (!spawned) {
-                    new Report().add("GIVE UP SPAWNING IN CHUNK", "[X=" + chunkX + ";Z=" + chunkZ + "]").print();
-                }
+            }
+            if (!spawned) {
+                new Report().add("GIVE UP SPAWNING IN CHUNK", "[X=" + chunkX + ";Z=" + chunkZ + "]").print();
             }
         }
-        if (Structures.selectVillages().size() > 0 && (villageDimensions.contains(dimID) || villageDimensions.contains(dimName))) {
-            int drops = (int) densityVillage + (random.nextDouble() <= (densityVillage - (int) densityVillage) ? 1 : 0);
-            for (int drop = 0; drop < drops; ++drop) {
+        for (int drop = getDrops(world, chunkX, chunkZ, true); drop > 0; --drop) {
+            if (Structures.selectVillages().size() > 0) {
                 spawnVillage(world, Utils.select(Structures.selectVillages(), random.nextLong()), chunkX, chunkZ, random).print();
             }
+        }
+    }
+
+    static int getDrops(World world, int chunkX, int chunkZ, boolean village) {
+        if (outsideBorder(chunkX, chunkZ)) {
+            return 0;
+        }
+        String dimID = String.valueOf(WorldCache.getDimensionID(world));
+        String dimName = String.valueOf(WorldCache.getDimensionName(world));
+        Random random = getRandom(world, chunkX, chunkZ);
+        if (village) {
+            if (!villageDimensions.contains(dimID) && !villageDimensions.contains(dimName)) {
+                return 0;
+            }
+            return (int) densityVillage + (random.nextDouble() <= (densityVillage - (int) densityVillage) ? 1 : 0);
+        } else {
+            if (!spawnDimensions.contains(dimID) && !spawnDimensions.contains(dimName)) {
+                return 0;
+            }
+            return (int) density + (random.nextDouble() <= (density - (int) density) ? 1 : 0);
         }
     }
 
@@ -83,6 +97,11 @@ class Distributor extends Configurator {
                 .add("VILLAGE", villageName)
                 .add("CHUNK", "[X=" + chunkX + ";Z=" + chunkZ + "]")
                 .add("TOTAL SPAWNED", String.valueOf(spawned));
+    }
+
+    /* Check if a chunk is outside of the border */
+    private static boolean outsideBorder(int chunkX, int chunkZ) {
+        return chunkX > worldChunkBorder || chunkX < -worldChunkBorder || chunkZ > worldChunkBorder || chunkZ < -worldChunkBorder;
     }
 
     /* Spawn candidate in certain position in the world */
