@@ -355,12 +355,12 @@ public class Projector extends Structure {
         double area = width * length;
         for (int wx = result.getPosX(); wx <= result.getEndX(); ++wx) {
             for (int wz = result.getPosZ(); wz <= result.getEndZ(); ++wz) {
-                int level = WorldCache.getHeight(world, wx, wz);
+                int level = WorldCache.getHeight(world, new BlockPos(wx, 0, wz));
                 maxHeight = Math.max(maxHeight, level);
                 minHeight = Math.min(minHeight, level);
                 totalHeight += level;
                 squareHeightSum += level * level;
-                level = WorldCache.getBottomHeight(world, wx, wz);
+                level = WorldCache.getBottomHeight(world, new BlockPos(wx, 0, wz));
                 maxHeightUnderLiquid = Math.max(maxHeightUnderLiquid, level);
                 minHeightUnderLiquid = Math.min(minHeightUnderLiquid, level);
                 totalHeightUnderLiquid += level;

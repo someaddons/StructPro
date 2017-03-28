@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+/* Structures control class */
 class Structures {
 
     private static ArrayList<Projector> projectors = new ArrayList<Projector>();
@@ -36,7 +37,7 @@ class Structures {
     static void loadStructure(File file) {
         try {
             final Projector projector = new Projector(file);
-            if (file.getPath().contains(Configurator.schematicsSavesFolder.getPath())) {
+            if (file.getPath().contains(Configurator.getSchematicsSavesFolder().getPath())) {
                 saves.add(projector);
                 return;
             }

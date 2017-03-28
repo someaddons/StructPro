@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/* Mobs control class*/
 @SuppressWarnings({"WeakerAccess", "deprecation"})
 public class Mobs {
 
@@ -41,14 +42,17 @@ public class Mobs {
         }
     }};
 
+    /* Get array of entity classes that matches biome */
     public static ArrayList<Class<? extends Entity>> select(Biome biome) {
         return mobsBiome.get(biome);
     }
 
+    /* Get array of entity classes that matches village */
     public static ArrayList<Class<? extends Entity>> selectVillage() {
         return mobsVillage;
     }
 
+    /* Get array of entity classes that matches name */
     public static Class<? extends Entity> selectByName(String name) {
         for (Class<? extends Entity> mob : mobs) {
             ResourceLocation mobName = classToName(mob);
@@ -65,10 +69,12 @@ public class Mobs {
         return null;
     }
 
+    /* Transform entity class to name */
     public static ResourceLocation classToName(Class<? extends Entity> mob) {
         return EntityList.getKey(mob);
     }
 
+    /* Construct entity by class in the world */
     public static Entity construct(World world, Class<? extends Entity> mob) {
         return EntityList.newEntity(mob, world);
     }

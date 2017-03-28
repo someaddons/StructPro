@@ -128,7 +128,7 @@ class Distributor extends Configurator {
                 .add("POS", "[X=" + posX + ";Y=" + posY + ";Z=" + posZ + "]")
                 .add("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]");
         try {
-            File file = new File(schematicsSavesFolder, name + ".schematic");
+            File file = new File(getSchematicsSavesFolder(), name + ".schematic");
             Projector projector = new Projector(file, world, posX, posY, posZ, width, height, length);
             projector.saveSchematic(projector.getOriginFile());
             Structures.loadStructure(projector.getOriginFile());

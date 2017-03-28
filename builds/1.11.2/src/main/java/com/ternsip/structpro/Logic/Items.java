@@ -31,6 +31,7 @@ public class Items extends net.minecraft.init.Items {
         return result;
     }
 
+    /* Remove items given by names from storage */
     public static void remove(final Iterable<String> bannedItemNames) {
         HashSet<Item> bannedItems = new HashSet<Item>() {{
             for (String itemName : bannedItemNames) {
@@ -40,6 +41,7 @@ public class Items extends net.minecraft.init.Items {
         items.removeAll(bannedItems);
     }
 
+    /* Remove items that are not vanilla */
     public static void removeNotVanilla() {
         final HashSet<Item> bannedItems = new HashSet<Item>() {{
             for (Item item : items) {
@@ -52,18 +54,22 @@ public class Items extends net.minecraft.init.Items {
         items.removeAll(bannedItems);
     }
 
+    /* Get item by name */
     public static Item ItemByName(String name) {
         return Item.REGISTRY.getObject(new ResourceLocation(name));
     }
 
+    /* Get item max damage */
     public static int itemMaxMeta(Item item) {
         return item.getMaxDamage();
     }
 
+    /* Get item max stack size */
     public static int itemMaxStack(Item item) {
         return item.getItemStackLimit();
     }
 
+    /* Select all items */
     public static ArrayList<Item> select() {
         return items;
     }

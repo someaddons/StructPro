@@ -22,6 +22,7 @@ class Chunkster {
     private static final int CHUNK_SIZE_Z = 16;
     private static final int CHUNK_PART_Y = 16;
     private static final int CHUNK_PARTS = 16;
+    private static final int PLAYER_NOTIFY_RADIUS = 32;
 
     private ExtendedBlockStorage[] storage;
     private int heights[][];
@@ -46,19 +47,15 @@ class Chunkster {
         chunkStartZ = chunkZ * CHUNK_SIZE_Z;
         needToUpdate = false;
         timer = new Timer();
-        track();
-        heights = new int[CHUNK_SIZE_X][CHUNK_SIZE_Z];
-        bottomHeights = new int[CHUNK_SIZE_X][CHUNK_SIZE_Z];
-        trackHeight();
-    }
-
-    private void track() {
         storage = chunk.getBlockStorageArray();
         for (int i = 0 ; i < CHUNK_PARTS; ++i) {
             if (storage[i] == Chunk.NULL_BLOCK_STORAGE) {
                 storage[i] = new ExtendedBlockStorage(i << 4, this.world.provider.hasSkyLight());
             }
         }
+        heights = new int[CHUNK_SIZE_X][CHUNK_SIZE_Z];
+        bottomHeights = new int[CHUNK_SIZE_X][CHUNK_SIZE_Z];
+        trackHeight();
     }
 
     private void trackHeight() {
@@ -66,11 +63,11 @@ class Chunkster {
         int startHeight = CHUNK_SIZE_Y - 1;
         startHeight = dimName.equalsIgnoreCase("Nether") ? 63 : startHeight;
         startHeight = dimName.equalsIgnoreCase("End") ? 127 : startHeight;
-        for (int cx = 0, wx = chunkStartX; cx < CHUNK_SIZE_X; ++wx, ++cx) {
-            for (int cz = 0, wz = chunkStartZ; cz < CHUNK_SIZE_Z; ++wz, ++cz) {
+        for (int cx = 0; cx < CHUNK_SIZE_X; ++cx) {
+            for (int cz = 0; cz < CHUNK_SIZE_Z; ++cz) {
                 int hg = startHeight;
                 while (hg > 0) {
-                    int blockID = Blocks.blockID(getBlockState(wx, hg, wz));
+                    int blockID = Blocks.blockID(getBlockState(cx, hg, cz));
                     if (Blocks.isOverlook(blockID)) {
                         --hg;
                     } else {
@@ -79,7 +76,7 @@ class Chunkster {
                 }
                 heights[cx][cz] = hg + 1;
                 while (hg > 0) {
-                    int blockID = Blocks.blockID(getBlockState(wx, hg, wz));
+                    int blockID = Blocks.blockID(getBlockState(cx, hg, cz));
                     if (Blocks.isOverlook(blockID) || Blocks.isLiquid(blockID)) {
                         --hg;
                     } else {
@@ -92,17 +89,17 @@ class Chunkster {
     }
 
     private void updateGrass() {
-        for (int cx = 0, wx = chunkStartX; cx < CHUNK_SIZE_X; ++wx, ++cx) {
-            for (int cz = 0, wz = chunkStartZ; cz < CHUNK_SIZE_Z; ++wz, ++cz) {
+        for (int cx = 0; cx < CHUNK_SIZE_X; ++cx) {
+            for (int cz = 0; cz < CHUNK_SIZE_Z; ++cz) {
                 Block prevBlock = Blocks.AIR;
                 boolean grassed = false;
-                for (int wy = Math.min(heights[cx][cz], CHUNK_SIZE_Y - 1); wy >= 0; --wy) {
-                    Block block = Blocks.getBlock(getBlockState(wx, wy, wz));
+                for (int y = Math.min(heights[cx][cz], CHUNK_SIZE_Y - 1); y >= 0; --y) {
+                    Block block = Blocks.getBlock(getBlockState(cx, y, cz));
                     if (block == Blocks.GRASS && Blocks.isSoil(Blocks.blockID(prevBlock))) {
-                        setBlockState(wx, wy, wz, Blocks.state(Blocks.DIRT));
+                        setBlockState(cx, y, cz, Blocks.state(Blocks.DIRT));
                     }
                     if (!grassed && block == Blocks.DIRT && Blocks.isOverlook(Blocks.blockID(prevBlock))) {
-                        setBlockState(wx, wy, wz, Blocks.state(Blocks.GRASS));
+                        setBlockState(cx, y, cz, Blocks.state(Blocks.GRASS));
                         grassed = true;
                     }
                     prevBlock = block;
@@ -111,35 +108,49 @@ class Chunkster {
         }
     }
 
-    void setBlockState(int wx, int wy, int wz, IBlockState blockState) {
-        if (isInsideY(wy)) {
-            removeTileEntity(wx, wy, wz);
-            storage[wy / CHUNK_PART_Y].set(wx - chunkStartX, wy % CHUNK_PART_Y, wz - chunkStartZ, blockState);
+    private void notifyPlayers() {
+        for (EntityPlayer player : world.playerEntities) {
+            if (player instanceof EntityPlayerMP) {
+                EntityPlayerMP playerMP = (EntityPlayerMP) player;
+                if (    Math.abs(playerMP.chunkCoordX - chunkX) <= PLAYER_NOTIFY_RADIUS &&
+                        Math.abs(playerMP.chunkCoordZ - chunkZ) <= PLAYER_NOTIFY_RADIUS) {
+                    Packet<?> packet = new SPacketChunkData(chunk, 65535);
+                    playerMP.connection.sendPacket(packet);
+                }
+            }
+        }
+    }
+
+    private void setBlockState(int x, int y, int z, IBlockState blockState) {
+        if (isInsideY(y)) {
+            removeTileEntity(x + chunkStartX, y, z + chunkStartZ);
+            storage[y / CHUNK_PART_Y].set(x, y % CHUNK_PART_Y, z, blockState);
             needToUpdate = true;
         }
     }
 
-    void setTileEntity(int wx, int wy, int wz, TileEntity tileEntity) {
-        if (isInsideY(wy)) {
-            world.setTileEntity(new BlockPos(wx, wy, wz), tileEntity);
-            needToUpdate = true;
-        }
+    private IBlockState getBlockState(int x, int y, int z) {
+        return isInsideY(y) ? storage[y / CHUNK_PART_Y].get(x, y % CHUNK_PART_Y, z) : Blocks.state(Blocks.AIR);
     }
 
-    int getHeight(int wx, int wz) {
-        return heights[wx - chunkStartX][wz - chunkStartZ];
+    int getHeight(BlockPos pos) {
+        return heights[pos.getX() - chunkStartX][pos.getZ() - chunkStartZ];
     }
 
-    int getBottomHeight(int wx, int wz) {
-        return bottomHeights[wx - chunkStartX][wz - chunkStartZ];
+    int getBottomHeight(BlockPos pos) {
+        return bottomHeights[pos.getX() - chunkStartX][pos.getZ() - chunkStartZ];
     }
 
-    IBlockState getBlockState(int wx, int wy, int wz) {
-        return isInsideY(wy) ? storage[wy / CHUNK_PART_Y].get(wx - chunkStartX, wy % CHUNK_PART_Y, wz - chunkStartZ) : Blocks.state(Blocks.AIR);
+    TileEntity getTileEntity(BlockPos pos) {
+        return isInsideY(pos.getY()) ? world.getTileEntity(pos) : null;
     }
 
-    TileEntity getTileEntity(int wx, int wy, int wz) {
-        return isInsideY(wy) ? world.getTileEntity(new BlockPos(wx, wy, wz)) : null;
+    void setBlockState(BlockPos pos, IBlockState blockState) {
+        setBlockState(pos.getX() - chunkStartX, pos.getY(), pos.getZ() - chunkStartZ, blockState);
+    }
+
+    IBlockState getBlockState(BlockPos pos) {
+        return getBlockState(pos.getX() - chunkStartX, pos.getY(), pos.getZ() - chunkStartZ);
     }
 
     private boolean isInsideY(int wy) {
@@ -154,19 +165,11 @@ class Chunkster {
         if (!needToUpdate) {
             return;
         }
+        needToUpdate = false;
         trackHeight();
         updateGrass();
         chunk.checkLight();
-        for (EntityPlayer player : world.playerEntities) {
-            if (player instanceof EntityPlayerMP) {
-                EntityPlayerMP playerMP = (EntityPlayerMP) player;
-                if (Math.abs(playerMP.chunkCoordX - chunkX) <= 32 && Math.abs(playerMP.chunkCoordZ - chunkZ) <= 32) {
-                    Packet<?> packet = new SPacketChunkData(chunk, 65535);
-                    playerMP.connection.sendPacket(packet);
-                }
-            }
-        }
-        needToUpdate = false;
+        notifyPlayers();
     }
 
     Timer getTimer() {

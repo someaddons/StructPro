@@ -101,11 +101,6 @@ public class Commands implements ICommand {
             int length = Utils.parseOrDefault(vars, "length", 64);
             feedback(sender, Evaluator.cmdSave(sender.getEntityWorld(), name, posX, posY, posZ, width, height, length));
         }
-        if (cmd.equalsIgnoreCase("generate")) {
-            int step = Math.max(1, Utils.parseOrDefault(vars, "step", 8));
-            int radius = Math.max(0, Utils.parseOrDefault(vars, "radius", 16));
-            feedback(sender, Evaluator.cmdGenerate(sender.getEntityWorld(), radius, step));
-        }
         if (cmd.equalsIgnoreCase("help")) {
             feedback(sender, Evaluator.cmdHelp());
         }

@@ -6,6 +6,7 @@ import net.minecraft.block.state.IBlockState;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+/* Blocks control class */
 @SuppressWarnings({"WeakerAccess", "deprecation"})
 public class Blocks extends net.minecraft.init.Blocks {
 
@@ -30,22 +31,37 @@ public class Blocks extends net.minecraft.init.Blocks {
     /* Block force replaces */
     private static int [] blockReplaces = new int[256];
 
+    /* Block id from block*/
     public static int blockID(Block block) {
         return Block.getIdFromBlock(block);
     }
 
+    /* Block id from block state */
     public static int blockID(IBlockState block) {
         return blockID(getBlock(block));
     }
 
+    /* Block from block id */
     public static Block idToBlock(int id) {
         return isVanillaID(id) ? vanillaBlocks[blockReplaces[id]] : null;
     }
 
+    /* Block state from block */
     public static IBlockState state(Block block) {
         return block.getDefaultState();
     }
 
+    /* Block from block state */
+    public static Block getBlock(IBlockState state) {
+        return state.getBlock();
+    }
+
+    /* Block metadata from block state */
+    public static int getMeta(IBlockState state) {
+        return state.getBlock().getMetaFromState(state);
+    }
+
+    /* Block state from block and metadata */
     public static IBlockState state(Block block, int meta) {
         IBlockState result = state(block);
         try {
@@ -76,14 +92,6 @@ public class Blocks extends net.minecraft.init.Blocks {
         for (Block block : blocks) {
             setReplace(block);
         }
-    }
-
-    public static Block getBlock(IBlockState state) {
-        return state.getBlock();
-    }
-
-    public static int getMeta(IBlockState state) {
-        return state.getBlock().getMetaFromState(state);
     }
 
     public static boolean isVanillaID(int blockID) {

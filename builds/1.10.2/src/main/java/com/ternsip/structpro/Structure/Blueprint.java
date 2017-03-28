@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
@@ -23,7 +24,7 @@ class Blueprint {
 
     /* Blueprint abstract limitations */
     private static final int WIDTH_LIMIT = 1024;
-    private static final int HEIGHT_LIMIT = 255;
+    private static final int HEIGHT_LIMIT = 256;
     private static final int LENGTH_LIMIT = 1024;
     private static final long VOLUME_LIMIT = 256 * 256 * 256;
 
@@ -79,13 +80,13 @@ class Blueprint {
         for (int ix = 0, x = posX; ix < width; ++ix, ++x) {
             for (int iy = 0, y = posY; iy < height; ++iy, ++y) {
                 for (int iz = 0, z = posZ; iz < length; ++iz, ++z) {
-                    IBlockState state = WorldCache.getBlockState(world, x, y, z);
+                    IBlockState state = WorldCache.getBlockState(world, new BlockPos(x, y, z));
                     int blockID = Blocks.blockID(state);
                     int index = getIndex(ix, iy, iz);
                     if (Blocks.isVanillaID(blockID)) {
                         blocks[index] = (short) blockID;
                         meta[index] = (byte) Blocks.getMeta(state);
-                        TileEntity tile = WorldCache.getTileEntity(world, x, y, z);
+                        TileEntity tile = WorldCache.getTileEntity(world, new BlockPos(x, y, z));
                         if (tile != null) {
                             try {
                                 tile.writeToNBT(tiles[index]);

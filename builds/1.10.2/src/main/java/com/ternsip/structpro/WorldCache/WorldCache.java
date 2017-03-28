@@ -6,6 +6,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -17,7 +20,7 @@ public class WorldCache {
     /* Holds World -> ChunkCache */
     private static HashMap<World, ChunkCache> holders = new HashMap<World, ChunkCache>();
 
-    public static Chunkster getChunkster(World world, int chunkX, int chunkZ) {
+    private static Chunkster getChunkster(World world, int chunkX, int chunkZ) {
         if (!holders.containsKey(world)) {
             holders.put(world, new ChunkCache(world));
         }
@@ -40,44 +43,41 @@ public class WorldCache {
         return entity;
     }
 
-    public static void setBlockState(World world, int x, int y, int z, IBlockState blockState) {
-        getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).setBlockState(x, y, z, blockState);
+    public static void generate(World world, int cx, int cz) {
+        if (world.getChunkProvider() instanceof ChunkProviderServer) {
+            ChunkProviderServer cps = (ChunkProviderServer) world.getChunkProvider();
+            Chunk chunk = cps.provideChunk(cx, cz);
+             if(!chunk.isTerrainPopulated()) {
+                chunk.checkLight();
+                cps.chunkGenerator.populate(cx, cz);
+                GameRegistry.generateWorld(cx, cz, world, cps.chunkGenerator, world.getChunkProvider());
+                chunk.setChunkModified();
+            }
+        }
     }
 
-    public static IBlockState getBlockState(World world, int x, int y, int z) {
-        return getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).getBlockState(x, y, z);
-    }
-
-    public static void setTileEntity(World world, int x, int y, int z, TileEntity tileEntity) {
-        getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).setTileEntity(x, y, z, tileEntity);
-    }
-
-    public static TileEntity getTileEntity(World world, int x, int y, int z) {
-        return getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).getTileEntity(x, y, z);
-    }
-
-    public static int getHeight(World world, int x, int z) {
-        return getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).getHeight(x, z);
-    }
-
-    public static int getBottomHeight(World world, int x, int z) {
-        return getChunkster(world, getStartChunkX(x), getStartChunkZ(z)).getBottomHeight(x, z);
+    public static Chunkster getChunkster(World world, BlockPos blockPos) {
+        return getChunkster(world, getStartChunkX(blockPos.getX()), getStartChunkZ(blockPos.getZ()));
     }
 
     public static void setBlockState(World world, BlockPos blockPos, IBlockState blockState) {
-        setBlockState(world, blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockState);
+        getChunkster(world, blockPos).setBlockState(blockPos, blockState);
     }
 
     public static IBlockState getBlockState(World world, BlockPos blockPos) {
-        return getBlockState(world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
-    }
-
-    public static void setTileEntity(World world, BlockPos blockPos, TileEntity tileEntity) {
-        setTileEntity(world, blockPos.getX(), blockPos.getY(), blockPos.getZ(), tileEntity);
+        return getChunkster(world, blockPos).getBlockState(blockPos);
     }
 
     public static TileEntity getTileEntity(World world, BlockPos blockPos) {
-        return getTileEntity(world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
+        return getChunkster(world, blockPos).getTileEntity(blockPos);
+    }
+
+    public static int getHeight(World world, BlockPos blockPos) {
+        return getChunkster(world, blockPos).getHeight(blockPos);
+    }
+
+    public static int getBottomHeight(World world, BlockPos blockPos) {
+        return getChunkster(world, blockPos).getBottomHeight(blockPos);
     }
 
     /* Unload obsoleted data */

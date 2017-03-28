@@ -18,9 +18,6 @@ import java.util.Stack;
 @SuppressWarnings({"WeakerAccess", "deprecation"})
 public class Configurator {
 
-    public static final File schematicsFolder = new File("schematics");
-    public static final File schematicsSavesFolder = new File(schematicsFolder,"Saves");
-
     /* Spawn probability per chunk, to not generate set any negative value */
     public static double density = 0.0035;
 
@@ -59,6 +56,9 @@ public class Configurator {
 
     /* Max length in chunks for world to be generated */
     public static int worldChunkBorder = 4096;
+
+    /* Schematics folder */
+    public static File schematicsFolder = new File("schematics");
 
     /* Allow spawning structures only in dimensions with given ids, case sensitive */
     public static HashSet<String> spawnDimensions = new HashSet<String>() {{
@@ -136,6 +136,7 @@ public class Configurator {
                 banBlocks = tokenize(config.getProperty("BAN_BLOCKS", combine(banBlocks)));
                 banItems = tokenize(config.getProperty("BAN_ITEMS", combine(banItems)));
                 worldChunkBorder = (int) Double.parseDouble(config.getProperty("WORLD_CHUNK_BORDER", Double.toString(worldChunkBorder)));
+                schematicsFolder = new File(config.getProperty("SCHEMATICS_FOLDER", schematicsFolder.getPath()));
             } finally {
                 fis.close();
             }
@@ -159,10 +160,15 @@ public class Configurator {
             config.setProperty("BAN_BLOCKS", combine(banBlocks));
             config.setProperty("BAN_ITEMS", combine(banItems));
             config.setProperty("WORLD_CHUNK_BORDER", Integer.toString(worldChunkBorder));
+            config.setProperty("SCHEMATICS_FOLDER", schematicsFolder.getPath());
             config.store(fos, null);
         } finally {
             fos.close();
         }
+    }
+
+    public static File getSchematicsSavesFolder() {
+        return new File(schematicsFolder,"Saves");
     }
 
     private static String combine(HashSet<String> set) {
