@@ -137,7 +137,7 @@ public class Projector extends Structure {
     /* Populate structure with entities */
     private void populate(World world, Posture posture, long seed) {
         boolean village = getOriginFile().getPath().toLowerCase().contains("village");
-        ArrayList<Class<? extends Entity>> mobs = village ? Mobs.selectVillage() : Mobs.select(biome);
+        ArrayList<Class<? extends Entity>> mobs = village ? Mobs.village.select() : Mobs.hostile.select(biome);
         Random random = new Random(seed);
         int size = width * length;
         int count = 1 + (size >= 256 ? 2 : 0) + (size >= 1024 ? 2 : 0) + (size >= 8192 ? 2 : 0);
@@ -288,12 +288,16 @@ public class Projector extends Structure {
         if (tile instanceof TileEntityMobSpawner) {
             TileEntityMobSpawner spawner = (TileEntityMobSpawner) tile;
             MobSpawnerBaseLogic logic = spawner.getSpawnerBaseLogic();
-            Class<? extends Entity> mob = Utils.select(Mobs.select(biome), random.nextLong());
+            Class<? extends Entity> mob = Utils.select(Mobs.hostile.select(biome), random.nextLong());
             if (mob != null) {
                 logic.setEntityName(Mobs.classToName(mob));
             }
             if (tileTag != null && tileTag.hasKey("EntityId")) {
-                mob = Mobs.selectByName(tileTag.getString("EntityId"));
+                mob = Utils.select(
+                        Configurator.mobSpawnersEggsOnly ?
+                        Mobs.mobsEggs.select(tileTag.getString("EntityId"), false) :
+                        Mobs.mobs.select(tileTag.getString("EntityId"), false)
+                );
                 if (mob != null) {
                     logic.setEntityName(Mobs.classToName(mob));
                 }

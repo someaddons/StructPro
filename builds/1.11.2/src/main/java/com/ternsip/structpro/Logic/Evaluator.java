@@ -6,7 +6,6 @@ import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /* Commands evaluator */
 class Evaluator {
@@ -18,21 +17,20 @@ class Evaluator {
                            int rotateX, int rotateY, int rotateZ,
                            boolean flipX, boolean flipY, boolean flipZ,
                            boolean village) {
-        long seed = System.currentTimeMillis();
         if (village) {
-            ArrayList<Projector> projectors = Utils.select(Structures.selectVillages(name), seed);
+            ArrayList<Projector> projectors = Utils.select(Structures.villages.select(name, false));
             if (projectors == null || projectors.size() == 0) {
                 return "No matching villages";
             }
-            Report report = Distributor.spawnVillage(world, projectors, posX / 16, posZ / 16, new Random(seed));
+            Report report = Distributor.spawnVillage(world, projectors, posX / 16, posZ / 16, System.currentTimeMillis());
             report.print();
             return report.toString();
         } else {
             ArrayList<Projector> candidates = new ArrayList<Projector>(){{
-                addAll(Structures.select(name));
-                addAll(Structures.selectSaves(name));
+                addAll(Structures.structures.select(name, false));
+                addAll(Structures.saves.select(name, false));
             }};
-            Projector projector = Utils.select(candidates, seed);
+            Projector projector = Utils.select(candidates);
             if (projector == null) {
                 return "No matching structures";
             }

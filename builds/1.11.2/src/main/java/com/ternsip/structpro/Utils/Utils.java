@@ -92,4 +92,9 @@ public class Utils {
         return array.size() > 0 ? array.get(new Random(seed).nextInt(array.size())) : null;
     }
 
+    /* Select random element */
+    public static <TYPE> TYPE select(ArrayList<TYPE> array) {
+        return select(array, System.currentTimeMillis());
+    }
+
 }

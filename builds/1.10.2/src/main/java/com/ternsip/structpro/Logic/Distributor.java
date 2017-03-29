@@ -17,18 +17,18 @@ class Distributor extends Configurator {
 
     /* Structures spawn sets in attempting order */
     private static ArrayList<ArrayList<Projector>> spawnOrder = new ArrayList<ArrayList<Projector>>(){{
-            add(Structures.select(new Method[]{Method.BASIC, Method.UNDERWATER, Method.AFLOAT, Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(Structures.select(new Method[]{Method.BASIC}));
-            add(Structures.select(new Method[]{Method.BASIC}));
-            add(Structures.select(new Method[]{Method.BASIC}));
-            add(Structures.select(new Method[]{Method.UNDERWATER}));
-            add(Structures.select(new Method[]{Method.AFLOAT}));
-            add(Structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(Structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(Structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(Structures.select(new Biome[]{Biome.NETHER}));
-            add(Structures.select(new Biome[]{Biome.SNOW}));
-            add(Structures.select(new Biome[]{Biome.END}));
+            add(Structures.structures.select(new Method[]{Method.BASIC, Method.UNDERWATER, Method.AFLOAT, Method.SKY, Method.HILL, Method.UNDERGROUND}));
+            add(Structures.structures.select(new Method[]{Method.BASIC}));
+            add(Structures.structures.select(new Method[]{Method.BASIC}));
+            add(Structures.structures.select(new Method[]{Method.BASIC}));
+            add(Structures.structures.select(new Method[]{Method.UNDERWATER}));
+            add(Structures.structures.select(new Method[]{Method.AFLOAT}));
+            add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+            add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+            add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+            add(Structures.structures.select(new Biome[]{Biome.NETHER}));
+            add(Structures.structures.select(new Biome[]{Biome.SNOW}));
+            add(Structures.structures.select(new Biome[]{Biome.END}));
     }};
 
     /* Process chunk generations */
@@ -37,7 +37,7 @@ class Distributor extends Configurator {
         for (int drop = getDrops(world, chunkX, chunkZ, false); drop > 0; --drop) {
             boolean spawned = false;
             for (ArrayList<Projector> projectors : spawnOrder) {
-                if (projectors.size() > 0 && spawn(world, Utils.select(projectors, random.nextLong()), chunkX, chunkZ, random)) {
+                if (projectors.size() > 0 && spawn(world, Utils.select(projectors, random.nextLong()), chunkX, chunkZ, random.nextLong())) {
                     spawned = true;
                     break;
                 }
@@ -47,8 +47,8 @@ class Distributor extends Configurator {
             }
         }
         for (int drop = getDrops(world, chunkX, chunkZ, true); drop > 0; --drop) {
-            if (Structures.selectVillages().size() > 0) {
-                spawnVillage(world, Utils.select(Structures.selectVillages(), random.nextLong()), chunkX, chunkZ, random).print();
+            if (Structures.villages.select().size() > 0) {
+                spawnVillage(world, Utils.select(Structures.villages.select(), random.nextLong()), chunkX, chunkZ, random.nextLong()).print();
             }
         }
     }
@@ -74,7 +74,8 @@ class Distributor extends Configurator {
     }
 
     /* Spawn village that starts in chunk */
-    static Report spawnVillage(World world, ArrayList<Projector> village, int chunkX, int chunkZ, Random random) {
+    static Report spawnVillage(World world, ArrayList<Projector> village, int chunkX, int chunkZ, long seed) {
+        Random random = new Random(seed);
         String villageName = village.get(0).getOriginFile().getParent();
         int side = (int) (1 + Math.sqrt(village.size()));
         int spawned = 0;
@@ -91,7 +92,7 @@ class Distributor extends Configurator {
             int curSize = Math.max(candidate.getWidth(), candidate.getLength());
             maxSize = Math.max(maxSize, curSize);
             offsetX += maxSize;
-            spawned += spawn(world, candidate, realX, 0, realZ, random) ? 1 : 0;
+            spawned += spawn(world, candidate, realX, 0, realZ, random.nextLong()) ? 1 : 0;
         }
         return new Report()
                 .add("VILLAGE", villageName)
@@ -105,7 +106,8 @@ class Distributor extends Configurator {
     }
 
     /* Spawn candidate in certain position in the world */
-    private static boolean spawn(World world, Projector candidate, int worldX, int worldY, int worldZ, Random random) {
+    private static boolean spawn(World world, Projector candidate, int worldX, int worldY, int worldZ, long seed) {
+        Random random = new Random(seed);
         int rotX = 0, rotY = random.nextInt() % 4, rotZ = 0;
         boolean flipX = random.nextBoolean(), flipY = false, flipZ = random.nextBoolean();
         Report report = candidate.paste(world, worldX, worldY, worldZ, rotX, rotY, rotZ, flipX, flipY, flipZ, random.nextLong());
@@ -116,10 +118,11 @@ class Distributor extends Configurator {
     }
 
     /* Spawn candidate in given world, chunk, seed */
-    private static boolean spawn(World world, Projector candidate, int chunkX, int chunkZ, Random random) {
+    private static boolean spawn(World world, Projector candidate, int chunkX, int chunkZ, long seed) {
+        Random random = new Random(seed);
         int cx = chunkX * 16 + Math.abs(random.nextInt()) % 16;
         int cz = chunkZ * 16 + Math.abs(random.nextInt()) % 16;
-        return spawn(world, candidate, cx, 0, cz, random);
+        return spawn(world, candidate, cx, 0, cz, random.nextLong());
     }
 
     static Report saveStructure(World world, String name, int posX, int posY, int posZ, int width, int height, int length) {

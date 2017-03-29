@@ -1,56 +1,43 @@
 package com.ternsip.structpro.Logic;
 
 import com.ternsip.structpro.Structure.Projector;
-import com.ternsip.structpro.Structure.Structure.Biome;
-import com.ternsip.structpro.Structure.Structure.Method;
 import com.ternsip.structpro.Utils.Report;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /* Structures control class */
 class Structures {
 
-    private static ArrayList<Projector> projectors = new ArrayList<Projector>();
-    private static ArrayList<Projector> saves = new ArrayList<Projector>();
-
-    /* All possible projectors for each type of method */
-    private static HashMap<Method, ArrayList<Projector>> methodProjectors = new HashMap<Method, ArrayList<Projector>>(){{
-        for (Method method : Method.values()) {
-            put(method, new ArrayList<Projector>());
-        }
-    }};
-
-    /* All possible projectors for each type of biome */
-    private static HashMap<Biome, ArrayList<Projector>> biomeProjectors = new HashMap<Biome, ArrayList<Projector>>(){{
-        for (Biome biome : Biome.values()) {
-            put(biome, new ArrayList<Projector>());
-        }
-    }};
-
-    /* Villages structures */
-    private static HashMap<String, Integer> villageIndices = new HashMap<String, Integer>();
-    private static ArrayList<ArrayList<Projector>> villages = new ArrayList<ArrayList<Projector>>();
+    /* Selector for all types of projectors */
+    static Selector<Projector> structures = new Selector<Projector>();
+    static Selector<ArrayList<Projector>> villages = new Selector<ArrayList<Projector>>();
+    static Selector<Projector> saves = new Selector<Projector>();
 
     /* Load structure from file */
     static void loadStructure(File file) {
         try {
             final Projector projector = new Projector(file);
             if (file.getPath().contains(Configurator.getSchematicsSavesFolder().getPath())) {
-                saves.add(projector);
+                saves.add(projector.getMethod(), projector);
+                saves.add(projector.getBiome(), projector);
+                saves.add(projector.getOriginFile().getPath(), projector);
                 return;
             }
-            projectors.add(projector);
-            methodProjectors.get(projector.getMethod()).add(projector);
-            biomeProjectors.get(projector.getBiome()).add(projector);
+            structures.add(projector.getMethod(), projector);
+            structures.add(projector.getBiome(), projector);
+            structures.add(projector.getOriginFile().getPath(), projector);
             String parent = file.getParent().toLowerCase().replace("\\", "/").replace("//", "/");
             if (parent.contains("/village/") || parent.contains("/town/")) {
-                if (!villageIndices.containsKey(parent)) {
-                    villageIndices.put(parent, villages.size());
-                    villages.add(new ArrayList<Projector>());
+                ArrayList<ArrayList<Projector>> village = villages.select(parent, true);
+                if (village.isEmpty()) {
+                    villages.add(parent, new ArrayList<Projector>(){{add(projector);}});
+                } else {
+                    village.get(0).add(projector);
                 }
-                villages.get(villageIndices.get(parent)).add(projector);
             }
             int width = projector.getWidth();
             int height = projector.getHeight();
@@ -76,7 +63,7 @@ class Structures {
 
     /* Sort village structures by size */
     static void sortVillages() {
-        for (ArrayList<Projector> village : villages) {
+        for (ArrayList<Projector> village : villages.select()) {
             Collections.sort(village, new Comparator<Projector>(){
                 @Override
                 public int compare(final Projector lhs,Projector rhs) {
@@ -89,83 +76,4 @@ class Structures {
         }
     }
 
-    /* Returns all projectors  */
-    static ArrayList<Projector> select() {
-        return select("");
-    }
-
-    /* Select structures by biome */
-    static ArrayList<Projector> select(Biome biome) {
-        return biomeProjectors.get(biome);
-    }
-
-    /* Select structures by method */
-    static ArrayList<Projector> select(Method method) {
-        return methodProjectors.get(method);
-    }
-
-    /* Select structures that matches any method */
-    static ArrayList<Projector> select(Method[] methods) {
-        ArrayList<Projector> result = new ArrayList<Projector>();
-        for (Method method : methods) {
-            result.addAll(select(method));
-        }
-        return result;
-    }
-
-    /* Select structures that matches any method */
-    static ArrayList<Projector> select(Biome[] biomes) {
-        ArrayList<Projector> result = new ArrayList<Projector>();
-        for (Biome biome : biomes) {
-            result.addAll(select(biome));
-        }
-        return result;
-    }
-
-    /* Returns suitable projectors for file name */
-    static ArrayList<Projector> select(String name) {
-        if (name.isEmpty()) {
-            return projectors;
-        }
-        ArrayList<Projector> result = new ArrayList<Projector>();
-        for (Projector projector : projectors) {
-            if (projector.getOriginFile().getPath().toLowerCase().contains(name.toLowerCase())) {
-                result.add(projector);
-            }
-        }
-        return result;
-    }
-
-    /* Returns suitable saves projectors for file name */
-    static ArrayList<Projector> selectSaves(String name) {
-        if (name.isEmpty()) {
-            return saves;
-        }
-        ArrayList<Projector> result = new ArrayList<Projector>();
-        for (Projector projector : saves) {
-            if (projector.getOriginFile().getPath().toLowerCase().contains(name.toLowerCase())) {
-                result.add(projector);
-            }
-        }
-        return result;
-    }
-
-    /* Select villages by name */
-    static ArrayList<ArrayList<Projector>> selectVillages(String name) {
-        if (name.isEmpty()) {
-            return villages;
-        }
-        ArrayList<ArrayList<Projector>> result = new ArrayList<ArrayList<Projector>>();
-        for (HashMap.Entry<String, Integer> entry : villageIndices.entrySet()) {
-            if (entry.getKey().toLowerCase().contains(name)) {
-                result.add(villages.get(entry.getValue()));
-            }
-        }
-        return result;
-    }
-
-    /* Select all villages */
-    static ArrayList<ArrayList<Projector>> selectVillages() {
-        return selectVillages("");
-    }
 }

@@ -7,7 +7,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketChunkData;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -121,9 +120,22 @@ class Chunkster {
         }
     }
 
+    private void notifyNeighbours() {
+        for (int cx = 0, wx = chunkStartX; cx < CHUNK_SIZE_X; ++cx, ++wx) {
+            for (int cz = 0, wz = chunkStartZ; cz < CHUNK_SIZE_Z; ++cz, ++wz) {
+                for (int cy = 0, wy = chunkStartY; cy < CHUNK_SIZE_Y; ++cy, ++wy) {
+                    try {
+                        BlockPos pos = new BlockPos(wx, wy, wz);
+                        world.notifyNeighborsOfStateChange(pos, Blocks.getBlock(getBlockState(cx, cy, cz)), true);
+                    } catch (Throwable ignored) {}
+                }
+            }
+        }
+    }
+
     private void setBlockState(int x, int y, int z, IBlockState blockState) {
         if (isInsideY(y)) {
-            removeTileEntity(x + chunkStartX, y, z + chunkStartZ);
+            WorldCache.removeTileEntity(world, new BlockPos(x + chunkStartX, y, z + chunkStartZ));
             storage[y / CHUNK_PART_Y].set(x, y % CHUNK_PART_Y, z, blockState);
             needToUpdate = true;
         }
@@ -141,10 +153,6 @@ class Chunkster {
         return bottomHeights[pos.getX() - chunkStartX][pos.getZ() - chunkStartZ];
     }
 
-    TileEntity getTileEntity(BlockPos pos) {
-        return isInsideY(pos.getY()) ? world.getTileEntity(pos) : null;
-    }
-
     void setBlockState(BlockPos pos, IBlockState blockState) {
         setBlockState(pos.getX() - chunkStartX, pos.getY(), pos.getZ() - chunkStartZ, blockState);
     }
@@ -157,10 +165,6 @@ class Chunkster {
         return wy >= 0 && wy < CHUNK_SIZE_Y && storage[wy / CHUNK_PART_Y] != Chunk.NULL_BLOCK_STORAGE;
     }
 
-    private void removeTileEntity(int wx, int wy, int wz) {
-        world.removeTileEntity(new BlockPos(wx, wy, wz));
-    }
-
     void update() {
         if (!needToUpdate) {
             return;
@@ -168,6 +172,7 @@ class Chunkster {
         needToUpdate = false;
         trackHeight();
         updateGrass();
+        notifyNeighbours();
         chunk.checkLight();
         notifyPlayers();
     }
@@ -175,4 +180,5 @@ class Chunkster {
     Timer getTimer() {
         return timer;
     }
+
 }

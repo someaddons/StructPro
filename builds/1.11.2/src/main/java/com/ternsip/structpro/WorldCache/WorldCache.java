@@ -35,6 +35,7 @@ public class WorldCache {
         return wz < 0 ? (wz + 1) / 16 - 1 : wz / 16;
     }
 
+    /* Spawn entity in the world */
     public static Entity spawnEntity(World world, Class<? extends Entity> mob, BlockPos pos) {
         Entity entity = Mobs.construct(world, mob);
         entity.setLocationAndAngles(pos.getX() + 0.5, pos.getY() + 0.1, pos.getZ() + 0.5, new Random(System.currentTimeMillis()).nextFloat() * 360.0F, 0.0F);
@@ -43,39 +44,51 @@ public class WorldCache {
         return entity;
     }
 
-    public static void generate(World world, int cx, int cz) {
+    /* Call generation manually at chunk position */
+    public static void generate(World world, int chunkX, int chunkZ) {
         if (world.getChunkProvider() instanceof ChunkProviderServer) {
             ChunkProviderServer cps = (ChunkProviderServer) world.getChunkProvider();
-            Chunk chunk = cps.provideChunk(cx, cz);
+            Chunk chunk = cps.provideChunk(chunkX, chunkZ);
              if(!chunk.isTerrainPopulated()) {
                 chunk.checkLight();
-                cps.chunkGenerator.populate(cx, cz);
-                GameRegistry.generateWorld(cx, cz, world, cps.chunkGenerator, world.getChunkProvider());
+                cps.chunkGenerator.populate(chunkX, chunkZ);
+                GameRegistry.generateWorld(chunkX, chunkZ, world, cps.chunkGenerator, world.getChunkProvider());
                 chunk.setChunkModified();
             }
         }
     }
 
+    /* Remove tile entity in the world */
+    public static void removeTileEntity(World world, BlockPos blockPos) {
+        world.removeTileEntity(blockPos);
+    }
+
+    /* Get chunkster from the world */
     public static Chunkster getChunkster(World world, BlockPos blockPos) {
         return getChunkster(world, getStartChunkX(blockPos.getX()), getStartChunkZ(blockPos.getZ()));
     }
 
+    /* Set block state in the world */
     public static void setBlockState(World world, BlockPos blockPos, IBlockState blockState) {
         getChunkster(world, blockPos).setBlockState(blockPos, blockState);
     }
 
+    /* Get block state from the world */
     public static IBlockState getBlockState(World world, BlockPos blockPos) {
         return getChunkster(world, blockPos).getBlockState(blockPos);
     }
 
+    /* Get tile entity from the world */
     public static TileEntity getTileEntity(World world, BlockPos blockPos) {
-        return getChunkster(world, blockPos).getTileEntity(blockPos);
+        return world.getTileEntity(blockPos);
     }
 
+    /* Get soil height in the world */
     public static int getHeight(World world, BlockPos blockPos) {
         return getChunkster(world, blockPos).getHeight(blockPos);
     }
 
+    /* Get bottom height in the world */
     public static int getBottomHeight(World world, BlockPos blockPos) {
         return getChunkster(world, blockPos).getBottomHeight(blockPos);
     }
@@ -95,10 +108,12 @@ public class WorldCache {
         unload();
     }
 
+    /* Get dimenstion name of the world */
     public static String getDimensionName(World world) {
         return world.provider.getDimensionType().getName();
     }
 
+    /* Get dimension id from the world */
     public static int getDimensionID(World world) {
         return world.provider.getDimension();
     }

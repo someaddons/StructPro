@@ -27,23 +27,17 @@ public class Configurator {
     /* Calibration accuracy */
     public static double accuracy = 1.0;
 
-    /* Set chest spawn priority to native loot if it exists */
-    public static boolean nativeLoot = false;
-
-    /* Chest loot chance, to not loot set any negative value */
-    public static double lootChance = 0.5;
-
     /* Pull out structure from the ground and lift up (recommended 0) */
     public static int forceLift = 0;
 
-    /* Spawn mobs in generated structures */
-    public static boolean spawnMobs = true;
-
-    /* Print additional mod output to console */
-    public static boolean additionalOutput = true;
+    /* Set chest spawn priority to native loot if it exists */
+    public static boolean nativeLoot = false;
 
     /* Ban modded items from spawning */
     public static boolean onlyVanillaLoot = true;
+
+    /* Chest loot chance, to not loot set any negative value */
+    public static double lootChance = 0.5;
 
     /* Min number of stack per chest inclusive */
     public static int minChestItems = 2;
@@ -54,10 +48,19 @@ public class Configurator {
     /* Max item stack size for chest loot */
     public static int maxChestStackSize = 12;
 
-    /* Max length in chunks for world to be generated */
+    /* Spawn mobs in generated structures */
+    public static boolean spawnMobs = true;
+
+    /* Spawn mobs in generated structures */
+    public static boolean mobSpawnersEggsOnly = true;
+
+    /* Print additional mod output to console */
+    public static boolean additionalOutput = true;
+
+    /* Max length in chunks for world to be generated, 4096 chunks = area 65536 x 65536 blocks */
     public static int worldChunkBorder = 4096;
 
-    /* Schematics folder */
+    /* Schematics loads from this folder */
     public static File schematicsFolder = new File("schematics");
 
     /* Allow spawning structures only in dimensions with given ids, case sensitive */
@@ -122,21 +125,22 @@ public class Configurator {
                 density = Double.parseDouble(config.getProperty("DENSITY", Double.toString(density)));
                 densityVillage = Double.parseDouble(config.getProperty("DENSITY_VILLAGE", Double.toString(densityVillage)));
                 accuracy = Double.parseDouble(config.getProperty("ACCURACY", Double.toString(accuracy)));
-                nativeLoot = Boolean.parseBoolean(config.getProperty("NATIVE_LOOT", Boolean.toString(nativeLoot)));
-                lootChance = Double.parseDouble(config.getProperty("CHEST_LOOT_CHANCE", Double.toString(lootChance)));
                 forceLift = (int) Double.parseDouble(config.getProperty("FORCE_LIFT", Double.toString(forceLift)));
-                spawnMobs = Boolean.parseBoolean(config.getProperty("SPAWN_MOBS", Boolean.toString(spawnMobs)));
-                additionalOutput = Boolean.parseBoolean(config.getProperty("ADDITIONAL_OUTPUT", Boolean.toString(additionalOutput)));
+                nativeLoot = Boolean.parseBoolean(config.getProperty("NATIVE_LOOT", Boolean.toString(nativeLoot)));
                 onlyVanillaLoot = Boolean.parseBoolean(config.getProperty("ONLY_VANILLA_LOOT", Boolean.toString(onlyVanillaLoot)));
+                lootChance = Double.parseDouble(config.getProperty("CHEST_LOOT_CHANCE", Double.toString(lootChance)));
                 minChestItems = (int) Double.parseDouble(config.getProperty("MIN_CHEST_ITEMS", Double.toString(minChestItems)));
                 maxChestItems = (int) Double.parseDouble(config.getProperty("MAX_CHEST_ITEMS", Double.toString(maxChestItems)));
                 maxChestStackSize = (int) Double.parseDouble(config.getProperty("MAX_CHEST_STACK_SIZE", Double.toString(maxChestStackSize)));
+                spawnMobs = Boolean.parseBoolean(config.getProperty("SPAWN_MOBS", Boolean.toString(spawnMobs)));
+                mobSpawnersEggsOnly = Boolean.parseBoolean(config.getProperty("MOB_SPAWNERS_EGGS_ONLY", Boolean.toString(mobSpawnersEggsOnly)));
+                additionalOutput = Boolean.parseBoolean(config.getProperty("ADDITIONAL_OUTPUT", Boolean.toString(additionalOutput)));
+                worldChunkBorder = (int) Double.parseDouble(config.getProperty("WORLD_CHUNK_BORDER", Double.toString(worldChunkBorder)));
+                schematicsFolder = new File(config.getProperty("SCHEMATICS_FOLDER", schematicsFolder.getPath()));
                 spawnDimensions = tokenize(config.getProperty("SPAWN_DIMENSIONS", combine(spawnDimensions)));
                 villageDimensions = tokenize(config.getProperty("VILLAGE_DIMENSIONS", combine(villageDimensions)));
                 banBlocks = tokenize(config.getProperty("BAN_BLOCKS", combine(banBlocks)));
                 banItems = tokenize(config.getProperty("BAN_ITEMS", combine(banItems)));
-                worldChunkBorder = (int) Double.parseDouble(config.getProperty("WORLD_CHUNK_BORDER", Double.toString(worldChunkBorder)));
-                schematicsFolder = new File(config.getProperty("SCHEMATICS_FOLDER", schematicsFolder.getPath()));
             } finally {
                 fis.close();
             }
@@ -146,21 +150,22 @@ public class Configurator {
             config.setProperty("DENSITY", Double.toString(density));
             config.setProperty("DENSITY_VILLAGE", Double.toString(densityVillage));
             config.setProperty("ACCURACY", Double.toString(accuracy));
-            config.setProperty("NATIVE_LOOT", Boolean.toString(nativeLoot));
-            config.setProperty("CHEST_LOOT_CHANCE", Double.toString(lootChance));
             config.setProperty("FORCE_LIFT", Integer.toString(forceLift));
-            config.setProperty("SPAWN_MOBS", Boolean.toString(spawnMobs));
-            config.setProperty("ADDITIONAL_OUTPUT", Boolean.toString(additionalOutput));
+            config.setProperty("NATIVE_LOOT", Boolean.toString(nativeLoot));
             config.setProperty("ONLY_VANILLA_LOOT", Boolean.toString(onlyVanillaLoot));
+            config.setProperty("CHEST_LOOT_CHANCE", Double.toString(lootChance));
             config.setProperty("MIN_CHEST_ITEMS", Integer.toString(minChestItems));
             config.setProperty("MAX_CHEST_ITEMS", Integer.toString(maxChestItems));
             config.setProperty("MAX_CHEST_STACK_SIZE", Integer.toString(maxChestStackSize));
+            config.setProperty("SPAWN_MOBS", Boolean.toString(spawnMobs));
+            config.setProperty("MOB_SPAWNERS_EGGS_ONLY", Boolean.toString(mobSpawnersEggsOnly));
+            config.setProperty("ADDITIONAL_OUTPUT", Boolean.toString(additionalOutput));
+            config.setProperty("WORLD_CHUNK_BORDER", Integer.toString(worldChunkBorder));
+            config.setProperty("SCHEMATICS_FOLDER", schematicsFolder.getPath());
             config.setProperty("SPAWN_DIMENSIONS", combine(spawnDimensions));
             config.setProperty("VILLAGE_DIMENSIONS", combine(villageDimensions));
             config.setProperty("BAN_BLOCKS", combine(banBlocks));
             config.setProperty("BAN_ITEMS", combine(banItems));
-            config.setProperty("WORLD_CHUNK_BORDER", Integer.toString(worldChunkBorder));
-            config.setProperty("SCHEMATICS_FOLDER", schematicsFolder.getPath());
             config.store(fos, null);
         } finally {
             fos.close();
@@ -206,12 +211,13 @@ public class Configurator {
         long loadTime = (System.currentTimeMillis() - startTime);
         Report report = new Report();
         for (Method method : Method.values()) {
-            report.add("METHOD " + method.name.toUpperCase(), String.valueOf(Structures.select(method).size()));
+            report.add("METHOD " + method.name.toUpperCase(), String.valueOf(Structures.structures.select(method).size()));
         }
         for (Biome biome : Biome.values()) {
-            report.add("BIOME " + biome.name.toUpperCase(), String.valueOf(Structures.select(biome).size()));
+            report.add("BIOME " + biome.name.toUpperCase(), String.valueOf(Structures.structures.select(biome).size()));
         }
-        report.add("TOTAL LOADED", String.valueOf(Structures.select().size()));
+        report.add("TOTAL STRUCTURES LOADED", String.valueOf(Structures.structures.select().size()));
+        report.add("TOTAL VILLAGES LOADED", String.valueOf(Structures.villages.select().size()));
         report.add("LOAD TIME", new DecimalFormat("###0.00").format(loadTime / 1000.0) + "s");
         report.print();
 
