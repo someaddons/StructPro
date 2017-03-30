@@ -5,6 +5,8 @@ import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.world.World;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /* Commands evaluator */
@@ -42,7 +44,19 @@ class Evaluator {
 
     /* Save schematic */
     static String cmdSave(World world, String name, int posX, int posY, int posZ, int width, int height, int length) {
-        Report report = Distributor.saveStructure(world, name, posX, posY, posZ, width, height, length);
+        Report report = new Report()
+                .add("WORLD FRAGMENT", name)
+                .add("POS", "[X=" + posX + ";Y=" + posY + ";Z=" + posZ + "]")
+                .add("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]");
+        try {
+            File file = new File(Configurator.getSchematicsSavesFolder(), name + ".schematic");
+            Projector projector = new Projector(file, world, posX, posY, posZ, width, height, length);
+            projector.saveSchematic(projector.getOriginFile());
+            Structures.loadStructure(projector.getOriginFile());
+            report.add("SAVED", projector.getOriginFile().getPath());
+        } catch (IOException ioe) {
+            report.add("NOT SAVED", ioe.getMessage());
+        }
         report.print();
         return report.toString();
     }

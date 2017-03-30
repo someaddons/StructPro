@@ -1,40 +1,25 @@
 package com.ternsip.structpro.Logic;
 
-import com.ternsip.structpro.Structure.Structure.Method;
-import com.ternsip.structpro.Structure.Structure.Biome;
 import com.ternsip.structpro.Structure.Projector;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
-import com.ternsip.structpro.WorldCache.WorldCache;
+import com.ternsip.structpro.World.Cache.WorldCache;
 import net.minecraft.world.World;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Random;
 
 /* Distributes world things generation */
-class Distributor extends Configurator {
+class Distributor {
 
     /* Structures spawn sets in attempting order */
-    private static ArrayList<ArrayList<Projector>> spawnOrder = new ArrayList<ArrayList<Projector>>(){{
-            add(Structures.structures.select(new Method[]{Method.BASIC, Method.UNDERWATER, Method.AFLOAT, Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(Structures.structures.select(new Method[]{Method.BASIC}));
-            add(Structures.structures.select(new Method[]{Method.BASIC}));
-            add(Structures.structures.select(new Method[]{Method.BASIC}));
-            add(Structures.structures.select(new Method[]{Method.UNDERWATER}));
-            add(Structures.structures.select(new Method[]{Method.AFLOAT}));
-            add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
-            add(Structures.structures.select(new Biome[]{Biome.NETHER}));
-            add(Structures.structures.select(new Biome[]{Biome.SNOW}));
-            add(Structures.structures.select(new Biome[]{Biome.END}));
-    }};
+    static ArrayList<ArrayList<Projector>> spawnOrder = new ArrayList<ArrayList<Projector>>();
 
     /* Process chunk generations */
-    static void structGen(World world, int chunkX, int chunkZ) {
-        Random random = getRandom(world, chunkX, chunkZ);
-        for (int drop = getDrops(world, chunkX, chunkZ, false); drop > 0; --drop) {
+    static void gen(World world, int chunkX, int chunkZ) {
+        for (int drop = drops(world, chunkX, chunkZ, false); drop > 0; --drop) {
+            Random random = getRandom(world, chunkX, chunkZ, false);
             boolean spawned = false;
             for (ArrayList<Projector> projectors : spawnOrder) {
                 if (projectors.size() > 0 && spawn(world, Utils.select(projectors, random.nextLong()), chunkX, chunkZ, random.nextLong())) {
@@ -46,31 +31,28 @@ class Distributor extends Configurator {
                 new Report().add("GIVE UP SPAWNING IN CHUNK", "[X=" + chunkX + ";Z=" + chunkZ + "]").print();
             }
         }
-        for (int drop = getDrops(world, chunkX, chunkZ, true); drop > 0; --drop) {
+        for (int drop = drops(world, chunkX, chunkZ, true); drop > 0; --drop) {
+            Random random = getRandom(world, chunkX, chunkZ, true);
             if (Structures.villages.select().size() > 0) {
                 spawnVillage(world, Utils.select(Structures.villages.select(), random.nextLong()), chunkX, chunkZ, random.nextLong()).print();
             }
         }
     }
 
-    static int getDrops(World world, int chunkX, int chunkZ, boolean village) {
+    /* Get drops in certain chunk in the world */
+    private static int drops(World world, int chunkX, int chunkZ, boolean village) {
         if (outsideBorder(chunkX, chunkZ)) {
             return 0;
         }
         String dimID = String.valueOf(WorldCache.getDimensionID(world));
         String dimName = String.valueOf(WorldCache.getDimensionName(world));
-        Random random = getRandom(world, chunkX, chunkZ);
-        if (village) {
-            if (!villageDimensions.contains(dimID) && !villageDimensions.contains(dimName)) {
-                return 0;
-            }
-            return (int) densityVillage + (random.nextDouble() <= (densityVillage - (int) densityVillage) ? 1 : 0);
-        } else {
-            if (!spawnDimensions.contains(dimID) && !spawnDimensions.contains(dimName)) {
-                return 0;
-            }
-            return (int) density + (random.nextDouble() <= (density - (int) density) ? 1 : 0);
+        Random random = getRandom(world, chunkX, chunkZ, village);
+        HashSet<String> dims = village ? Configurator.villageDimensions : Configurator.spawnDimensions;
+        double density = village ? Configurator.densityVillage : Configurator.density;
+        if (!dims.contains(dimID) && !dims.contains(dimName)) {
+            return 0;
         }
+        return (int) density + (random.nextDouble() <= (density - (int) density) ? 1 : 0);
     }
 
     /* Spawn village that starts in chunk */
@@ -102,7 +84,8 @@ class Distributor extends Configurator {
 
     /* Check if a chunk is outside of the border */
     private static boolean outsideBorder(int chunkX, int chunkZ) {
-        return chunkX > worldChunkBorder || chunkX < -worldChunkBorder || chunkZ > worldChunkBorder || chunkZ < -worldChunkBorder;
+        return  chunkX > Configurator.worldChunkBorder || chunkX < -Configurator.worldChunkBorder ||
+                chunkZ > Configurator.worldChunkBorder || chunkZ < -Configurator.worldChunkBorder;
     }
 
     /* Spawn candidate in certain position in the world */
@@ -111,7 +94,7 @@ class Distributor extends Configurator {
         int rotX = 0, rotY = random.nextInt() % 4, rotZ = 0;
         boolean flipX = random.nextBoolean(), flipY = false, flipZ = random.nextBoolean();
         Report report = candidate.paste(world, worldX, worldY, worldZ, rotX, rotY, rotZ, flipX, flipY, flipZ, random.nextLong());
-        if (report.isSuccess() || additionalOutput) {
+        if (report.isSuccess() || Configurator.additionalOutput) {
             report.print();
         }
         return report.isSuccess();
@@ -125,25 +108,8 @@ class Distributor extends Configurator {
         return spawn(world, candidate, cx, 0, cz, random.nextLong());
     }
 
-    static Report saveStructure(World world, String name, int posX, int posY, int posZ, int width, int height, int length) {
-        Report report = new Report()
-                .add("WORLD FRAGMENT", name)
-                .add("POS", "[X=" + posX + ";Y=" + posY + ";Z=" + posZ + "]")
-                .add("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]");
-        try {
-            File file = new File(getSchematicsSavesFolder(), name + ".schematic");
-            Projector projector = new Projector(file, world, posX, posY, posZ, width, height, length);
-            projector.saveSchematic(projector.getOriginFile());
-            Structures.loadStructure(projector.getOriginFile());
-            report.add("SAVED", projector.getOriginFile().getPath());
-        } catch (IOException ioe) {
-            report.add("NOT SAVED", ioe.getMessage());
-        }
-        return report;
-    }
-
     /* Get random for world chunk */
-    private static Random getRandom(World world, int chunkX, int chunkZ) {
+    private static Random getRandom(World world, int chunkX, int chunkZ, boolean village) {
         long seed = world.getSeed();
         long chunkIndex = (long)chunkX << 32 | chunkZ & 0xFFFFFFFFL;
         Random random = new Random(chunkIndex);
@@ -151,6 +117,11 @@ class Distributor extends Configurator {
         random.setSeed(random.nextLong() ^ chunkIndex);
         random.setSeed(random.nextLong() ^ seed);
         random.setSeed(random.nextLong());
+        if (village) {
+            random.setSeed(random.nextLong() ^ chunkIndex);
+            random.setSeed(random.nextLong() ^ seed);
+            random.setSeed(random.nextLong());
+        }
         return random;
     }
 

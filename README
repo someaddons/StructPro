@@ -3,7 +3,7 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 1.5
+Latest mod version: 1.6
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
 Repository: https://github.com/ternsip/StructPro
@@ -111,6 +111,7 @@ BAN_ITEMS Array Exclude items from possible loot
 WORLD_BORDER Integer Border where structure-generation process will stop, measured in chunks
 SCHEMATICS_FOLDER Schematics goes this folder, relative minecraft root
 MOB_SPAWNERS_EGGS_ONLY Boolean Pasting mob spawners with mobs that have eggs only, or not only
+IGNORE_LIGHT Boolean ignore light, enabling may speed-up pasting process
 
 Notice: to NOT spawn structures, villages, items - set density, density_village, chest_loot_chance <= 0 (probability 0)
 Notice: to NOT spawn Command blocks or other blocks add appropriate block name to BAN_BLOCKS
@@ -175,10 +176,15 @@ Version 1.5
 Fixed critical bug - neighbor updates Forge stack overflow neighbor update routine
 Now structures notify blocks about changes: water start flowing, rails reconnects, sand drops down, etc
 New config option: MOB_SPAWNERS_EGGS_ONLY
+Version 1.6
+Speed-up pasting proccess and cleanup code
+Fix block-light bugs
+Fix bug that makes village spawns always in pair with structure
+New config option: IGNORE_LIGHT
 
 Known bugs
 ----------------------------------------------
-Incorrect rotation metadata: Portals, Electrical Rails
+Sometimes spawned structures have incorrect rotation metadata: Portals, Electrical Rails
 Sometimes creative command "paste" may produce structures with invisible mobs
 
 Suggestions

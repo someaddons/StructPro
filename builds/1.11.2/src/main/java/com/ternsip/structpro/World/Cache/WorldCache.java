@@ -1,6 +1,6 @@
-package com.ternsip.structpro.WorldCache;
+package com.ternsip.structpro.World.Cache;
 
-import com.ternsip.structpro.Logic.Mobs;
+import com.ternsip.structpro.World.Entities.Mobs;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
@@ -39,7 +39,7 @@ public class WorldCache {
     public static Entity spawnEntity(World world, Class<? extends Entity> mob, BlockPos pos) {
         Entity entity = Mobs.construct(world, mob);
         entity.setLocationAndAngles(pos.getX() + 0.5, pos.getY() + 0.1, pos.getZ() + 0.5, new Random(System.currentTimeMillis()).nextFloat() * 360.0F, 0.0F);
-        world.spawnEntityInWorld(entity);
+        world.spawnEntity(entity);
         entity.onUpdate();
         return entity;
     }
@@ -85,12 +85,12 @@ public class WorldCache {
 
     /* Get soil height in the world */
     public static int getHeight(World world, BlockPos blockPos) {
-        return getChunkster(world, blockPos).getHeight(blockPos);
+        return getChunkster(world, blockPos).getHeightOverlook(blockPos);
     }
 
     /* Get bottom height in the world */
     public static int getBottomHeight(World world, BlockPos blockPos) {
-        return getChunkster(world, blockPos).getBottomHeight(blockPos);
+        return getChunkster(world, blockPos).getHeightBottom(blockPos);
     }
 
     /* Unload obsoleted data */

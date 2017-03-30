@@ -1,7 +1,7 @@
 package com.ternsip.structpro.Logic;
 
-import com.ternsip.structpro.Structure.Structure.Biome;
-import com.ternsip.structpro.Structure.Structure.Method;
+import com.ternsip.structpro.Structure.Biome;
+import com.ternsip.structpro.Structure.Method;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +61,7 @@ public class Selector<T> {
         }
         for (HashMap.Entry<String, T> entry : nameFilter.entrySet()) {
             String key = entry.getKey();
-            if (key.contains(target) || target.contains(key)) {
+            if (!key.equalsIgnoreCase(target) && (key.contains(target) || target.contains(key))) {
                 result.add(entry.getValue());
             }
         }

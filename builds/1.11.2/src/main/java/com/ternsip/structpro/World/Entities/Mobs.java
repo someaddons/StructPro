@@ -1,7 +1,8 @@
-package com.ternsip.structpro.Logic;
+package com.ternsip.structpro.World.Entities;
 
-import com.ternsip.structpro.Structure.Structure;
-import com.ternsip.structpro.Structure.Structure.Biome;
+import com.ternsip.structpro.Logic.Selector;
+import com.ternsip.structpro.Structure.Biome;
+import com.ternsip.structpro.Structure.Method;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.monster.*;
@@ -50,9 +51,9 @@ public class Mobs {
         add(Biome.SNOW, EntityEnderman.class);
         add(Biome.SNOW, EntitySnowman.class);
         add(Biome.END, EntityEnderman.class);
-        add(Structure.Method.UNDERGROUND, EntityCaveSpider.class);
-        add(Structure.Method.UNDERGROUND, EntityBat.class);
-        add(Structure.Method.AFLOAT, EntityWitch.class);
+        add(Method.UNDERGROUND, EntityCaveSpider.class);
+        add(Method.UNDERGROUND, EntityBat.class);
+        add(Method.AFLOAT, EntityWitch.class);
     }};
 
     /* Selector for village mobs */

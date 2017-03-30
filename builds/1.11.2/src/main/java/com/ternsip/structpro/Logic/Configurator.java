@@ -1,15 +1,19 @@
 package com.ternsip.structpro.Logic;
 
-import com.ternsip.structpro.Structure.Structure.Biome;
-import com.ternsip.structpro.Structure.Structure.Method;
+import com.ternsip.structpro.Structure.Biome;
+import com.ternsip.structpro.Structure.Method;
+import com.ternsip.structpro.Structure.Projector;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
+import com.ternsip.structpro.World.Blocks.Blocks;
+import com.ternsip.structpro.World.Items.Items;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Stack;
@@ -56,6 +60,9 @@ public class Configurator {
 
     /* Print additional mod output to console */
     public static boolean additionalOutput = true;
+
+    /* Ignore block light update, disabling may speed up pasting process */
+    public static boolean ignoreLight = false;
 
     /* Max length in chunks for world to be generated, 4096 chunks = area 65536 x 65536 blocks */
     public static int worldChunkBorder = 4096;
@@ -135,6 +142,7 @@ public class Configurator {
                 spawnMobs = Boolean.parseBoolean(config.getProperty("SPAWN_MOBS", Boolean.toString(spawnMobs)));
                 mobSpawnersEggsOnly = Boolean.parseBoolean(config.getProperty("MOB_SPAWNERS_EGGS_ONLY", Boolean.toString(mobSpawnersEggsOnly)));
                 additionalOutput = Boolean.parseBoolean(config.getProperty("ADDITIONAL_OUTPUT", Boolean.toString(additionalOutput)));
+                ignoreLight = Boolean.parseBoolean(config.getProperty("IGNORE_LIGHT", Boolean.toString(ignoreLight)));
                 worldChunkBorder = (int) Double.parseDouble(config.getProperty("WORLD_CHUNK_BORDER", Double.toString(worldChunkBorder)));
                 schematicsFolder = new File(config.getProperty("SCHEMATICS_FOLDER", schematicsFolder.getPath()));
                 spawnDimensions = tokenize(config.getProperty("SPAWN_DIMENSIONS", combine(spawnDimensions)));
@@ -160,6 +168,7 @@ public class Configurator {
             config.setProperty("SPAWN_MOBS", Boolean.toString(spawnMobs));
             config.setProperty("MOB_SPAWNERS_EGGS_ONLY", Boolean.toString(mobSpawnersEggsOnly));
             config.setProperty("ADDITIONAL_OUTPUT", Boolean.toString(additionalOutput));
+            config.setProperty("IGNORE_LIGHT", Boolean.toString(ignoreLight));
             config.setProperty("WORLD_CHUNK_BORDER", Integer.toString(worldChunkBorder));
             config.setProperty("SCHEMATICS_FOLDER", schematicsFolder.getPath());
             config.setProperty("SPAWN_DIMENSIONS", combine(spawnDimensions));
@@ -172,14 +181,17 @@ public class Configurator {
         }
     }
 
+    /* Get schematics savings file */
     public static File getSchematicsSavesFolder() {
         return new File(schematicsFolder,"Saves");
     }
 
+    /* Combine array to string */
     private static String combine(HashSet<String> set) {
         return Utils.join(Utils.toArray(set), ", ");
     }
 
+    /* Tokenize array to unique strings */
     private static HashSet<String> tokenize(String string) {
         return Utils.tokenize(string, ",");
     }
@@ -199,7 +211,7 @@ public class Configurator {
                     .print();
         }
 
-        Blocks.remove(banBlocks);
+        Blocks.replace(banBlocks);
         Items.remove(banItems);
 
         if (onlyVanillaLoot) {
@@ -220,6 +232,21 @@ public class Configurator {
         report.add("TOTAL VILLAGES LOADED", String.valueOf(Structures.villages.select().size()));
         report.add("LOAD TIME", new DecimalFormat("###0.00").format(loadTime / 1000.0) + "s");
         report.print();
+
+        Distributor.spawnOrder = new ArrayList<ArrayList<Projector>>(){{
+            add(Structures.structures.select());
+            add(Structures.structures.select(new Method[]{Method.BASIC}));
+            add(Structures.structures.select(new Method[]{Method.BASIC}));
+            add(Structures.structures.select(new Method[]{Method.BASIC}));
+            add(Structures.structures.select(new Method[]{Method.UNDERWATER}));
+            add(Structures.structures.select(new Method[]{Method.AFLOAT}));
+            add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+            add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+            add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+            add(Structures.structures.select(new Biome[]{Biome.NETHER}));
+            add(Structures.structures.select(new Biome[]{Biome.SNOW}));
+            add(Structures.structures.select(new Biome[]{Biome.END}));
+        }};
 
     }
 

@@ -1,7 +1,7 @@
 package com.ternsip.structpro.Structure;
 
-import com.ternsip.structpro.Logic.Blocks;
-import com.ternsip.structpro.WorldCache.WorldCache;
+import com.ternsip.structpro.World.Blocks.Blocks;
+import com.ternsip.structpro.World.Cache.WorldCache;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -35,8 +35,6 @@ class Blueprint {
     byte[] meta;
     NBTTagCompound[] tiles;
 
-    Blueprint() {}
-
     int getIndex(int x, int y, int z) {
         return x + y * width * length + z * width;
     }
@@ -53,10 +51,12 @@ class Blueprint {
         return (index / width) % length;
     }
 
+    /* Load schematic from file */
     void loadSchematic(File file) throws IOException {
         readSchematic(readTags(file));
     }
 
+    /* Load schematic from world fragment */
     void loadSchematic(World world, int posX, int posY, int posZ, int width, int height, int length) throws IOException {
         String dimensions = "[W=" + width + ";H=" + height + ";L=" + length + "]";
         String dimLimit = "[W=" + WIDTH_LIMIT + ";H=" + HEIGHT_LIMIT + ";L=" + LENGTH_LIMIT + "]";
@@ -119,6 +119,7 @@ class Blueprint {
         }
     }
 
+    /* Write tags to file */
     static void writeTags(File file, NBTTagCompound tag) throws IOException {
         if (file.getParentFile() != null && !file.getParentFile().exists()) {
             if (!file.getParentFile().mkdirs()) {

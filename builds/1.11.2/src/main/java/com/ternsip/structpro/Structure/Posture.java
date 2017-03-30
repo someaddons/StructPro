@@ -33,6 +33,7 @@ class Posture {
         update();
     }
 
+    /* Internal changes trigger */
     private void update() {
         this.sizeX = width;
         this.sizeY = height;

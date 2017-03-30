@@ -1,12 +1,13 @@
 package com.ternsip.structpro.Structure;
 
-import com.ternsip.structpro.Logic.Blocks;
-import com.ternsip.structpro.Logic.Items;
+import com.ternsip.structpro.World.Blocks.Blocks;
+import com.ternsip.structpro.World.Blocks.Classifier;
+import com.ternsip.structpro.World.Items.Items;
 import com.ternsip.structpro.Logic.Configurator;
-import com.ternsip.structpro.Logic.Mobs;
+import com.ternsip.structpro.World.Entities.Mobs;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
-import com.ternsip.structpro.WorldCache.WorldCache;
+import com.ternsip.structpro.World.Cache.WorldCache;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
@@ -27,6 +28,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+
+import static com.ternsip.structpro.World.Blocks.Classifier.CARDINAL;
+import static com.ternsip.structpro.World.Blocks.Classifier.OVERLOOK;
+import static com.ternsip.structpro.World.Blocks.Classifier.SOIL;
 
 /*
 * Projector is wrapper for structure for better storing and pasting
@@ -175,7 +180,7 @@ public class Projector extends Structure {
     /* Process block after spawning */
     private void processBlock(World world, int index, Posture posture, Random random) {
         int x = getX(index), y = getY(index), z = getZ(index);
-        if (!Blocks.isVanillaID(blocks[index]) || !Blocks.isCardinal(blocks[index]) || y < lift) {
+        if (!Blocks.isVanillaID(blocks[index]) || !Classifier.isBlock(CARDINAL, blocks[index]) || y < lift) {
             return;
         }
         double radius = Blocks.cardinalRadius;
@@ -187,7 +192,7 @@ public class Projector extends Structure {
                         int nx = x + dx, ny = y + dy, nz = z + dz;
                         BlockPos worldPos = posture.getWorldPos(nx, ny, nz);
                         int blockID = Blocks.blockID(WorldCache.getBlockState(world, worldPos));
-                        if (Blocks.isSoil(blockID) || Blocks.isOverlook(blockID)) {
+                        if (Classifier.isBlock(SOIL, blockID) || Classifier.isBlock(OVERLOOK, blockID)) {
                             if (nx < 0 || nx >= width || ny < 0 || ny >= height || nz < 0 || nz >= length) {
                                 WorldCache.setBlockState(world, worldPos, Blocks.state(Blocks.AIR));
                             } else {
@@ -388,11 +393,11 @@ public class Projector extends Structure {
         Random random = new Random(seed);
         double liquidHeight = averageHeight - averageHeightUnderLiquid;
         DecimalFormat decimal = new DecimalFormat("######0.00");
-        boolean afloat = method == Projector.Method.AFLOAT;
-        boolean underwater = method == Projector.Method.UNDERWATER;
-        boolean sky = method == Projector.Method.SKY;
-        boolean underground = method == Projector.Method.UNDERGROUND;
-        boolean hill = method == Projector.Method.HILL;
+        boolean afloat = method == Method.AFLOAT;
+        boolean underwater = method == Method.UNDERWATER;
+        boolean sky = method == Method.SKY;
+        boolean underground = method == Method.UNDERGROUND;
+        boolean hill = method == Method.HILL;
         double roughness = Math.sqrt(variance);
         double underLiquidRoughness = Math.sqrt(varianceUnderLiquid);
         double roughnessFactor = Configurator.accuracy;

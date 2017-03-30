@@ -1,4 +1,4 @@
-package com.ternsip.structpro.WorldCache;
+package com.ternsip.structpro.World.Cache;
 
 import net.minecraft.world.World;
 
@@ -47,6 +47,7 @@ class ChunkCache {
         }
     }
 
+    /* Get chunk key */
     private long getKey(int chunkX, int chunkZ) {
         return (long)chunkX << 32 | chunkZ & 0xFFFFFFFFL;
     }
