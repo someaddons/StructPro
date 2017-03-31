@@ -1,68 +1,45 @@
 package com.ternsip.structpro.World.Items;
 
+import com.ternsip.structpro.Logic.Configurator;
 import com.ternsip.structpro.Logic.Selector;
+import com.ternsip.structpro.Utils.Report;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.GameData;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 @SuppressWarnings({"WeakerAccess", "deprecation"})
 public class Items extends net.minecraft.init.Items {
 
     /* All possible items */
     private static final ArrayList<Item> items = new ArrayList<Item>() {{
-        for (Item item : GameData.getItemRegistry().getValues()) {
-            if (item != null) {
-                add(item);
-            }
-        }
-    }};
-
-    /* Items names selector */
-    private static Selector<Item> names = new Selector<Item>() {{
-        for (Item item : items) {
-            if (item.getRegistryName() != null) {
-                add(item.getRegistryName().getResourcePath().toLowerCase(), item);
-            }
-        }
-    }};
-
-    /* Items domain selector */
-    private static Selector<ArrayList<Item>> domains = new Selector<ArrayList<Item>>() {{
-        for (final Item item : items) {
-            if (item.getRegistryName() != null) {
-                String domain = item.getRegistryName().getResourceDomain();
-                ArrayList<ArrayList<Item>> domainItems = select(domain, false);
-                if (domainItems.isEmpty()) {
-                    add(domain, new ArrayList<Item>(){{add(item);}});
-                } else {
-                    domainItems.get(0).add(item);
+        final Selector<Item> names = new Selector<Item>() {{
+            for (Item item : GameData.getItemRegistry().getValues()) {
+                if (item != null && item.getRegistryName() != null) {
+                    String path = item.getRegistryName().getResourcePath();
+                    String domain = item.getRegistryName().getResourceDomain();
+                    if (domain.equalsIgnoreCase("minecraft") || !Configurator.ONLY_VANILLA_LOOT) {
+                        add(path, item);
+                    }
                 }
             }
-        }
+        }};
+        ArrayList<Item> acceptable = new ArrayList<Item>() {{
+            addAll(names.select());
+            for (String exclusion : Configurator.EXCLUDE_ITEMS) {
+                try {
+                    Pattern ePattern = Pattern.compile(exclusion, Pattern.CASE_INSENSITIVE);
+                    removeAll(names.select(ePattern));
+                } catch (PatternSyntaxException pse) {
+                    new Report().add("BAD PATTERN", pse.getMessage()).print();
+                }
+            }
+        }};
+        addAll(acceptable);
     }};
-
-    /* Remove items given by names from storage */
-    public static void remove(final Iterable<String> badItems) {
-        items.removeAll(new HashSet<Item>() {{
-            for (String itemName : badItems) {
-                addAll(names.select(itemName, false));
-            }
-        }});
-    }
-
-    /* Remove items that are not vanilla */
-    public static void removeNotVanilla() {
-        items.removeAll(new HashSet<Item>() {{
-            addAll(items);
-            ArrayList<ArrayList<Item>> res = domains.select("minecraft", false);
-            if (!res.isEmpty()) {
-                removeAll(res.get(0));
-            }
-        }});
-    }
 
     /* Get item by name */
     public static Item ItemByName(String name) {

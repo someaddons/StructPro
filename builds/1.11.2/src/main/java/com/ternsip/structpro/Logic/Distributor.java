@@ -1,5 +1,7 @@
 package com.ternsip.structpro.Logic;
 
+import com.ternsip.structpro.Structure.Biome;
+import com.ternsip.structpro.Structure.Method;
 import com.ternsip.structpro.Structure.Projector;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
@@ -14,7 +16,20 @@ import java.util.Random;
 class Distributor {
 
     /* Structures spawn sets in attempting order */
-    static ArrayList<ArrayList<Projector>> spawnOrder = new ArrayList<ArrayList<Projector>>();
+    private static final ArrayList<ArrayList<Projector>> spawnOrder = new ArrayList<ArrayList<Projector>>(){{
+        add(Structures.structures.select());
+        add(Structures.structures.select(new Method[]{Method.BASIC}));
+        add(Structures.structures.select(new Method[]{Method.BASIC}));
+        add(Structures.structures.select(new Method[]{Method.BASIC}));
+        add(Structures.structures.select(new Method[]{Method.UNDERWATER}));
+        add(Structures.structures.select(new Method[]{Method.AFLOAT}));
+        add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+        add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+        add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
+        add(Structures.structures.select(new Biome[]{Biome.NETHER}));
+        add(Structures.structures.select(new Biome[]{Biome.SNOW}));
+        add(Structures.structures.select(new Biome[]{Biome.END}));
+    }};
 
     /* Process chunk generations */
     static void gen(World world, int chunkX, int chunkZ) {
@@ -47,8 +62,8 @@ class Distributor {
         String dimID = String.valueOf(WorldCache.getDimensionID(world));
         String dimName = String.valueOf(WorldCache.getDimensionName(world));
         Random random = getRandom(world, chunkX, chunkZ, village);
-        HashSet<String> dims = village ? Configurator.villageDimensions : Configurator.spawnDimensions;
-        double density = village ? Configurator.densityVillage : Configurator.density;
+        HashSet<String> dims = village ? Configurator.VILLAGE_DIMENSIONS : Configurator.SPAWN_DIMENSIONS;
+        double density = village ? Configurator.DENSITY_VILLAGE : Configurator.DENSITY;
         if (!dims.contains(dimID) && !dims.contains(dimName)) {
             return 0;
         }
@@ -58,7 +73,7 @@ class Distributor {
     /* Spawn village that starts in chunk */
     static Report spawnVillage(World world, ArrayList<Projector> village, int chunkX, int chunkZ, long seed) {
         Random random = new Random(seed);
-        String villageName = village.get(0).getOriginFile().getParent();
+        String villageName = village.get(0).getFile().getParent();
         int side = (int) (1 + Math.sqrt(village.size()));
         int spawned = 0;
         for (int i = 0, maxSize = 0, offsetX = 0, offsetZ = 0; i < village.size(); ++i) {
@@ -84,8 +99,8 @@ class Distributor {
 
     /* Check if a chunk is outside of the border */
     private static boolean outsideBorder(int chunkX, int chunkZ) {
-        return  chunkX > Configurator.worldChunkBorder || chunkX < -Configurator.worldChunkBorder ||
-                chunkZ > Configurator.worldChunkBorder || chunkZ < -Configurator.worldChunkBorder;
+        return  chunkX > Configurator.WORLD_CHUNK_BORDER || chunkX < -Configurator.WORLD_CHUNK_BORDER ||
+                chunkZ > Configurator.WORLD_CHUNK_BORDER || chunkZ < -Configurator.WORLD_CHUNK_BORDER;
     }
 
     /* Spawn candidate in certain position in the world */
@@ -94,7 +109,7 @@ class Distributor {
         int rotX = 0, rotY = random.nextInt() % 4, rotZ = 0;
         boolean flipX = random.nextBoolean(), flipY = false, flipZ = random.nextBoolean();
         Report report = candidate.paste(world, worldX, worldY, worldZ, rotX, rotY, rotZ, flipX, flipY, flipZ, random.nextLong());
-        if (report.isSuccess() || Configurator.additionalOutput) {
+        if (report.isSuccess() || Configurator.ADDITIONAL_OUTPUT) {
             report.print();
         }
         return report.isSuccess();

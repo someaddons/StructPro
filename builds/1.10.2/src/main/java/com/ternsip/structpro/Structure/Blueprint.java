@@ -17,7 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 /* Schematic - Classical Minecraft schematic storage. Provide data access and world control */
-class Blueprint {
+public class Blueprint {
 
     /* Tag file size limit in bytes */
     private static final long TAG_FILE_SIZE_LIMIT = 1024 * 1024 * 16;
@@ -35,18 +35,28 @@ class Blueprint {
     byte[] meta;
     NBTTagCompound[] tiles;
 
+    Blueprint() {}
+
+    public Blueprint(World world, int posX, int posY, int posZ, int width, int height, int length) throws IOException {
+        loadSchematic(world, posX, posY, posZ, width, height, length);
+    }
+
+    /* Get index using relative position */
     int getIndex(int x, int y, int z) {
         return x + y * width * length + z * width;
     }
 
+    /* Get X-relative position using index */
     int getX(int index) {
         return index % width;
     }
 
+    /* Get Y-relative position using index */
     int getY(int index) {
         return index / (width * length);
     }
 
+    /* Get Z-relative position using index */
     int getZ(int index) {
         return (index / width) % length;
     }
@@ -57,7 +67,7 @@ class Blueprint {
     }
 
     /* Load schematic from world fragment */
-    void loadSchematic(World world, int posX, int posY, int posZ, int width, int height, int length) throws IOException {
+    private void loadSchematic(World world, int posX, int posY, int posZ, int width, int height, int length) throws IOException {
         String dimensions = "[W=" + width + ";H=" + height + ";L=" + length + "]";
         String dimLimit = "[W=" + WIDTH_LIMIT + ";H=" + HEIGHT_LIMIT + ";L=" + LENGTH_LIMIT + "]";
         if (width <= 0 || height <= 0 || length <= 0) {
@@ -180,7 +190,7 @@ class Blueprint {
     }
 
     /* Read Schematic blueprint from tags */
-    private NBTTagCompound getSchematic() throws IOException {
+    private NBTTagCompound getSchematic() {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setString("Materials", "Alpha");
         tag.setShort("Width", (short) width);

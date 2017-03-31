@@ -1,5 +1,6 @@
 package com.ternsip.structpro.Logic;
 
+import com.ternsip.structpro.Structure.Blueprint;
 import com.ternsip.structpro.Structure.Projector;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
@@ -8,6 +9,7 @@ import net.minecraft.world.World;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /* Commands evaluator */
 class Evaluator {
@@ -19,8 +21,9 @@ class Evaluator {
                            int rotateX, int rotateY, int rotateZ,
                            boolean flipX, boolean flipY, boolean flipZ,
                            boolean village) {
+        final Pattern nPattern = Pattern.compile(".*" + Pattern.quote(name) + ".*", Pattern.CASE_INSENSITIVE);
         if (village) {
-            ArrayList<Projector> projectors = Utils.select(Structures.villages.select(name, false));
+            ArrayList<Projector> projectors = Utils.select(Structures.villages.select(nPattern));
             if (projectors == null || projectors.size() == 0) {
                 return "No matching villages";
             }
@@ -29,8 +32,8 @@ class Evaluator {
             return report.toString();
         } else {
             ArrayList<Projector> candidates = new ArrayList<Projector>(){{
-                addAll(Structures.structures.select(name, false));
-                addAll(Structures.saves.select(name, false));
+                addAll(Structures.structures.select(nPattern));
+                addAll(Structures.saves.select(nPattern));
             }};
             Projector projector = Utils.select(candidates);
             if (projector == null) {
@@ -50,10 +53,10 @@ class Evaluator {
                 .add("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]");
         try {
             File file = new File(Configurator.getSchematicsSavesFolder(), name + ".schematic");
-            Projector projector = new Projector(file, world, posX, posY, posZ, width, height, length);
-            projector.saveSchematic(projector.getOriginFile());
-            Structures.loadStructure(projector.getOriginFile());
-            report.add("SAVED", projector.getOriginFile().getPath());
+            Blueprint blueprint = new Blueprint(world, posX, posY, posZ, width, height, length);
+            blueprint.saveSchematic(file);
+            Structures.loadStructure(file);
+            report.add("SAVED", file.getPath());
         } catch (IOException ioe) {
             report.add("NOT SAVED", ioe.getMessage());
         }

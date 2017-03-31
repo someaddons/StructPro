@@ -19,7 +19,7 @@ import static com.ternsip.structpro.World.Blocks.Classifier.*;
 /* Chunk control class */
 class Chunkster {
 
-    /* Classical chunk size */
+    /* Classical chunk sizes */
     private static final int CHUNK_SIZE_X = 16;
     private static final int CHUNK_SIZE_Y = 256;
     private static final int CHUNK_SIZE_Z = 16;
@@ -27,19 +27,20 @@ class Chunkster {
     private static final int CHUNK_PARTS = 16;
     private static final int PLAYER_NOTIFY_RADIUS = 32;
 
-    private ExtendedBlockStorage[] storage;
-    private int[][] heightMapOverlook = new int[CHUNK_SIZE_X][CHUNK_SIZE_Z];
-    private int[][] heightMapBottom = new int[CHUNK_SIZE_X][CHUNK_SIZE_Z];
-    private World world;
-    private Chunk chunk;
-    private int chunkX;
-    private int chunkZ;
-    private int chunkStartX;
-    private int chunkStartZ;
+    private final ExtendedBlockStorage[] storage;
+    private final int[][] heightMapOverlook = new int[CHUNK_SIZE_X][CHUNK_SIZE_Z];
+    private final int[][] heightMapBottom = new int[CHUNK_SIZE_X][CHUNK_SIZE_Z];
+    private final World world;
+    private final Chunk chunk;
+    private final int chunkX;
+    private final int chunkZ;
+    private final int chunkStartX;
+    private final int chunkStartZ;
+    private final Timer timer;
+    private final boolean[] modifiedParts = new boolean[CHUNK_PARTS];
     private boolean modified = false;
-    private boolean[] modifiedParts = new boolean[CHUNK_PARTS];
-    private Timer timer;
 
+    /* Construct new chunkster in certain position in the world */
     Chunkster(World world, int chunkX, int chunkZ) {
         this.world = world;
         this.chunk = world.getChunkFromChunkCoords(chunkX, chunkZ);
@@ -121,7 +122,7 @@ class Chunkster {
                 for (int cy = ys, wy = ys; cy < ye; ++cy, ++wy) {
                     BlockPos pos = new BlockPos(wx, wy, wz);
                     Block block = Blocks.getBlock(getBlockState(cx, cy, cz));
-                    if (!Configurator.ignoreLight && Classifier.isBlock(LIGHT, block)) {
+                    if (!Configurator.IGNORE_LIGHT && Classifier.isBlock(LIGHT, block)) {
                         world.checkLight(pos);
                     }
                     try {
@@ -180,7 +181,7 @@ class Chunkster {
         modified = false;
         trackHeightMaps();
         cosmetic();
-        if (!Configurator.ignoreLight) {
+        if (!Configurator.IGNORE_LIGHT) {
             chunk.generateSkylightMap();
         }
         for (int part = 0; part < CHUNK_PARTS; ++part) {

@@ -12,7 +12,6 @@ import net.minecraft.util.text.TextComponentString;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -66,40 +65,40 @@ public class Commands implements ICommand {
             return;
         }
         String cmd = args[0];
-        HashMap<String, String> vars = Utils.extractVariables(Utils.join(args, " "));
+        Variables vars = new Variables(Utils.join(args, " "));
         Random random = new Random();
         WorldCache.unload();
         if (cmd.equalsIgnoreCase("paste")) {
-            String name = Utils.parseOrDefault(vars, "name", "");
-            int posX = Utils.parseOrDefault(vars, "posx", sender.getPosition().getX());
-            int posY = Utils.parseOrDefault(vars, "posy", sender.getPosition().getY());
-            int posZ = Utils.parseOrDefault(vars, "posz", sender.getPosition().getZ());
-            posX = Utils.parseOrDefault(vars, "x", posX);
-            posY = Utils.parseOrDefault(vars, "y", posY);
-            posZ = Utils.parseOrDefault(vars, "z", posZ);
-            int rotateX = Utils.parseOrDefault(vars, "rotatex", 0);
-            int rotateY = Utils.parseOrDefault(vars, "rotatey", random.nextInt() % 4);
-            int rotateZ = Utils.parseOrDefault(vars, "rotatez", 0);
-            rotateX = Utils.parseOrDefault(vars, "rotx", rotateX);
-            rotateY = Utils.parseOrDefault(vars, "roty", rotateY);
-            rotateZ = Utils.parseOrDefault(vars, "rotz", rotateZ);
-            boolean flipX = Utils.parseOrDefault(vars, "flipx",  random.nextBoolean());
-            boolean flipY = Utils.parseOrDefault(vars, "flipy", false);
-            boolean flipZ = Utils.parseOrDefault(vars, "flipz", random.nextBoolean());
-            boolean village = Utils.parseOrDefault(vars, "village",false);
+            String name = vars.get("name", "");
+            int posX = vars.get("posx", sender.getPosition().getX());
+            int posY = vars.get("posy", sender.getPosition().getY());
+            int posZ = vars.get("posz", sender.getPosition().getZ());
+            posX = vars.get("x", posX);
+            posY = vars.get("y", posY);
+            posZ = vars.get("z", posZ);
+            int rotateX = vars.get("rotatex", 0);
+            int rotateY = vars.get("rotatey", random.nextInt() % 4);
+            int rotateZ = vars.get("rotatez", 0);
+            rotateX = vars.get("rotx", rotateX);
+            rotateY = vars.get("roty", rotateY);
+            rotateZ = vars.get("rotz", rotateZ);
+            boolean flipX = vars.get("flipx",  random.nextBoolean());
+            boolean flipY = vars.get("flipy", false);
+            boolean flipZ = vars.get("flipz", random.nextBoolean());
+            boolean village = vars.get("village",false);
             feedback(sender, Evaluator.cmdPaste(sender.getEntityWorld(), name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, village));
         }
         if (cmd.equalsIgnoreCase("save")) {
-            String name = Utils.parseOrDefault(vars, "name", "unnamed");
-            int posX = Utils.parseOrDefault(vars, "posx", sender.getPosition().getX());
-            int posY = Utils.parseOrDefault(vars, "posy", sender.getPosition().getY());
-            int posZ = Utils.parseOrDefault(vars, "posz", sender.getPosition().getZ());
-            posX = Utils.parseOrDefault(vars, "x", posX);
-            posY = Utils.parseOrDefault(vars, "y", posY);
-            posZ = Utils.parseOrDefault(vars, "z", posZ);
-            int width = Utils.parseOrDefault(vars, "width", 64);
-            int height = Utils.parseOrDefault(vars, "height", 64);
-            int length = Utils.parseOrDefault(vars, "length", 64);
+            String name = vars.get("name", "unnamed");
+            int posX = vars.get("posx", sender.getPosition().getX());
+            int posY = vars.get("posy", sender.getPosition().getY());
+            int posZ = vars.get("posz", sender.getPosition().getZ());
+            posX = vars.get("x", posX);
+            posY = vars.get("y", posY);
+            posZ = vars.get("z", posZ);
+            int width = vars.get("width", 64);
+            int height = vars.get("height", 64);
+            int length = vars.get("length", 64);
             feedback(sender, Evaluator.cmdSave(sender.getEntityWorld(), name, posX, posY, posZ, width, height, length));
         }
         if (cmd.equalsIgnoreCase("help")) {

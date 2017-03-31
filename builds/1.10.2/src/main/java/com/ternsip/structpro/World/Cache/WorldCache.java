@@ -108,7 +108,7 @@ public class WorldCache {
         unload();
     }
 
-    /* Get dimenstion name of the world */
+    /* Get dimension name of the world */
     public static String getDimensionName(World world) {
         return world.provider.getDimensionType().getName();
     }

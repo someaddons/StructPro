@@ -1,9 +1,9 @@
 Automatic structure generation based on schematics
-----------------------------------------------
+--------------------------------
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 1.6
+Latest mod version: 1.7
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
 Repository: https://github.com/ternsip/StructPro
@@ -12,11 +12,11 @@ Status: Ready to suggestions
 License: You can freely distribute this mod. Just read license.
 
 Information
-----------------------------------------------
+--------------------------------
 Adds new functionality to the world generator. It automatically spawns various structures based on schematics during world generation on the server side. It works both with server and client-integrated server. Strutures can reach gigantic proportions and generates as quickly as possible. During the world exploration you can discover neatly pasted schematics that looks harmonically with environment. Any user can add arbitrary schematic to make it possible automatically appear in the world. Collected more than 2900+ great schematics and include them to standard mod releases. Mod config provides the ability to adjust spawn rates. There is possibility to generate villages constructed from schematic sets.
 
 Details
-----------------------------------------------
+--------------------------------
 First time launching this mod with 3000 schematics consumes about 1-5 min in forge loading screen, because of reading new schematic entails appropriate calculating dump files to speed up pasting routine in future. If your schematic have ground level with grass, gravel, stone, dirt etc. it will dig down as it is necessary. if your scheme made roughly, paste process will automatically detect air outside of your structure and place it goodly. Creatures automatically spawns inside buildings. For example blazes and ghasts in nether, villagers in village, cave spiders in undergrounds. Every chest have random loot according to configuration and may reproduce some schematic-native items. I spent many time to identify the best approach of the problem of the most beautiful schematic insertion in the world. I realize that schematic cosmetic-configuring is very time-expensive, so I decide to entrust this job to computer. I figured out many ennobling approaches and sewed it all to the mod.
 
 Features:
@@ -35,44 +35,46 @@ In-game creative commands to paste schematics or even villages
 Any players can combine their own schematic sets
 Built-in schematic rotation and flipping algorithms
 Lots of best schematics collected and it number over 2900
+Compatible with most mods
 No dependencies
 
 Differences
-----------------------------------------------
+--------------------------------
 Differences with Placemod:
-Major changes in logic system.
-Fixed most bugs.
-Fixed critical bug when overlapping blocks had not removed tile entities.
-Much more accurate soil-roughness calculations.
-Spawn attempts order to surely spawn some type of building if it possible.
-Universal world-cache system for fast and more simple world control.
-Convenient spawn commands for schematic and village.
-Isolated dump-files.
-Biome spawn relations improvements.
-Workable Command block, Text Signs and Dispensers
+Major changes in logic system
+Fixed most bugs
+Fixed critical bug when overlapping blocks had not removed tile entities
+Much more accurate soil-roughness calculations
+Spawn attempts order to surely spawn some type of building if it possible
+Universal world-cache system for fast and more simple world control
+Convenient spawn commands for schematic and village
+Isolated dump-files
+Biome spawn relations improvements
+Workable Command block, Text Signs, Dispensers, Chests, etc
 Random chest loot for all versions
 
 Limitations
-----------------------------------------------
+--------------------------------
 Schematic proportions W <= 1024, H <= 256, L <= 1024
 Schematic volume <= 256^3
 Schematic file size <= 16 MB
 Java: 1.6+
 
 Schematics
-----------------------------------------------
+--------------------------------
 You can find all .schematic inside schematics folder that you have to put inside your .minecraft root directory.
 By default it has next subdirectories: Common, Floating, Underground, Underwater, Water, Village.
-You can put your own folders and schematics inside without any problems.
+Saves goes into subdirectory with name Saves and they exluded from world generation but available for commands.
+Put your own folders and schematics inside base folder without any problems.
 
 Important folder names:
-Common conventional buildings
-Sky | Floating hovering in the sky, like floating islands
-Underground fully dug into the ground
-Underwater appears under water
-Afloat | Water spawns exactly on water
-Village same folder schematics tries to appear all at once as village
-Hill | Mountain spawns like basic buildings but without roughness-accuracy bias.
+[Common] Conventional buildings
+[Sky | Floating] hovering in the sky, like floating islands
+[Underground] Fully dug into the ground
+[Underwater] Appears under water
+[Afloat | Water] Spawns exactly on water
+[Village] Same folder schematics tries to appear all at once as village
+[Hill | Mountain] Spawns like basic buildings but without roughness-accuracy bias.
 
 You can add your schematics to any sub-folder of %appdata%/.minecraft/schematics/Your_Schematics, or the folder you specified in config.
 Biomes determines automatically and fully isolated from players and builders.
@@ -90,70 +92,72 @@ Nether - NETHER BIOME
 Hell - NETHER BIOME
 
 Mod Configuration
-----------------------------------------------
+--------------------------------
 Config file located in config/structpro.cfg
-DENSITY Double [0..+INF] Spawn probability per chunk, to not generate set any negative value
-DENSITY_VILLAGE Double [0..+INF] Village probability per chunk, to not generate set any negative value
-ACCURACY Double [0..+INF] Calibration accuracy
-NATIVE_LOOT Boolean Set chest spawn priority to native loot if it exists
-CHEST_LOOT_CHANCE Double [0..+INF] Chest loot chance, to not loot set any negative value
-FORCE_LIFT Int [-INF; +INF] Force lift up every structure (recommended 0)
-SPAWN_MOBS Boolean Prevent mob-spawners for spawning
-ADDITIONAL_OUTPUT Boolean Print additional mod output to console
-ONLY_VANILLA_LOOT Boolean Ban modded items from spawning
-MIN_CHEST_ITEMS Integer [0; 27] Min number of stack per chest inclusive
-MAX_CHEST_ITEMS Integer [0; 27] Max number of stacks per chest exclusive
-MAX_CHEST_STACK_SIZE Integer [0; 64] Max item stack size for chest loot
-SPAWN_DIMENSIONS Array Allow spawning structures only in dimensions with given ids, case sensitive
-VILLAGE_DIMENSIONS Array Allow spawning villages only in dimensions with given ids, case sensitive
-BAN_BLOCKS Array Replaces this blocks with stone
-BAN_ITEMS Array Exclude items from possible loot
-WORLD_BORDER Integer Border where structure-generation process will stop, measured in chunks
-SCHEMATICS_FOLDER Schematics goes this folder, relative minecraft root
-MOB_SPAWNERS_EGGS_ONLY Boolean Pasting mob spawners with mobs that have eggs only, or not only
-IGNORE_LIGHT Boolean ignore light, enabling may speed-up pasting process
+DENSITY {Double} [0..+INF, Overflowing probability, Recomended 0.0035] Spawn probability per chunk
+DENSITY_VILLAGE {Double} [0..+INF, Overflowing probability, Recomended 0.00035] Village probability per chunk
+ACCURACY {Double} [0..+INF, Recommended 1.0] Calibration accuracy criteria, 0.5 means two times more accurate
+FORCE_LIFT {Integer} [-INF; +INF, Recomended 0] Force lift up every structure (recommended 0)
+NATIVE_LOOT {Boolean} [Recomended false] Set chest spawn priority to native loot if it exists
+ONLY_VANILLA_LOOT {Boolean} [Recomended true] Ban modded items from spawning
+LOOT_CHANCE {Double} [0..1, Normilized probability, Recomended 0.5] Chest loot chance
+MIN_CHEST_ITEMS {Integer} [0..27, Recomended 2] Min number of stacks per chest inclusive
+MAX_CHEST_ITEMS {Integer} [0..27, Recomended 7] Max number of stacks per chest exclusive
+MAX_CHEST_STACK_SIZE {Integer} [0..64, Recomended 12] Max item stack size for chest loot
+SPAWN_MOBS {Boolean} [Recomended true] Spawn mobs in generated structures
+MOB_SPAWNERS_EGGS_ONLY {Boolean} [Recomended true] Pasting mob spawners only with mobs that have eggs
+ADDITIONAL_OUTPUT {Boolean} [Recomended true] Print details about schematics loading and failed paste attempts
+IGNORE_LIGHT {Boolean} [Recomended false] Ignore light, enabling may speed-up pasting process but broke light
+WORLD_CHUNK_BORDER {Integer} [0..+INF, Measured in chunks, Recomended 4096] Generation border
+SCHEMATICS_FOLDER {File} [Relative path, Use "/", Recomended schematics] Schematics goes this folder
+SPAWN_DIMENSIONS {Set} [Case sensitive, Recomended -1, 0, 1] Allow spawning structures only in this dimensions
+VILLAGE_DIMENSIONS {Set} [Case sensitive, Recomended 0] Allow spawning villages only in specified dimensions
+REPLACE_BLOCKS {Map} [BlockSrc -> BlockDst, Comma separated, Case non-sensitive] Replaces blocks to another
+EXCLUDE_ITEMS {Set} [Item names, Comma separated, Case non-sensitive] Exclude items from possible loot
 
-Notice: to NOT spawn structures, villages, items - set density, density_village, chest_loot_chance <= 0 (probability 0)
-Notice: to NOT spawn Command blocks or other blocks add appropriate block name to BAN_BLOCKS
-Notice: spawn_dimensions and village_dimensions are case sensitive and it can be found by name or by id
-Notice: to allow items from other mods - set ONLY_VANILLA_LOOT = false
+Notice: To match any item or block that have some subword use .* around, for instance .*COMMAND.* to specify all command blocks/items
+Notice: REPLACE_BLOCKS AND EXCLUDE_ITEMS support java regular expressions, for example .*COMMAND.* to find all words with command
+Notice: To not spawn Structures, Villages, Items set DENSITY, DENSITY_VILLAGE, CHEST_LOOT_CHANCE = 0
+Notice: To not spawn command blocks or other blocks add appropriate block name to BAN_BLOCKS
+Notice: SPAWN_DIMENSIONS and VILLAGE_DIMENSIONS works both for names and ids and they are case sensitive
+Notice: To allow items from other mods set ONLY_VANILLA_LOOT = false
 
 Commands
-----------------------------------------------
+--------------------------------
 Pasting schematic in the world. Each field may not be specified. Available only for creative users.
 /structpro paste
-name= Select random schematic which path contains this name (default = "")
-posX= Position X in the world (default = Player position X)
-posY= Position Y in the world (default = Player position Y) (Put = 0 To auto detect height)
-posZ= Position Z in the world (default = Player position Z)
-rotateX= Rotation around X axis (default = random 0) [not works]
-rotateY= Rotation around Y axis (default = random 0..3)
-rotateZ= Rotation around Z axis (default = random 0) [not works]
-flipX= Flip X axis (default = random true..false)
-flipY= Flip Y axis (default = random false) [You want flip your building upside down?]
-flipZ= Flip Z axis (default = random true..false)
-village= Spawn entire village (default = false)
+name = Select random schematic which path contains this name (default = "")
+posX = Position X in the world (default = Player position X)
+posY = Position Y in the world (default = Player position Y) (Put = 0 To auto detect height)
+posZ = Position Z in the world (default = Player position Z)
+rotateX = Rotation around X axis (default = random 0) [not works]
+rotateY = Rotation around Y axis (default = random 0..3)
+rotateZ = Rotation around Z axis (default = random 0) [not works]
+flipX = Flip X axis (default = random true..false)
+flipY = Flip Y axis (default = random false) [You want flip your building upside down?]
+flipZ = Flip Z axis (default = random true..false)
+village = Spawn entire village (default = false)
 
 Schematic saving to schematics/Saves folder from world fragment. Fragment will be copied in increasing X,Y,Z direction.
 /structpro save
-name= Schematic name
-posX= Position X in the world (default = Player position X)
-posY= Position Y in the world (default = Player position Y)
-posZ= Position Z in the world (default = Player position Z)
+name = Schematic name
+posX = Position X in the world (default = Player position X)
+posY = Position Y in the world (default = Player position Y)
+posZ = Position Z in the world (default = Player position Z)
 width = Schematic width
 height = Schematic height
 length = Schematic length
 
 FAQ
-----------------------------------------------
-- Are you using any dependencies like schematica to spawn structures in the world?
-- Structpro are fully independent. It can be easily added or removed.
+--------------------------------
+- Are you using any dependencies to spawn structures in the world?
+- Structpro are fully independent
 
 - Where does the schematic folder go?
-- %appdata%/.minecraft/schematics/
+- .minecraft/schematics/ by default, but you can configure it
 
 - For using own schematics, do we also need something?
-- You need only to put schematics in the folder. Nothing more.
+- Nope, you need to put your schematics in the folder. Nothing more.
 
 - How to make structures more rare?
 - Go to config and open structpro.cfg file then put density, for instance 10 times less than before (0.005 -> 0.0005)
@@ -181,6 +185,11 @@ Speed-up pasting proccess and cleanup code
 Fix block-light bugs
 Fix bug that makes village spawns always in pair with structure
 New config option: IGNORE_LIGHT
+Version 1.7
+Soil lians under roughly-generated basic ground-buildings cosmetics
+Configurator generalization and improves
+Block replacement improvements
+Now blocks and items can be specified using regexp in configs
 
 Known bugs
 ----------------------------------------------

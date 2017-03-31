@@ -8,11 +8,11 @@ import net.minecraftforge.fml.common.IWorldGenerator;
 import java.util.Random;
 
 /* Decorate chunk generation process */
-public class Decorator extends Distributor implements IWorldGenerator {
+public class Decorator implements IWorldGenerator {
 
     @Override
     public void generate(Random randomDefault, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator, IChunkProvider chunkProvider) {
-        gen(world, chunkX, chunkZ);
+        Distributor.gen(world, chunkX, chunkZ);
     }
 
 }

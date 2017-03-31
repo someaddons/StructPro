@@ -8,13 +8,14 @@ import java.util.concurrent.ConcurrentHashMap;
 /* Chunks memoization */
 class ChunkCache {
 
+    /* Time limit in milliseconds to hold data */
     private static final long CACHE_TIME_LIMIT = 32 * 1000;
 
     /* Actual world */
-    private World world;
+    private final World world;
 
     /* Chunkster cache */
-    private ConcurrentHashMap<Long, Chunkster> chunksters = new ConcurrentHashMap<Long, Chunkster>();
+    private final ConcurrentHashMap<Long, Chunkster> chunksters = new ConcurrentHashMap<Long, Chunkster>();
 
     ChunkCache(World world) {
         this.world = world;
@@ -40,7 +41,7 @@ class ChunkCache {
         }
     }
 
-    /* Update all chunsters */
+    /* Update all chunksters */
     void update() {
         for (ConcurrentHashMap.Entry <Long, Chunkster> entry : chunksters.entrySet()) {
             entry.getValue().update();

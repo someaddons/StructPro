@@ -18,14 +18,14 @@ public enum Classifier {
     LIQUID (0x03),
     LIGHT (0x04);
 
-    public final int value;
+    private final int value;
 
     Classifier(int value) {
         this.value = value;
     }
 
     /* Ground soil blocks */
-    private static boolean[][] blocks = new boolean[Classifier.values().length][256];
+    private static final boolean[][] blocks = new boolean[Classifier.values().length][256];
 
     /* Check if block of specific class by id */
     public static boolean isBlock(Classifier type, int blockID) {
@@ -43,7 +43,7 @@ public enum Classifier {
     }
 
     /* Set block class */
-    public static void setBlock(Classifier type, Block block) {
+    private static void setBlock(Classifier type, Block block) {
         int blockID = Blocks.blockID(block);
         if (Blocks.isVanillaID(blockID)) {
             blocks[type.value][blockID] = true;

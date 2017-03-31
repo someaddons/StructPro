@@ -9,6 +9,7 @@ import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
 import com.ternsip.structpro.World.Cache.WorldCache;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -28,6 +29,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import static com.ternsip.structpro.World.Blocks.Classifier.CARDINAL;
 import static com.ternsip.structpro.World.Blocks.Classifier.OVERLOOK;
@@ -42,40 +44,11 @@ public class Projector extends Structure {
     /* Directory for dump files */
     private static final File DUMP_DIR = new File("sprodump");
 
-    /* Flags file for blueprint flags */
-    private File originFile = null;
-
+    /* Construct projector based on structure file */
     public Projector(File file) throws IOException {
-        originFile = file;
-        try {
-            if (!getDataFile().exists() || !getFlagFile().exists()) {
-                throw new IOException("Dump files not exists");
-            }
-            loadFlags(originFile, getFlagFile());
-        } catch (IOException ioe) {
-            loadSchematic(file);
-        }
-    }
-
-    public Projector(File file, World world, int posX, int posY, int posZ, int width, int height, int length) throws IOException {
-        originFile = file;
-        loadSchematic(world, posX, posY, posZ, width, height, length);
-    }
-
-    private File getDataFile() {
-        return new File(DUMP_DIR.getPath(), originFile.getPath().hashCode() + ".dmp");
-    }
-
-    private File getFlagFile() {
-        return new File(DUMP_DIR.getPath(), originFile.getPath().hashCode() + ".flg");
-    }
-
-    @Override
-    protected void loadSchematic(File file) throws IOException {
-        super.loadSchematic(file);
-        saveFlags(getFlagFile());
-        saveData(getDataFile());
-        free();
+        super(  file,
+                new File(DUMP_DIR.getPath(), file.getPath().hashCode() + ".dmp"),
+                new File(DUMP_DIR.getPath(), file.getPath().hashCode() + ".flg"));
     }
 
     /* Paste structure into the world using given arguments */
@@ -86,8 +59,9 @@ public class Projector extends Structure {
         long startTime = System.currentTimeMillis();
         Report report = new Report();
         try {
-            Posture posture = calibrate(world, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, seed);
-            project(world, posture, seed);
+            boolean freely = posY > 0;
+            Posture posture = calibrate(world, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, freely, seed);
+            project(world, posture, freely, seed);
             report.add("PASTED ", "[X=" + posture.getPosX() + ";Y=" + posture.getPosY() + ";Z=" + posture.getPosZ() + "]");
         } catch (IOException ioe) {
             report.setSuccess(false);
@@ -95,7 +69,7 @@ public class Projector extends Structure {
         }
         long spentTime = (System.currentTimeMillis() - startTime);
         report
-                .add("SCHEMATIC", originFile.getName())
+                .add("SCHEMATIC", getFile().getName())
                 .add("SPENT TIME", new DecimalFormat("###0.00").format(spentTime / 1000.0) + "s")
                 .add("WORLD", world.getWorldInfo().getWorldName())
                 .add("DIMENSION", String.valueOf(world.provider.getDimension()))
@@ -107,14 +81,15 @@ public class Projector extends Structure {
                 .add("FLIP", "[X=" + flipX + ";Y=" + flipY + ";Z=" + flipZ + "]");
         return report;
     }
+
     /* Project structure to the world */
-    private void project(World world, Posture posture, long seed) throws IOException {
+    private void project(World world, Posture posture, boolean freely, long seed) throws IOException {
 
         /* Prepare tiles */
         Random random = new Random(seed);
 
         /* Load whole data */
-        loadData(originFile, getDataFile());
+        loadData();
 
         /* Iterate over volume and manage blocks */
         for (int index = 0; index < width * height * length; ++index) {
@@ -130,8 +105,20 @@ public class Projector extends Structure {
             }
         }
 
+        /* Do liana fix*/
+        if (!freely && method == Method.BASIC) {
+            for (int x = 0; x < width; ++x) {
+                for (int z = 0; z < length; ++z) {
+                    int index = getIndex(x, 0, z);
+                    if (!skin.get(index)) {
+                        lianaFix(world, posture.getWorldPos(x, 0, z));
+                    }
+                }
+            }
+        }
+
         /* Populate generated structure */
-        if (Configurator.spawnMobs) {
+        if (Configurator.SPAWN_MOBS) {
             populate(world, posture, seed);
         }
 
@@ -141,7 +128,7 @@ public class Projector extends Structure {
 
     /* Populate structure with entities */
     private void populate(World world, Posture posture, long seed) {
-        boolean village = getOriginFile().getPath().toLowerCase().contains("village");
+        boolean village = isVillage();
         ArrayList<Class<? extends Entity>> mobs = village ? Mobs.village.select() : Mobs.hostile.select(biome);
         Random random = new Random(seed);
         int size = width * length;
@@ -183,7 +170,8 @@ public class Projector extends Structure {
         if (!Blocks.isVanillaID(blocks[index]) || !Classifier.isBlock(CARDINAL, blocks[index]) || y < lift) {
             return;
         }
-        double radius = Blocks.cardinalRadius;
+        /* Clear soil and overlook around cardinal blocks */
+        double radius = 3;
         int shift = (int) radius;
         for (int dx = -shift; dx <= shift; ++dx) {
             for (int dz = -shift; dz <= shift; ++dz) {
@@ -208,15 +196,30 @@ public class Projector extends Structure {
         }
     }
 
+    /* Do block-liana fix for specific position */
+    private void lianaFix(World world, BlockPos pos) {
+        IBlockState state = WorldCache.getBlockState(world, pos);
+        if (Classifier.isBlock(SOIL, state)) {
+            for (int y = pos.getY() - 1; y >= 0; --y) {
+                BlockPos nPos = new BlockPos(pos.getX(), y, pos.getZ());
+                if (Classifier.isBlock(OVERLOOK, WorldCache.getBlockState(world, nPos))) {
+                    WorldCache.setBlockState(world, nPos, state);
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
     /* Process tile entity */
     private void processTile(TileEntity tile, int index, Random random) {
         if (tile == null) {
             return;
         }
         NBTTagCompound tileTag = tiles[index];
-        if (tile instanceof TileEntityChest && Configurator.lootChance >= random.nextDouble()) {
+        if (tile instanceof TileEntityChest && Configurator.LOOT_CHANCE >= random.nextDouble()) {
             ArrayList<ItemStack> forceItems = new ArrayList<ItemStack>();
-            if (Configurator.nativeLoot && tileTag != null) {
+            if (Configurator.NATIVE_LOOT && tileTag != null) {
                 NBTTagList items = tileTag.getTagList("Items", Constants.NBT.TAG_COMPOUND);
                 for (int i = 0; i < items.tagCount(); ++i) {
                     NBTTagCompound stackTag = items.getCompoundTagAt(i);
@@ -229,8 +232,8 @@ public class Projector extends Structure {
                 }
             }
             TileEntityChest chest = (TileEntityChest) tile;
-            int minItems = Math.max(0, Math.min(27, Configurator.minChestItems));
-            int maxItems = Math.max(minItems, Math.min(27, Configurator.maxChestItems));
+            int minItems = Math.max(0, Math.min(27, Configurator.MIN_CHEST_ITEMS));
+            int maxItems = Math.max(minItems, Math.min(27, Configurator.MAX_CHEST_ITEMS));
             int itemsCount = minItems + random.nextInt(maxItems - minItems + 1);
             ArrayList<Integer> permutation = new ArrayList<Integer>();
             for (int idx = 0; idx < 27; ++idx) {
@@ -248,7 +251,7 @@ public class Projector extends Structure {
                     item = forceItems.get(idx).getItem();
                     stackMeta = forceItems.get(idx).getItemDamage();
                 }
-                int maxStackSize = Math.max(1, Math.min(Configurator.maxChestStackSize, Items.itemMaxStack(item)));
+                int maxStackSize = Math.max(1, Math.min(Configurator.MAX_CHEST_STACK_SIZE, Items.itemMaxStack(item)));
                 int stackSize = 1 + random.nextInt(maxStackSize);
                 chest.setInventorySlotContents(permutation.get(idx), new ItemStack(item, stackSize, stackMeta));
             }
@@ -298,11 +301,9 @@ public class Projector extends Structure {
                 logic.setEntityName(Mobs.classToName(mob));
             }
             if (tileTag != null && tileTag.hasKey("EntityId")) {
-                mob = Utils.select(
-                        Configurator.mobSpawnersEggsOnly ?
-                        Mobs.mobsEggs.select(tileTag.getString("EntityId"), false) :
-                        Mobs.mobs.select(tileTag.getString("EntityId"), false)
-                );
+                String mobName = Pattern.quote(tileTag.getString("EntityId"));
+                Pattern mPattern = Pattern.compile(".*" + Pattern.quote(mobName) + ".*", Pattern.CASE_INSENSITIVE);
+                mob = Utils.select(Configurator.MOB_SPAWNERS_EGGS_ONLY ? Mobs.eggs.select(mPattern) : Mobs.mobs.select(mPattern));
                 if (mob != null) {
                     logic.setEntityName(Mobs.classToName(mob));
                 }
@@ -315,12 +316,12 @@ public class Projector extends Structure {
                               int posX, int posY, int posZ,
                               int rotateX, int rotateY, int rotateZ,
                               boolean flipX, boolean flipY, boolean flipZ,
-                              long seed) throws IOException {
+                              boolean freely, long seed) throws IOException {
 
         Posture result = new Posture(posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, width, height, length);
 
         /* Positive Y-position not calibrates */
-        if (posY > 0) {
+        if (freely) {
             return result;
         }
 
@@ -400,7 +401,7 @@ public class Projector extends Structure {
         boolean hill = method == Method.HILL;
         double roughness = Math.sqrt(variance);
         double underLiquidRoughness = Math.sqrt(varianceUnderLiquid);
-        double roughnessFactor = Configurator.accuracy;
+        double roughnessFactor = Configurator.ACCURACY;
         if (afloat) {
             if (roughness > 3.0 * roughnessFactor) {
                 throw new IOException("Rough water: " + decimal.format(roughness));
@@ -433,15 +434,10 @@ public class Projector extends Structure {
             posY = Math.min(posY - height, 30 + random.nextInt() % 25);
         } else {
             posY -= lift;
-            posY += Configurator.forceLift;
+            posY += Configurator.FORCE_LIFT;
         }
         posY = Math.max(4, Math.min(posY, 250));
         return new Posture(posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, width, height, length);
     }
-
-    public File getOriginFile() {
-        return originFile;
-    }
-
 
 }

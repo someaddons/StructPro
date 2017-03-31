@@ -8,11 +8,15 @@ public class Report {
     private boolean success = true;
     private String result = "[" + Structpro.MODNAME + " v" + Structpro.VERSION + "]";
 
+    /* Add new word mapping */
     public Report add(String key, String value) {
-        result += "[" + key + " = " + value + "]";
+        String k = key == null ? "NULL" : key.replace("\n", "");
+        String v = value == null ? "NULL" : value.replace("\n", "");
+        result += "[" + k + " = " + v + "]";
         return this;
     }
 
+    /* Change success status */
     public void setSuccess(boolean success) {
         this.success = success;
     }

@@ -20,56 +20,88 @@ public class Structure extends Blueprint {
     /* Structure version */
     private static final int VERSION = 105;
 
-    public Method getMethod() {
-        return method;
-    }
-
-    public Biome getBiome() {
-        return biome;
-    }
-
-    public int getLift() {
-        return lift;
-    }
-
+    private File fileStructure;
+    private File fileFlag;
+    private File fileData;
     private long schemaLen;
     Method method;
     Biome biome;
     int lift;
     BitSet skin;
 
-    @Override
-    void loadSchematic(File file) throws IOException {
-        super.loadSchematic(file);
-        schemaLen = file.length();
-        method = Method.valueOf(file);
-        biome = Biome.valueOf(file, blocks);
-        lift = calcLift();
-        skin = getSkin();
-    }
-
-    /* Load flags from flags-file and match it with schematic-file */
-    void loadFlags(File schematic, File flags) throws IOException {
-        readFlags(readTags(flags));
-        if (schemaLen != schematic.length()) {
-            throw new IOException("Mismatched schematic length: " + schematic.length() + "/" + schemaLen);
+    /* Construct structure based on blueprint file, data and flags */
+    public Structure(File file, File data, File flags) throws IOException {
+        fileStructure = file;
+        fileData = data;
+        fileFlag = flags;
+        try {
+            if (!fileData.exists() || !fileFlag.exists()) {
+                throw new IOException("Dump files not exists");
+            }
+            loadFlags();
+        } catch (IOException ioe) {
+            loadSchematic(fileStructure);
         }
     }
 
-    /* Load data from data-file and match it with schematic-file */
-    void loadData(File schematic, File data) throws IOException {
-        super.loadSchematic(schematic);
-        readData(readTags(data));
+    @Override
+    void loadSchematic(File file) throws IOException {
+        super.loadSchematic(file);
+        schemaLen = fileStructure.length();
+        method = Method.valueOf(fileStructure);
+        biome = Biome.valueOf(fileStructure, blocks);
+        lift = calcLift();
+        skin = getSkin();
+        saveFlags();
+        saveData();
+        free();
+    }
+
+    /* Load flags from flags-file */
+    private void loadFlags() throws IOException {
+        NBTTagCompound tag = readTags(fileFlag);
+        int version = tag.getInteger("Version");
+        if (version != VERSION) {
+            throw new IOException("Incomplete version: " + version + " requires " + VERSION);
+        }
+        width = tag.getShort("Width");
+        height = tag.getShort("Height");
+        length = tag.getShort("Length");
+        schemaLen = tag.getLong("SchemaLen");
+        lift = tag.getInteger("Lift");
+        method = Method.valueOf(tag.getInteger("Method"));
+        biome = Biome.valueOf(tag.getInteger("Biome"));
+        if (schemaLen != fileStructure.length()) {
+            throw new IOException("Mismatched schematic length: " + fileStructure.length() + "/" + schemaLen);
+        }
+    }
+
+    /* Load data from data-file and schematic-file */
+    void loadData() throws IOException {
+        super.loadSchematic(fileStructure);
+        NBTTagCompound tag = readTags(fileData);
+        skin = Utils.toBitSet(tag.getByteArray("Skin"));
     }
 
     /* Save flags to file */
-    void saveFlags(File file) throws IOException {
-        writeTags(file, getFlags());
+    private void saveFlags() throws IOException {
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setInteger("Version", VERSION);
+        tag.setShort("Width", (short)width);
+        tag.setShort("Height", (short)height);
+        tag.setShort("Length", (short)length);
+        tag.setLong("SchemaLen", schemaLen);
+        tag.setInteger("Lift", lift);
+        tag.setInteger("Method", method.value);
+        tag.setInteger("Biome", biome.value);
+        writeTags(fileFlag, tag);
     }
 
-    /* Save data to file */
-    void saveData(File file) throws IOException {
-        writeTags(file, getData());
+    /* Save file to file */
+    private void saveData() throws IOException {
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setByteArray("Skin", Utils.toByteArray(skin));
+        writeTags(fileData, tag);
     }
 
     /* Free memory */
@@ -78,47 +110,6 @@ public class Structure extends Blueprint {
         meta = null;
         skin = null;
         tiles = null;
-    }
-
-    /* Get data as NBT tag */
-    private NBTTagCompound getData() {
-        NBTTagCompound result = new NBTTagCompound();
-        result.setByteArray("Skin", Utils.toByteArray(skin));
-        return result;
-    }
-
-    /* Get flags as NBT tag */
-    private NBTTagCompound getFlags() {
-        NBTTagCompound result = new NBTTagCompound();
-        result.setInteger("Version", VERSION);
-        result.setShort("Width", (short)width);
-        result.setShort("Height", (short)height);
-        result.setShort("Length", (short)length);
-        result.setLong("SchemaLen", schemaLen);
-        result.setInteger("Lift", lift);
-        result.setInteger("Method", method.value);
-        result.setInteger("Biome", biome.value);
-        return result;
-    }
-
-    /* Read data from NBT tag */
-    private void readData(NBTTagCompound data) throws IOException {
-        skin = Utils.toBitSet(data.getByteArray("Skin"));
-    }
-
-    /* read flags from NBT tag */
-    private void readFlags(NBTTagCompound flags) throws IOException {
-        int version = flags.getInteger("Version");
-        if (version != VERSION) {
-            throw new IOException("Incomplete version: " + version + " requires " + VERSION);
-        }
-        width = flags.getShort("Width");
-        height = flags.getShort("Height");
-        length = flags.getShort("Length");
-        schemaLen = flags.getLong("SchemaLen");
-        lift = flags.getInteger("Lift");
-        method = Method.valueOf(flags.getInteger("Method"));
-        biome = Biome.valueOf(flags.getInteger("Biome"));
     }
 
     /* Get structure ground level (lift) to dig it down */
@@ -146,7 +137,7 @@ public class Structure extends Blueprint {
         return  Math.max(borderLevel, wholeLevel);
     }
 
-    /* Generate schematic skin as bitset of possible(0) and restricted(1) to spawn blocks */
+    /* Generate schematic skin as BitSet of possible(0) and restricted(1) to spawn blocks */
     private BitSet getSkin() {
 
         boolean[] skip = new boolean[256];
@@ -226,4 +217,24 @@ public class Structure extends Blueprint {
         return skin;
     }
 
+    /* Check if the structure is village structure */
+    boolean isVillage() {
+        return fileStructure.getPath().toLowerCase().contains("village");
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public Biome getBiome() {
+        return biome;
+    }
+
+    public int getLift() {
+        return lift;
+    }
+
+    public File getFile() {
+        return fileStructure;
+    }
 }

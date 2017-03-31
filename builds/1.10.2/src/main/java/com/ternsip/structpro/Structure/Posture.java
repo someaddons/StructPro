@@ -3,7 +3,7 @@ package com.ternsip.structpro.Structure;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 
-/* Reflects information about cuboid stereometric state in the world. */
+/* Reflects information about cuboid stereo-metric state in the world. */
 @SuppressWarnings({"WeakerAccess", "unused"})
 class Posture {
 

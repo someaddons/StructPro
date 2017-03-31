@@ -21,7 +21,7 @@ import java.util.Map;
 public class Mobs {
 
     /* Selector for all eggs mobs */
-    public static final Selector<Class<? extends Entity>> mobsEggs = new Selector<Class<? extends Entity>>(){{
+    public static final Selector<Class<? extends Entity>> eggs = new Selector<Class<? extends Entity>>(){{
         for (Map.Entry<ResourceLocation, EntityList.EntityEggInfo> e : EntityList.ENTITY_EGGS.entrySet()) {
             Class<? extends Entity> mob = EntityList.getClass(e.getKey());
             add(classToName(mob).getResourcePath(), mob);

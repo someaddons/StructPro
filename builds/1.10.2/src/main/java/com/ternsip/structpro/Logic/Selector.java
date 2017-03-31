@@ -2,10 +2,12 @@ package com.ternsip.structpro.Logic;
 
 import com.ternsip.structpro.Structure.Biome;
 import com.ternsip.structpro.Structure.Method;
+import com.ternsip.structpro.Utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.regex.Pattern;
 
 /* Object selection relative parameters */
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -49,23 +51,13 @@ public class Selector<T> {
         return methodFilter.get(method);
     }
 
-    /* Select all objects that matches name, first goes most matchable, O(n) */
-    public ArrayList<T> select(String name, boolean absolute) {
-        ArrayList<T> result = new ArrayList<T>();
-        String target = name.toLowerCase();
-        if (nameFilter.containsKey(target)) {
-            result.add(nameFilter.get(target));
-        }
-        if (absolute) {
-            return result;
-        }
-        for (HashMap.Entry<String, T> entry : nameFilter.entrySet()) {
-            String key = entry.getKey();
-            if (!key.equalsIgnoreCase(target) && (key.contains(target) || target.contains(key))) {
-                result.add(entry.getValue());
+    /* Select all objects that matches pattern, O(n) */
+    public ArrayList<T> select(final Pattern pattern) {
+        return new ArrayList<T>() {{
+            for (String match : Utils.match(nameFilter.keySet(), pattern)) {
+                add(nameFilter.get(match));
             }
-        }
-        return result;
+        }};
     }
 
     /* Select structures that matches any method, O(n) */
@@ -108,7 +100,7 @@ public class Selector<T> {
 
     /* Add targets for specific biome */
     public void add(String name, T target) {
-        nameFilter.put(name.toLowerCase(), target);
+        nameFilter.put(name, target);
         add(target);
     }
 
