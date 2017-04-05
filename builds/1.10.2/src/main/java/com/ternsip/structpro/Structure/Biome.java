@@ -1,6 +1,6 @@
 package com.ternsip.structpro.Structure;
 
-import com.ternsip.structpro.World.Blocks.Blocks;
+import com.ternsip.structpro.Universe.Blocks.Blocks;
 import net.minecraft.block.Block;
 
 import java.io.File;
@@ -101,7 +101,7 @@ public enum Biome {
     }
 
     /* Determine Biome by given Minecraft Biome */
-    static Biome valueOf(net.minecraft.world.biome.Biome biome) {
+    public static Biome valueOf(net.minecraft.world.biome.Biome biome) {
         String biomeName = biome.getBiomeName().toLowerCase().replace(" ", "");
         for (HashMap.Entry<Biome, String[]> entry : bioNames.entrySet()) {
             for (int i = 0; i < entry.getValue().length; ++i) {

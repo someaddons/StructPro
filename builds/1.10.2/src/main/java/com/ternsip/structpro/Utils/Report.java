@@ -5,32 +5,49 @@ import com.ternsip.structpro.Structpro;
 /* Console message reporter [key = value] */
 public class Report {
 
-    private boolean success = true;
-    private String result = "[" + Structpro.MODNAME + " v" + Structpro.VERSION + "]";
+    private String result = "";
 
     /* Add new word mapping */
-    public Report add(String key, String value) {
-        String k = key == null ? "NULL" : key.replace("\n", "");
-        String v = value == null ? "NULL" : value.replace("\n", "");
-        result += "[" + k + " = " + v + "]";
+    public Report post(String key, String value) {
+        result = result + combine(key, value);
         return this;
     }
 
-    /* Change success status */
-    public void setSuccess(boolean success) {
-        this.success = success;
+    /* Add new word mapping */
+    public Report pref(String key, String value) {
+        result = combine(key, value) + result;
+        return this;
     }
 
-    public boolean isSuccess() {
-        return success;
+    /* Add new word mapping */
+    public Report post(Report report) {
+        result = result + report.getResult();
+        return this;
+    }
+
+    /* Add new word mapping */
+    public Report pref(Report report) {
+        result = report.getResult() + result;
+        return this;
+    }
+
+    private String getResult() {
+        return result;
+    }
+
+    /* Combine into one */
+    private String combine(String key, String value) {
+        String k = key == null ? "NULL" : key.replace("\n", "");
+        String v = value == null ? "NULL" : value.replace("\n", "");
+        return  "[" + k + " = " + v + "]";
     }
 
     public void print() {
-        System.out.println(result);
+        System.out.println(toString());
     }
 
     @Override
     public String toString() {
-        return result;
+        return "[" + Structpro.MODNAME + " v" + Structpro.VERSION + "]" + result;
     }
 }

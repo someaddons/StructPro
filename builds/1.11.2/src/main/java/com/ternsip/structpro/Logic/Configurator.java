@@ -14,67 +14,67 @@ import java.util.Properties;
 @SuppressWarnings({"WeakerAccess", "deprecation"})
 public class Configurator {
 
-    /* Spawn probability per chunk, to not generate set any negative value */
+    /* [0..+INF, Overflowing probability, Recommended 0.0035] Spawn probability per chunk */
     public static double DENSITY = 0.0035;
 
-    /* Village probability per chunk, to not generate set any negative value */
+    /* [0..+INF, Overflowing probability, Recommended 0.00035] Village probability per chunk*/
     public static double DENSITY_VILLAGE = 0.00035;
 
-    /* Calibration accuracy */
+    /* [0..+INF, Recommended 1.0] Calibration accuracy criteria, 0.5 means two times more accurate */
     public static double ACCURACY = 1.0;
 
-    /* Pull out structure from the ground and lift up (recommended 0) */
+    /* [-INF; +INF, Recommended 0] Force lift up every structure (recommended 0) */
     public static int FORCE_LIFT = 0;
 
-    /* Set chest spawn priority to native loot if it exists */
+    /* [Recommended false] Set chest spawn priority to native loot if it exists */
     public static boolean NATIVE_LOOT = false;
 
-    /* Ban modded items from spawning */
+    /* [Recommended true] Ban modded items from spawning */
     public static boolean ONLY_VANILLA_LOOT = true;
 
-    /* Chest loot chance, to not loot set any negative value */
+    /* [0..1, Normalized probability, Recommended 0.5] Chest loot chance */
     public static double LOOT_CHANCE = 0.5;
 
-    /* Min number of stack per chest inclusive */
+    /* [0..27, Recommended 2] Min number of stacks per chest inclusive */
     public static int MIN_CHEST_ITEMS = 2;
 
-    /* Max number of stacks per chest exclusive */
+    /* [0..27, Recommended 7] Max number of stacks per chest exclusive */
     public static int MAX_CHEST_ITEMS = 7;
 
-    /* Max item stack size for chest loot */
+    /* [0..64, Recommended 12] Max item stack size for chest loot */
     public static int MAX_CHEST_STACK_SIZE = 12;
 
-    /* Spawn mobs in generated structures */
+    /* [Recommended true] Spawn mobs in generated structures */
     public static boolean SPAWN_MOBS = true;
 
-    /* Spawn mobs in generated structures */
+    /* [Recommended true] Pasting mob spawners only with mobs that have eggs */
     public static boolean MOB_SPAWNERS_EGGS_ONLY = true;
 
-    /* Print additional mod output to console */
+    /* [Recommended true] Print details about schematics loading and failed paste attempts */
     public static boolean ADDITIONAL_OUTPUT = true;
 
-    /* Ignore block light update, disabling may speed up pasting process */
+    /* [Recommended false] Ignore light, enabling may speed-up pasting process but broke light */
     public static boolean IGNORE_LIGHT = false;
 
-    /* Max length in chunks for world to be generated, 4096 chunks = area 65536 x 65536 blocks */
+    /* [0..+INF, Measured in chunks, Recommended 4096] Generation border */
     public static int WORLD_CHUNK_BORDER = 4096;
 
-    /* Schematics loads from this folder */
+    /* [Relative path, Use "/", Recommended schematics] Schematics goes this folder */
     public static File SCHEMATIC_FOLDER = new File("schematics");
 
-    /* Allow spawning structures only in dimensions with given ids, case sensitive */
+    /* [Case sensitive, Recommended -1, 0, 1] Allow spawning structures only in this dimensions */
     public static HashSet<String> SPAWN_DIMENSIONS = new HashSet<String>() {{
         add("-1");
         add("0");
         add("1");
     }};
 
-    /* Allow spawning villages only in dimensions with given ids, case sensitive */
+    /* [Case sensitive, Recommended 0] Allow spawning villages only in specified dimensions */
     public static HashSet<String> VILLAGE_DIMENSIONS = new HashSet<String>() {{
         add("0");
     }};
 
-    /* Replaces this blocks with stone */
+    /* [BlockSrc -> BlockDst, Comma separated, Case non-sensitive] Replaces blocks to another */
     public static HashSet<String> REPLACE_BLOCKS = new HashSet<String>() {{
         add("BARRIER -> NULL");
         add("BEDROCK -> STONE");
@@ -89,7 +89,7 @@ public class Configurator {
         add("BEACON -> QUARTZ_BLOCK");
     }};
 
-    /* Exclude items from possible loot */
+    /* [Item names, Comma separated, Case non-sensitive] Exclude items from possible loot */
     public static HashSet<String> EXCLUDE_ITEMS = new HashSet<String>() {{
         add(".*BARRIER.*");
         add(".*COMMAND.*");
@@ -108,6 +108,7 @@ public class Configurator {
         }
         return object.toString();
     }
+
     /* Parse string */
     private static Object parse(String string, Class clazz) throws IOException {
         if (Integer.class.isAssignableFrom(clazz)) {
@@ -147,16 +148,16 @@ public class Configurator {
                         }
                         Utils.setFieldValue(Configurator.class, field, parse(property, origin.getClass()));
                     } catch (Throwable throwable) {
-                        new Report().add("FIELD", field).add("ERROR", throwable.getMessage()).print();
+                        new Report().post("FIELD", field).post("ERROR", throwable.getMessage()).print();
                     }
                 }
             } catch (Throwable throwable) {
-                new Report().add("CONFIG", file.getPath()).add("ERROR", throwable.getMessage()).print();
+                new Report().post("CONFIG", file.getPath()).post("ERROR", throwable.getMessage()).print();
             } finally {
                 fis.close();
             }
         } catch (IOException ioe) {
-            new Report().add("CONFIG FILE", file.getPath()).add("ERROR", ioe.getMessage()).print();
+            new Report().post("CONFIG FILE", file.getPath()).post("ERROR", ioe.getMessage()).print();
         }
     }
 
@@ -171,19 +172,19 @@ public class Configurator {
                 }
                 config.store(fos, null);
             } catch (Throwable throwable) {
-                new Report().add("CONFIG", file.getPath()).add("ERROR", throwable.getMessage()).print();
+                new Report().post("CONFIG", file.getPath()).post("ERROR", throwable.getMessage()).print();
             } finally {
                 fos.close();
             }
         } catch (IOException ioe) {
-            new Report().add("CONFIG FILE", file.getPath()).add("ERROR", ioe.getMessage()).print();
+            new Report().post("CONFIG FILE", file.getPath()).post("ERROR", ioe.getMessage()).print();
         }
     }
 
     /* Configure mod settings */
     public static void configure(File file) {
         if (new File(file.getParent()).mkdirs()) {
-            new Report().add("CREATE CONFIG", file.getParent()).print();
+            new Report().post("CREATE CONFIG", file.getParent()).print();
         }
         if (file.exists()) {
             load(file);
@@ -192,7 +193,7 @@ public class Configurator {
         Report report = new Report();
         for (String field : Utils.getFields(Configurator.class)) {
             try {
-                report.add(field, combine(Utils.getFieldValue(Configurator.class, field)));
+                report.post(field, combine(Utils.getFieldValue(Configurator.class, field)));
             } catch (Throwable ignored) {}
         }
         report.print();

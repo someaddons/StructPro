@@ -1,11 +1,12 @@
 package com.ternsip.structpro.Structure;
 
+import com.ternsip.structpro.Utils.Report;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 
 /* Reflects information about cuboid stereo-metric state in the world. */
 @SuppressWarnings({"WeakerAccess", "unused"})
-class Posture {
+public class Posture {
 
     private int posX, posY, posZ;
     private int rotateX, rotateY, rotateZ;
@@ -14,10 +15,10 @@ class Posture {
     private int sizeX, sizeY, sizeZ;
     private int endX, endY, endZ;
 
-    Posture(int posX, int posY, int posZ,
-            int rotateX, int rotateY, int rotateZ,
-            boolean flipX, boolean flipY, boolean flipZ,
-            int width, int height, int length) {
+    public Posture(int posX, int posY, int posZ,
+                   int rotateX, int rotateY, int rotateZ,
+                   boolean flipX, boolean flipY, boolean flipZ,
+                   int width, int height, int length) {
         this.posX = posX;
         this.posY = posY;
         this.posZ = posZ;
@@ -30,6 +31,13 @@ class Posture {
         this.width = width;
         this.height = height;
         this.length = length;
+        update();
+    }
+
+    public void move(int posX, int posY, int posZ) {
+        this.posX = posX;
+        this.posY = posY;
+        this.posZ = posZ;
         update();
     }
 
@@ -127,39 +135,47 @@ class Posture {
         return meta | overlap;
     }
 
-    int getPosX() {
+    /* Generate posture report */
+    public Report report() {
+        return new Report()
+                .post("POS", "[X=" + posX + ";Y=" + posY + ";Z=" + posZ + "]")
+                .post("ROTATE", "[X=" + rotateX + ";Y=" + rotateY + ";Z=" + rotateZ + "]")
+                .post("FLIP", "[X=" + flipX + ";Y=" + flipY + ";Z=" + flipZ + "]");
+    }
+
+    public int getPosX() {
         return posX;
     }
 
-    int getPosY() {
+    public int getPosY() {
         return posY;
     }
 
-    int getPosZ() {
+    public int getPosZ() {
         return posZ;
     }
 
-    int getEndX() {
+    public int getEndX() {
         return endX;
     }
 
-    int getEndY() {
+    public int getEndY() {
         return endY;
     }
 
-    int getEndZ() {
+    public int getEndZ() {
         return endZ;
     }
 
-    int getSizeX() {
+    public int getSizeX() {
         return sizeX;
     }
 
-    int getSizeY() {
+    public int getSizeY() {
         return sizeY;
     }
 
-    int getSizeZ() {
+    public int getSizeZ() {
         return sizeZ;
     }
 }

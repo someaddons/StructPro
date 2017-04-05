@@ -1,5 +1,12 @@
 package com.ternsip.structpro.Utils;
 
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -118,4 +125,30 @@ public class Utils {
         HashMap<String, Object> result = new HashMap<String, Object>();
         clazz.getDeclaredField(field).set(clazz, value);
     }
+
+    /* Write tags to file */
+    public static void writeTags(File file, NBTTagCompound tag) throws IOException {
+        if (file.getParentFile() != null && !file.getParentFile().exists()) {
+            if (!file.getParentFile().mkdirs()) {
+                throw new IOException("Can't create path: " + file.getParent());
+            }
+        }
+        FileOutputStream fos = new FileOutputStream(file);
+        try {
+            CompressedStreamTools.writeCompressed(tag, fos);
+        } finally {
+            fos.close();
+        }
+    }
+
+    /* Load map tag from file */
+    public static NBTTagCompound readTags(File file) throws IOException {
+        FileInputStream fis = new FileInputStream(file);
+        try {
+            return CompressedStreamTools.readCompressed(fis);
+        } finally {
+            fis.close();
+        }
+    }
+
 }

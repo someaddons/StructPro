@@ -3,7 +3,7 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 1.7
+Latest mod version: 1.8
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
 Repository: https://github.com/ternsip/StructPro
@@ -190,6 +190,9 @@ Soil lians under roughly-generated basic ground-buildings cosmetics
 Configurator generalization and improves
 Block replacement improvements
 Now blocks and items can be specified using regexp in configs
+Version 1.8
+Performance issues
+Better logging
 
 Known bugs
 ----------------------------------------------

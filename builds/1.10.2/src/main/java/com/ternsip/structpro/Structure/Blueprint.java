@@ -1,9 +1,9 @@
 package com.ternsip.structpro.Structure;
 
-import com.ternsip.structpro.World.Blocks.Blocks;
-import com.ternsip.structpro.World.Cache.WorldCache;
+import com.ternsip.structpro.Universe.Blocks.Blocks;
+import com.ternsip.structpro.Universe.Cache.Universe;
+import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
@@ -12,8 +12,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 /* Schematic - Classical Minecraft schematic storage. Provide data access and world control */
@@ -63,7 +61,10 @@ public class Blueprint {
 
     /* Load schematic from file */
     void loadSchematic(File file) throws IOException {
-        readSchematic(readTags(file));
+        if (file.length() > TAG_FILE_SIZE_LIMIT) {
+            throw new IOException("File is too large: " + file.length());
+        }
+        readSchematic(Utils.readTags(file));
     }
 
     /* Load schematic from world fragment */
@@ -90,13 +91,13 @@ public class Blueprint {
         for (int ix = 0, x = posX; ix < width; ++ix, ++x) {
             for (int iy = 0, y = posY; iy < height; ++iy, ++y) {
                 for (int iz = 0, z = posZ; iz < length; ++iz, ++z) {
-                    IBlockState state = WorldCache.getBlockState(world, new BlockPos(x, y, z));
+                    IBlockState state = Universe.getBlockState(world, new BlockPos(x, y, z));
                     int blockID = Blocks.blockID(state);
                     int index = getIndex(ix, iy, iz);
                     if (Blocks.isVanillaID(blockID)) {
                         blocks[index] = (short) blockID;
                         meta[index] = (byte) Blocks.getMeta(state);
-                        TileEntity tile = WorldCache.getTileEntity(world, new BlockPos(x, y, z));
+                        TileEntity tile = Universe.getTileEntity(world, new BlockPos(x, y, z));
                         if (tile != null) {
                             try {
                                 tile.writeToNBT(tiles[index]);
@@ -113,35 +114,7 @@ public class Blueprint {
 
     /* Save blueprint as schematic */
     public void saveSchematic(File file) throws IOException {
-        writeTags(file, getSchematic());
-    }
-
-    /* Load map tag from file */
-    static NBTTagCompound readTags(File file) throws IOException {
-        if (file.length() > TAG_FILE_SIZE_LIMIT) {
-            throw new IOException("File is too large: " + file.length());
-        }
-        FileInputStream fis = new FileInputStream(file);
-        try {
-            return CompressedStreamTools.readCompressed(fis);
-        } finally {
-            fis.close();
-        }
-    }
-
-    /* Write tags to file */
-    static void writeTags(File file, NBTTagCompound tag) throws IOException {
-        if (file.getParentFile() != null && !file.getParentFile().exists()) {
-            if (!file.getParentFile().mkdirs()) {
-                throw new IOException("Can't create path: " + file.getParent());
-            }
-        }
-        FileOutputStream fos = new FileOutputStream(file);
-        try {
-            CompressedStreamTools.writeCompressed(tag, fos);
-        } finally {
-            fos.close();
-        }
+        Utils.writeTags(file, getSchematic());
     }
 
     /* Read Schematic blueprint from tags */
