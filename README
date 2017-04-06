@@ -3,7 +3,7 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 1.8
+Latest mod version: 1.9
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
 Repository: https://github.com/ternsip/StructPro
@@ -193,6 +193,9 @@ Now blocks and items can be specified using regexp in configs
 Version 1.8
 Performance issues
 Better logging
+Version 1.9
+Hotfix water impenetrability appeared in 1.8
+Update chuntsters before removing from cache
 
 Known bugs
 ----------------------------------------------

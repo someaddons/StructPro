@@ -33,6 +33,7 @@ class Worldster {
         for (Iterator<ConcurrentHashMap.Entry<Long, Chunkster>> iterator = chunksters.entrySet().iterator(); iterator.hasNext();) {
             ConcurrentHashMap.Entry<Long, Chunkster> entry = iterator.next();
             if(entry.getValue().getTimer().isOver()){
+                entry.getValue().update();
                 iterator.remove();
             }
         }

@@ -102,7 +102,7 @@ class Chunkster {
             String dimName = Universe.getDimensionName(world);
             y = dimName.equalsIgnoreCase("Nether") ? 63 : y;
             y = dimName.equalsIgnoreCase("End") ? 127 : y;
-            while (y >= 0 && Classifier.isBlock(OVERLOOK, getBlockState(x, y, z))) {
+            while (y >= 0 && Classifier.isBlock(classifier, getBlockState(x, y, z))) {
                 --y;
             }
             map.put(index, y + 1);
