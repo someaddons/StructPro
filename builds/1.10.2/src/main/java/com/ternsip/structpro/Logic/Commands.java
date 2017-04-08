@@ -21,7 +21,7 @@ public class Commands implements ICommand {
 
     private static final String name = "structpro";
     private static final String usage = "/structpro <help|paste|save>";
-    private static final ArrayList<String> aliases = new ArrayList<String>(){{add("/structpro");}};
+    private static final ArrayList<String> aliases = new ArrayList<String>(){{add("structpro");add("spro");}};
 
     @Override
     public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
@@ -37,6 +37,7 @@ public class Commands implements ICommand {
     public boolean isUsernameIndex(String[] args, int index) {
         return false;
     }
+
 
     @Override
     public int compareTo(ICommand o) {

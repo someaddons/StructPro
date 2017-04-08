@@ -3,7 +3,7 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 1.9
+Latest mod version: 2.0
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
 Repository: https://github.com/ternsip/StructPro
@@ -17,7 +17,7 @@ Adds new functionality to the world generator. It automatically spawns various s
 
 Details
 --------------------------------
-First time launching this mod with 3000 schematics consumes about 1-5 min in forge loading screen, because of reading new schematic entails appropriate calculating dump files to speed up pasting routine in future. If your schematic have ground level with grass, gravel, stone, dirt etc. it will dig down as it is necessary. if your scheme made roughly, paste process will automatically detect air outside of your structure and place it goodly. Creatures automatically spawns inside buildings. For example blazes and ghasts in nether, villagers in village, cave spiders in undergrounds. Every chest have random loot according to configuration and may reproduce some schematic-native items. I spent many time to identify the best approach of the problem of the most beautiful schematic insertion in the world. I realize that schematic cosmetic-configuring is very time-expensive, so I decide to entrust this job to computer. I figured out many ennobling approaches and sewed it all to the mod.
+First time launching this mod with 3000 schematics consumes about 1-5 min, because of reading new schematic entails appropriate calculating dump files to speed up pasting routine in future. If your schematic have ground level with grass, gravel, stone, dirt etc. it will dig down as it is necessary. if your scheme made roughly, paste process will automatically detect air outside of your structure and place it goodly. Creatures automatically spawns inside buildings. For example blazes and ghasts in nether, villagers in village, cave spiders in undergrounds. Every chest have random loot according to configuration and may reproduce some schematic-native items. I spent many time to identify the best approach of the problem of the most beautiful schematic insertion in the world. I realize that schematic cosmetic-configuring is very time-expensive, so I decide to entrust this job to computer. I figured out many ennobling approaches and sewed it all to the mod.
 
 Features:
 Arbitrary schematics supported
@@ -196,6 +196,11 @@ Better logging
 Version 1.9
 Hotfix water impenetrability appeared in 1.8
 Update chuntsters before removing from cache
+Version 2.0
+Fix major bug command /structpro save not saves tile entities
+Fix bedrock replace bug
+Small performance increasment
+Improve some default configurations
 
 Known bugs
 ----------------------------------------------

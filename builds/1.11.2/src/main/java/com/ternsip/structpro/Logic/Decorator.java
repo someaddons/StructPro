@@ -13,6 +13,11 @@ public class Decorator implements IWorldGenerator {
 
     @Override
     public void generate(Random randomDefault, final int chunkX, final int chunkZ, final World world, IChunkGenerator chunkGenerator, IChunkProvider chunkProvider) {
+        spawn(world, chunkX, chunkZ);
+    }
+
+    /* Project all generated structures in chunk */
+    private static void spawn(World world, int chunkX, int chunkZ) {
         /* Paste generated constructions */
         for (Projection projection : Construction.generate(world, chunkX, chunkZ)) {
             projection.project().print();

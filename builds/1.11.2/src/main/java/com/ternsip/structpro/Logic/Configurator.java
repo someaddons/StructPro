@@ -26,8 +26,8 @@ public class Configurator {
     /* [-INF; +INF, Recommended 0] Force lift up every structure (recommended 0) */
     public static int FORCE_LIFT = 0;
 
-    /* [Recommended false] Set chest spawn priority to native loot if it exists */
-    public static boolean NATIVE_LOOT = false;
+    /* [Recommended true] Set chest spawn priority to native loot if it exists */
+    public static boolean NATIVE_LOOT = true;
 
     /* [Recommended true] Ban modded items from spawning */
     public static boolean ONLY_VANILLA_LOOT = true;
@@ -85,6 +85,7 @@ public class Configurator {
         add("EMERALD_BLOCK -> STONE");
         add(".*COMMAND.* -> REDSTONE_BLOCK");
         add(".*SPAWNER.* -> IRON_BLOCK");
+        add(".*STRUCTURE.* -> GOLD_BLOCK");
         add("WOOL -> LOG");
         add("BEACON -> QUARTZ_BLOCK");
     }};
@@ -93,6 +94,11 @@ public class Configurator {
     public static HashSet<String> EXCLUDE_ITEMS = new HashSet<String>() {{
         add(".*BARRIER.*");
         add(".*COMMAND.*");
+        add(".*BEACON.*");
+        add(".*CRYSTAL.*");
+        add(".*VOID.*");
+        add(".*SHULKER.*");
+        add(".*STRUCTURE.*");
     }};
 
     /* Get schematics savings file */

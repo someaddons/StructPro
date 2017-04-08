@@ -1,36 +1,26 @@
 package com.ternsip.structpro.Structure;
 
 import com.ternsip.structpro.Logic.Configurator;
-import com.ternsip.structpro.Universe.Cache.Universe;
-import com.ternsip.structpro.Universe.Entities.Mobs;
-import com.ternsip.structpro.Universe.Items.Items;
-import com.ternsip.structpro.Utils.Report;
-import com.ternsip.structpro.Utils.Utils;
 import com.ternsip.structpro.Universe.Blocks.Blocks;
 import com.ternsip.structpro.Universe.Blocks.Classifier;
+import com.ternsip.structpro.Universe.Cache.Universe;
+import com.ternsip.structpro.Universe.Entities.Mobs;
+import com.ternsip.structpro.Universe.Entities.Tiles;
+import com.ternsip.structpro.Utils.Report;
+import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.*;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.Random;
-import java.util.regex.Pattern;
 
 import static com.ternsip.structpro.Universe.Blocks.Classifier.*;
 
@@ -38,11 +28,13 @@ import static com.ternsip.structpro.Universe.Blocks.Classifier.*;
 public class Structure extends Blueprint {
 
     /* Structure version */
-    private static final int VERSION = 105;
-
+    private static final int VERSION = 108;
 
     /* Directory for dump files */
     private static final File DUMP_DIR = new File("sprodump", "structures");
+
+    /* Melting distance measured in blocks */
+    private static final int MELT_DISTANCE = 5;
 
     private File fileStructure;
     private File fileFlag;
@@ -52,6 +44,7 @@ public class Structure extends Blueprint {
     private Biome biome;
     private int lift;
     private BitSet skin;
+    private BitSet melt;
 
     /* Construct structure based on structure file */
     public Structure(File file) throws IOException {
@@ -83,6 +76,7 @@ public class Structure extends Blueprint {
         biome = Biome.valueOf(fileStructure, blocks);
         lift = calcLift();
         skin = getSkin();
+        melt = getMelt();
         saveFlags();
         saveData();
         free();
@@ -112,6 +106,7 @@ public class Structure extends Blueprint {
         super.loadSchematic(fileStructure);
         NBTTagCompound tag = Utils.readTags(fileData);
         skin = Utils.toBitSet(tag.getByteArray("Skin"));
+        melt = Utils.toBitSet(tag.getByteArray("Melt"));
     }
 
     /* Save flags to file */
@@ -132,6 +127,7 @@ public class Structure extends Blueprint {
     private void saveData() throws IOException {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setByteArray("Skin", Utils.toByteArray(skin));
+        tag.setByteArray("Melt", Utils.toByteArray(melt));
         Utils.writeTags(fileData, tag);
     }
 
@@ -140,6 +136,7 @@ public class Structure extends Blueprint {
         blocks = null;
         meta = null;
         skin = null;
+        melt = null;
         tiles = null;
     }
 
@@ -171,22 +168,8 @@ public class Structure extends Blueprint {
     /* Generate schematic skin as BitSet of possible(0) and restricted(1) to spawn blocks */
     private BitSet getSkin() {
 
-        boolean[] skip = new boolean[256];
-        ArrayList<Block> skipBlocks = new ArrayList<Block>(){{
-            add(Blocks.AIR);
-            if (method == Method.AFLOAT || method == Method.UNDERWATER) {
-                add(Blocks.WATER);
-                add(Blocks.FLOWING_WATER);
-                add(Blocks.LAVA);
-                add(Blocks.FLOWING_LAVA);
-            }
-        }};
-        for (Block block : skipBlocks) {
-            int blockID = Blocks.blockID(block);
-            if (blockID >= 0 && blockID < 256) {
-                skip[blockID] = true;
-            }
-        }
+        Classifier skips = (method == Method.AFLOAT || method == Method.UNDERWATER) ? SOP : GAS;
+
         /* Height Map [SIDE][DIR][SIZE_A][SIZE_B], SIDE = YX, YZ, XZ, DIR = MAX, MIN */
         int[][][][] heightMap = {
                 {new int[height][width], new int[height][width]},
@@ -205,8 +188,7 @@ public class Structure extends Blueprint {
                         int k = kStart[side][dir];
                         for (; k != kEnd[side][dir]; k += dk[dir]) {
                             int index = side == 0 ? getIndex(j, i, k) : (side == 1 ? getIndex(k, i, j) : getIndex(i, k, j));
-                            int blockID = blocks[index];
-                            if (blockID >= 0 && blockID < 256 && !skip[blockID]) {
+                            if (!Classifier.isBlock(skips, blocks[index])) {
                                 break;
                             }
                         }
@@ -216,6 +198,7 @@ public class Structure extends Blueprint {
             }
         }
 
+        /* Create skin using height-maps */
         BitSet skin = new BitSet(width * height * length);
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
@@ -230,13 +213,13 @@ public class Structure extends Blueprint {
             }
         }
 
+        /* Shed liana all under skin positions */
         for (int index = 0; index < width * height * length; ++index) {
             if (skin.get(index)) {
                 int x = getX(index), y = getY(index), z = getZ(index);
                 while (y-- > 0) {
                     int next = getIndex(x, y, z);
-                    int blockID = blocks[next];
-                    if (!skin.get(next) && blockID >= 0 && blockID < 256 && skip[blockID]) {
+                    if (!skin.get(next) && Classifier.isBlock(skips, blocks[next])) {
                         skin.set(next);
                     } else {
                         break;
@@ -246,6 +229,53 @@ public class Structure extends Blueprint {
         }
 
         return skin;
+    }
+
+    /* Returns structure melts, requires calculated skin */
+    private BitSet getMelt() {
+
+        /* Create melt using cardinal blocks */
+        BitSet melt = new BitSet(getMeltIndex(width + MELT_DISTANCE - 1, height + MELT_DISTANCE - 1, length + MELT_DISTANCE - 1) + 1);
+
+        /* Skip underwater melting*/
+        if (method == Method.UNDERWATER || method == Method.AFLOAT) {
+            return melt;
+        }
+
+        for (int x = 0; x < width; ++x) {
+            for (int y = lift; y < height; ++y) {
+                for (int z = 0; z < length; ++z) {
+                    int idx = getIndex(x, y, z);
+                    if (!Classifier.isBlock(CARDINAL, blocks[idx])) {
+                        continue;
+                    }
+                    double radius = 3;
+                    int shift = (int) radius;
+                    for (int dx = -shift; dx <= shift; ++dx) {
+                        for (int dz = -shift; dz <= shift; ++dz) {
+                            for (int dy = 0; dy <= shift * 2; ++dy) {
+                                if (Math.sqrt(dx * dx + dy * dy / 4.0 + dz * dz) <= radius) {
+                                    int nx = x + dx, ny = y + dy, nz = z + dz;
+                                    if (    nx < -MELT_DISTANCE || nx >= width + MELT_DISTANCE ||
+                                            ny < -MELT_DISTANCE || ny >= height + MELT_DISTANCE ||
+                                            nz < -MELT_DISTANCE || nz >= length + MELT_DISTANCE) {
+                                        continue;
+                                    }
+                                    if (    nx < 0 || nx >= width ||
+                                            ny < 0 || ny >= height ||
+                                            nz < 0 || nz >= length ||
+                                            skin.get(getIndex(nx, ny, nz))) {
+                                        melt.set(getMeltIndex(nx, ny, nz), true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return melt;
     }
 
     /* Generate structure report */
@@ -267,23 +297,30 @@ public class Structure extends Blueprint {
         /* Load whole data */
         loadData();
 
-        liana = liana && method == Method.BASIC;
-
-        /* Iterate over volume and manage blocks */
+        /* Iterate over volume and paste blocks */
         for (int index = 0; index < width * height * length; ++index) {
             if (!skin.get(index)) {
-                pasteBlock(world, index, posture, random);
+                paste(world, index, posture, random);
             }
         }
 
-        /* Iterate over volume and process pasted blocks */
-        for (int index = 0; index < width * height * length; ++index) {
-            if (!skin.get(index)) {
-                processBlock(world, index, posture, random);
+        /* Iterate over volume and melt area */
+        for (int x = -MELT_DISTANCE; x < width + MELT_DISTANCE; ++x) {
+            for (int z = -MELT_DISTANCE; z < length + MELT_DISTANCE; ++z) {
+                for (int y = -MELT_DISTANCE; y < height + MELT_DISTANCE; ++y) {
+                    if (!melt.get(getMeltIndex(x, y, z))) {
+                        continue;
+                    }
+                    BlockPos worldPos = posture.getWorldPos(x, y, z);
+                    IBlockState state = Universe.getBlockState(world, worldPos);
+                    if (Classifier.isBlock(SOIL, state) || Classifier.isBlock(OVERLOOK, state)) {
+                        Universe.setBlockState(world, worldPos, Blocks.state(Blocks.AIR));
+                    }
+                }
             }
         }
 
-        /* Do liana fix*/
+        /* Do liana fix, works only for basic structures */
         if (liana && method == Method.BASIC) {
             for (int x = 0; x < width; ++x) {
                 for (int z = 0; z < length; ++z) {
@@ -300,13 +337,16 @@ public class Structure extends Blueprint {
             populate(world, posture, seed);
         }
 
+        /* Update universe changes */
         Universe.update();
+
+        /* Free structure memory */
         free();
     }
 
     /* Populate structure with entities */
     private void populate(World world, Posture posture, long seed) {
-        boolean village = isVillage();
+        boolean village = isHostile();
         ArrayList<Class<? extends Entity>> mobs = village ? Mobs.village.select() : Mobs.hostile.select(biome);
         Random random = new Random(seed);
         int size = width * length;
@@ -330,7 +370,7 @@ public class Structure extends Blueprint {
     }
 
     /* Paste structure block in the world */
-    private void pasteBlock(World world, int index, Posture posture, Random random) {
+    private void paste(World world, int index, Posture posture, Random random) {
         int x = getX(index), y = getY(index), z = getZ(index);
         BlockPos worldPos = posture.getWorldPos(x, y, z);
         Block block = Blocks.idToBlock(blocks[index]);
@@ -339,151 +379,19 @@ public class Structure extends Blueprint {
         }
         int metaData = posture.getWorldMeta(block, meta[index]);
         Universe.setBlockState(world, worldPos, Blocks.state(block, metaData));
-        processTile(Universe.getTileEntity(world, worldPos), index, random);
-    }
-
-    /* Process block after spawning */
-    private void processBlock(World world, int index, Posture posture, Random random) {
-        int x = getX(index), y = getY(index), z = getZ(index);
-        if (!Blocks.isVanillaID(blocks[index]) || !Classifier.isBlock(CARDINAL, blocks[index]) || y < lift) {
-            return;
-        }
-        /* Clear soil and overlook around cardinal blocks */
-        double radius = 3;
-        int shift = (int) radius;
-        for (int dx = -shift; dx <= shift; ++dx) {
-            for (int dz = -shift; dz <= shift; ++dz) {
-                for (int dy = 0; dy <= shift * 2; ++dy) {
-                    if (Math.sqrt(dx * dx + dy * dy / 4.0 + dz * dz) <= radius) {
-                        int nx = x + dx, ny = y + dy, nz = z + dz;
-                        BlockPos worldPos = posture.getWorldPos(nx, ny, nz);
-                        int blockID = Blocks.blockID(Universe.getBlockState(world, worldPos));
-                        if (Classifier.isBlock(SOIL, blockID) || Classifier.isBlock(OVERLOOK, blockID)) {
-                            if (nx < 0 || nx >= width || ny < 0 || ny >= height || nz < 0 || nz >= length) {
-                                Universe.setBlockState(world, worldPos, Blocks.state(Blocks.AIR));
-                            } else {
-                                int nIndex = getIndex(nx, ny, nz);
-                                if (skin.get(nIndex)) {
-                                    pasteBlock(world, nIndex, posture, random);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        Tiles.load(Universe.getTileEntity(world, worldPos), tiles[index], random.nextLong());
     }
 
     /* Do block-liana fix for specific position */
     private void lianaFix(World world, BlockPos pos) {
         IBlockState state = Universe.getBlockState(world, pos);
         if (Classifier.isBlock(SOIL, state)) {
-            for (int y = pos.getY() - 1; y >= 0; --y) {
+            for (int y = pos.getY() - 1, count = 0; y >= 0 && count < 16; --y, ++count) {
                 BlockPos nPos = new BlockPos(pos.getX(), y, pos.getZ());
                 if (Classifier.isBlock(OVERLOOK, Universe.getBlockState(world, nPos))) {
                     Universe.setBlockState(world, nPos, state);
                 } else {
                     break;
-                }
-            }
-        }
-    }
-
-    /* Process tile entity */
-    private void processTile(TileEntity tile, int index, Random random) {
-        if (tile == null) {
-            return;
-        }
-        NBTTagCompound tileTag = tiles[index];
-        if (tile instanceof TileEntityChest && Configurator.LOOT_CHANCE >= random.nextDouble()) {
-            ArrayList<ItemStack> forceItems = new ArrayList<ItemStack>();
-            if (Configurator.NATIVE_LOOT && tileTag != null) {
-                NBTTagList items = tileTag.getTagList("Items", Constants.NBT.TAG_COMPOUND);
-                for (int i = 0; i < items.tagCount(); ++i) {
-                    NBTTagCompound stackTag = items.getCompoundTagAt(i);
-                    Item item = Items.ItemByName(stackTag.getString("id"));
-                    byte cnt = items.getCompoundTagAt(i).getByte("Count");
-                    int dmg = items.getCompoundTagAt(i).getShort("Damage");
-                    if (item != null && cnt > 0 && cnt <= Items.itemMaxStack(item) && dmg >= 0 && dmg <= Items.itemMaxMeta(item)) {
-                        forceItems.add(new ItemStack(item, cnt, dmg));
-                    }
-                }
-            }
-            TileEntityChest chest = (TileEntityChest) tile;
-            int minItems = Math.max(0, Math.min(27, Configurator.MIN_CHEST_ITEMS));
-            int maxItems = Math.max(minItems, Math.min(27, Configurator.MAX_CHEST_ITEMS));
-            int itemsCount = minItems + random.nextInt(maxItems - minItems + 1);
-            ArrayList<Integer> permutation = new ArrayList<Integer>();
-            for (int idx = 0; idx < 27; ++idx) {
-                permutation.add(idx);
-            }
-            Collections.shuffle(forceItems, random);
-            Collections.shuffle(permutation, random);
-            for (int idx = 0; idx < itemsCount; ++idx) {
-                Item item = Utils.select(Items.select(), random.nextLong());
-                if (item == null) {
-                    continue;
-                }
-                int stackMeta = random.nextInt(Math.abs(Items.itemMaxMeta(item)) + 1);
-                if (idx < forceItems.size()) {
-                    item = forceItems.get(idx).getItem();
-                    stackMeta = forceItems.get(idx).getItemDamage();
-                }
-                int maxStackSize = Math.max(1, Math.min(Configurator.MAX_CHEST_STACK_SIZE, Items.itemMaxStack(item)));
-                int stackSize = 1 + random.nextInt(maxStackSize);
-                chest.setInventorySlotContents(permutation.get(idx), new ItemStack(item, stackSize, stackMeta));
-            }
-            return;
-        }
-        if (tile instanceof TileEntitySign && tileTag != null) {
-            TileEntitySign sign = (TileEntitySign) tile;
-            for (int i = 0; i < 4; ++i) {
-                try {
-                    ITextComponent tc = ITextComponent.Serializer.fromJsonLenient(tileTag.getString("Text" + (i + 1)));
-                    sign.signText[i] = new TextComponentString(tc.getUnformattedComponentText());
-                } catch (Throwable ignored){}
-            }
-            return;
-        }
-        if (tile instanceof TileEntityDispenser && tileTag != null) {
-            TileEntityDispenser dispenser = (TileEntityDispenser) tile;
-            NBTTagList items = tileTag.getTagList("Items", Constants.NBT.TAG_COMPOUND);
-            for (int i = 0; i < items.tagCount() && i < 9; ++i) {
-                NBTTagCompound stackTag = items.getCompoundTagAt(i);
-                Item item = Item.REGISTRY.getObject(new ResourceLocation(stackTag.getString("id")));
-                byte count = items.getCompoundTagAt(i).getByte("Count");
-                int damage = items.getCompoundTagAt(i).getShort("Damage");
-                if (item != null && count > 0) {
-                    dispenser.setInventorySlotContents(i, new ItemStack(item, count, damage));
-                }
-            }
-            return;
-        }
-        if (tile instanceof TileEntityCommandBlock && tileTag != null) {
-            TileEntityCommandBlock commandBlock = (TileEntityCommandBlock) tile;
-            CommandBlockBaseLogic logic = commandBlock.getCommandBlockLogic();
-            logic.setCommand(tileTag.getString("Command"));
-            if (tileTag.hasKey("CustomName")) {
-                logic.setName(tileTag.getString("CustomName"));
-            }
-            if (tileTag.hasKey("TrackOutput")) {
-                logic.setTrackOutput(tileTag.getBoolean("TrackOutput"));
-            }
-            return;
-        }
-        if (tile instanceof TileEntityMobSpawner) {
-            TileEntityMobSpawner spawner = (TileEntityMobSpawner) tile;
-            MobSpawnerBaseLogic logic = spawner.getSpawnerBaseLogic();
-            Class<? extends Entity> mob = Utils.select(Mobs.hostile.select(biome), random.nextLong());
-            if (mob != null) {
-                logic.setEntityId(Mobs.classToName(mob));
-            }
-            if (tileTag != null && tileTag.hasKey("EntityId")) {
-                String mobName = Pattern.quote(tileTag.getString("EntityId"));
-                Pattern mPattern = Pattern.compile(".*" + Pattern.quote(mobName) + ".*", Pattern.CASE_INSENSITIVE);
-                mob = Utils.select(Configurator.MOB_SPAWNERS_EGGS_ONLY ? Mobs.eggs.select(mPattern) : Mobs.mobs.select(mPattern));
-                if (mob != null) {
-                    logic.setEntityId(Mobs.classToName(mob));
                 }
             }
         }
@@ -558,11 +466,16 @@ public class Structure extends Blueprint {
             posY -= lift;
             posY += Configurator.FORCE_LIFT;
         }
-        return Math.max(0, Math.min(posY, 255));
+        return Math.max(4, Math.min(posY, 255));
     }
 
-    /* Check if the structure is village structure */
-    private boolean isVillage() {
+    /* Get index in melt area relative structure position */
+    private int getMeltIndex(int x, int y, int z) {
+        return getIndex(x, y, z) - getIndex(-MELT_DISTANCE, -MELT_DISTANCE, -MELT_DISTANCE);
+    }
+
+    /* Check structure hostile for players */
+    private boolean isHostile() {
         return fileStructure.getPath().toLowerCase().contains("village");
     }
 

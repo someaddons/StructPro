@@ -10,6 +10,9 @@ import net.minecraft.block.state.IBlockState;
 * CARDINAL - blocks with cardinal influence
 * LIQUID - liquid blocks
 * LIGHT - blocks that emits light
+* BOTTOM - OVERLOOKS + LIQUID
+* GAS - Air, gases, etc.
+* SOP - GAS + LIQUID
 */
 public enum Classifier {
     SOIL (0x00),
@@ -17,7 +20,9 @@ public enum Classifier {
     CARDINAL(0x02),
     LIQUID (0x03),
     LIGHT (0x04),
-    DRY (0x05);
+    BOTTOM(0x05),
+    GAS(0x06),
+    SOP(0x07);
 
     private final int value;
 
@@ -197,10 +202,20 @@ public enum Classifier {
         setBlock(LIGHT, Blocks.BREWING_STAND);
         setBlock(LIGHT, Blocks.DRAGON_EGG);
 
-        /* Dry - combination of liquid and overlook */
+        /* Bottom - combination of liquid and overlook */
         for (int blockID = 0; blockID < 256; ++blockID) {
             if (isBlock(OVERLOOK, blockID) || isBlock(LIQUID, blockID)) {
-                setBlock(DRY, blockID);
+                setBlock(BOTTOM, blockID);
+            }
+        }
+
+        /* Set gas */
+        setBlock(GAS, Blocks.AIR);
+
+        /* SOP - combination of liquid and overlook */
+        for (int blockID = 0; blockID < 256; ++blockID) {
+            if (isBlock(GAS, blockID) || isBlock(LIQUID, blockID)) {
+                setBlock(SOP, blockID);
             }
         }
 

@@ -99,8 +99,12 @@ public class Blueprint {
                         meta[index] = (byte) Blocks.getMeta(state);
                         TileEntity tile = Universe.getTileEntity(world, new BlockPos(x, y, z));
                         if (tile != null) {
+                            tiles[index] = new NBTTagCompound();
                             try {
                                 tile.writeToNBT(tiles[index]);
+                                tiles[index].setInteger("x", ix);
+                                tiles[index].setInteger("y", iy);
+                                tiles[index].setInteger("z", iz);
                             } catch (Throwable ignored) {}
                         }
                     } else {
@@ -176,7 +180,6 @@ public class Blueprint {
         }
         tag.setByteArray("Blocks", blocksID);
         tag.setByteArray("Data", meta);
-        tiles = new NBTTagCompound[width * height * length];
         NBTTagList tileEntities = new NBTTagList();
         for (NBTTagCompound tile : tiles) {
             if (tile != null) {

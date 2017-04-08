@@ -1,10 +1,9 @@
 package com.ternsip.structpro.Universe.Items;
 
 import com.ternsip.structpro.Logic.Configurator;
-import com.ternsip.structpro.Utils.Selector;
 import com.ternsip.structpro.Utils.Report;
+import com.ternsip.structpro.Utils.Selector;
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.GameData;
 
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ import java.util.regex.PatternSyntaxException;
 public class Items extends net.minecraft.init.Items {
 
     /* All possible items */
-    private static final ArrayList<Item> items = new ArrayList<Item>() {{
+    public static final Selector<Item> items = new Selector<Item>() {{
         final Selector<Item> names = new Selector<Item>() {{
             for (Item item : GameData.getItemRegistry().getValues()) {
                 if (item != null && item.getRegistryName() != null) {
@@ -38,13 +37,12 @@ public class Items extends net.minecraft.init.Items {
                 }
             }
         }};
-        addAll(acceptable);
+        for (Item item: acceptable) {
+            if (item.getRegistryName() != null) {
+                add(item.getRegistryName().getResourcePath(), item);
+            }
+        }
     }};
-
-    /* Get item by name */
-    public static Item ItemByName(String name) {
-        return Item.REGISTRY.getObject(new ResourceLocation(name));
-    }
 
     /* Get item max damage */
     public static int itemMaxMeta(Item item) {
@@ -54,11 +52,6 @@ public class Items extends net.minecraft.init.Items {
     /* Get item max stack size */
     public static int itemMaxStack(Item item) {
         return item.getItemStackLimit();
-    }
-
-    /* Select all items */
-    public static ArrayList<Item> select() {
-        return items;
     }
 
 }
