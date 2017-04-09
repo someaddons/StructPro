@@ -83,8 +83,8 @@ public enum Biome {
         for (Biome biome : Biome.values()) {
             double count = 0, frequency = 0;
             for (Block block : bioBlocks.get(biome)) {
-                count += counts[Blocks.blockID(block)];
-                frequency += frequencies[Blocks.blockID(block)];
+                count += counts[Blocks.getID(block)];
+                frequency += frequencies[Blocks.getID(block)];
             }
             bioCounts.put(biome, count);
             bioFrequencies.put(biome, frequency);

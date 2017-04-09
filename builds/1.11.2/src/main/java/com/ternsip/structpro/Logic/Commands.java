@@ -21,7 +21,7 @@ import java.util.Random;
 public class Commands implements ICommand {
 
     private static final String name = "structpro";
-    private static final String usage = "/structpro <help|paste|save>";
+    private static final String usage = "/structpro <help|paste|save|undo>";
     private static final ArrayList<String> aliases = new ArrayList<String>(){{add("structpro");add("spro");}};
 
     @Override
@@ -30,13 +30,13 @@ public class Commands implements ICommand {
     }
 
     @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        return null;
+    public boolean isUsernameIndex(String[] args, int index) {
+        return false;
     }
 
     @Override
-    public boolean isUsernameIndex(String[] args, int index) {
-        return false;
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+        return null;
     }
 
     @Override
@@ -101,6 +101,9 @@ public class Commands implements ICommand {
             int height = vars.get("height", 64);
             int length = vars.get("length", 64);
             feedback(sender, Evaluator.cmdSave(sender.getEntityWorld(), name, posX, posY, posZ, width, height, length));
+        }
+        if (cmd.equalsIgnoreCase("undo")) {
+            feedback(sender, Evaluator.cmdUndo());
         }
         if (cmd.equalsIgnoreCase("help")) {
             feedback(sender, Evaluator.cmdHelp());

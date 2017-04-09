@@ -35,12 +35,12 @@ public enum Classifier {
 
     /* Check if block of specific class by id */
     public static boolean isBlock(Classifier type, int blockID) {
-        return Blocks.isVanillaID(blockID) && blocks[type.value][blockID];
+        return Blocks.isVanilla(blockID) && blocks[type.value][blockID];
     }
 
     /* Check if block of specific class by block */
     public static boolean isBlock(Classifier type, Block block) {
-        return isBlock(type, Blocks.blockID(block));
+        return isBlock(type, Blocks.getID(block));
     }
 
     /* Check if block of specific class by state */
@@ -50,12 +50,12 @@ public enum Classifier {
 
     /* Set block class */
     private static void setBlock(Classifier type, Block block) {
-        setBlock(type, Blocks.blockID(block));
+        setBlock(type, Blocks.getID(block));
     }
 
     /* Set block class */
     private static void setBlock(Classifier type, int blockID) {
-        if (Blocks.isVanillaID(blockID)) {
+        if (Blocks.isVanilla(blockID)) {
             blocks[type.value][blockID] = true;
         }
     }

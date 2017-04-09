@@ -6,16 +6,15 @@ import net.minecraft.util.math.BlockPos;
 
 /* Reflects information about cuboid stereo-metric state in the world. */
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class Posture {
+public class Posture extends Volume {
 
     private int posX, posY, posZ;
     private int rotateX, rotateY, rotateZ;
     private boolean flipX, flipY, flipZ;
-    private int width, height, length;
     private int sizeX, sizeY, sizeZ;
     private int endX, endY, endZ;
 
-    public Posture(int posX, int posY, int posZ,
+    Posture(int posX, int posY, int posZ,
                    int rotateX, int rotateY, int rotateZ,
                    boolean flipX, boolean flipY, boolean flipZ,
                    int width, int height, int length) {
@@ -31,18 +30,9 @@ public class Posture {
         this.width = width;
         this.height = height;
         this.length = length;
-        update();
-    }
-
-    public void move(int posX, int posY, int posZ) {
-        this.posX = posX;
-        this.posY = posY;
-        this.posZ = posZ;
-        update();
-    }
-
-    /* Internal changes trigger */
-    private void update() {
+        if (width <= 0 || height <= 0 || length <= 0) {
+            throw new IllegalArgumentException("Bad dimensions: [W=" + width + ";H=" + height + ";L=" + length + "]");
+        }
         this.sizeX = width;
         this.sizeY = height;
         this.sizeZ = length;
@@ -58,6 +48,11 @@ public class Posture {
         this.endZ = posZ + sizeZ - 1;
     }
 
+    /* Get world position of structure index block */
+    BlockPos getWorldPos(int index) {
+        return getWorldPos(getX(index), getY(index), getZ(index));
+    }
+
     /* Get world position of structure index(x,y,z) block */
     BlockPos getWorldPos(int x, int y, int z) {
         int wx = flipX ? width - x - 1 : x;
@@ -71,7 +66,6 @@ public class Posture {
         }
         return new BlockPos(wx + posX, wy + posY, wz + posZ);
     }
-
 
     /* Get posture position of world (wx,wy,wz) block*/
     BlockPos getPosturePos(int wx, int wy, int wz) {
@@ -141,6 +135,30 @@ public class Posture {
                 .post("POS", "[X=" + posX + ";Y=" + posY + ";Z=" + posZ + "]")
                 .post("ROTATE", "[X=" + rotateX + ";Y=" + rotateY + ";Z=" + rotateZ + "]")
                 .post("FLIP", "[X=" + flipX + ";Y=" + flipY + ";Z=" + flipZ + "]");
+    }
+
+    public int getRotateX() {
+        return rotateX;
+    }
+
+    public int getRotateY() {
+        return rotateY;
+    }
+
+    public int getRotateZ() {
+        return rotateZ;
+    }
+
+    public boolean isFlipX() {
+        return flipX;
+    }
+
+    public boolean isFlipY() {
+        return flipY;
+    }
+
+    public boolean isFlipZ() {
+        return flipZ;
     }
 
     public int getPosX() {

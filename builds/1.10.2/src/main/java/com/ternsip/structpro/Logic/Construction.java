@@ -99,14 +99,14 @@ class Construction {
         Random random = new Random(seed);
         int rotX = 0, rotY = random.nextInt() % 4, rotZ = 0;
         boolean flipX = random.nextBoolean(), flipY = false, flipZ = random.nextBoolean();
-        Posture posture = new Posture(worldX, 64, worldZ, rotX, rotY, rotZ, flipX, flipY, flipZ, candidate.getWidth(), candidate.getHeight(), candidate.getLength());
+        Posture posture = candidate.getPosture(worldX, 64, worldZ, rotX, rotY, rotZ, flipX, flipY, flipZ);
         candidate.matchBiome(Biome.valueOf(Universe.getBiome(world, new BlockPos(posture.getPosX(), posture.getPosY(), posture.getPosZ()))));
         Region surface = new Region(world, posture.getPosX(), posture.getPosZ(), posture.getSizeX(), posture.getSizeZ(), OVERLOOK);
         Region bottom = new Region(world, posture.getPosX(), posture.getPosZ(), posture.getSizeX(), posture.getSizeZ(), BOTTOM);
         candidate.matchAccuracy(surface, bottom);
         int worldY = candidate.getBestY(surface, bottom, random.nextLong());
-        posture.move(worldX, worldY, worldZ);
-        return new Projection(world, candidate, posture, true, random.nextLong());
+        posture = candidate.getPosture(worldX, worldY, worldZ, rotX, rotY, rotZ, flipX, flipY, flipZ);
+        return new Projection(world, candidate, posture, random.nextLong());
     }
 
     /* Get random for world chunk */

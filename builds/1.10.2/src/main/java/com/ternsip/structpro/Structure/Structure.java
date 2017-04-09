@@ -8,6 +8,7 @@ import com.ternsip.structpro.Universe.Entities.Mobs;
 import com.ternsip.structpro.Universe.Entities.Tiles;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
+import javafx.geometry.Pos;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -28,13 +29,13 @@ import static com.ternsip.structpro.Universe.Blocks.Classifier.*;
 public class Structure extends Blueprint {
 
     /* Structure version */
-    private static final int VERSION = 108;
+    private static final int VERSION = 109;
 
     /* Directory for dump files */
     private static final File DUMP_DIR = new File("sprodump", "structures");
 
     /* Melting distance measured in blocks */
-    private static final int MELT_DISTANCE = 5;
+    private static final int MELT = 5;
 
     private File fileStructure;
     private File fileFlag;
@@ -213,7 +214,7 @@ public class Structure extends Blueprint {
             }
         }
 
-        /* Shed liana all under skin positions */
+        /* Shed under skin positions */
         for (int index = 0; index < width * height * length; ++index) {
             if (skin.get(index)) {
                 int x = getX(index), y = getY(index), z = getZ(index);
@@ -235,7 +236,8 @@ public class Structure extends Blueprint {
     private BitSet getMelt() {
 
         /* Create melt using cardinal blocks */
-        BitSet melt = new BitSet(getMeltIndex(width + MELT_DISTANCE - 1, height + MELT_DISTANCE - 1, length + MELT_DISTANCE - 1) + 1);
+        Volume meltVolume = getMeltVolume();
+        BitSet melt = new BitSet(meltVolume.getVolume());
 
         /* Skip underwater melting*/
         if (method == Method.UNDERWATER || method == Method.AFLOAT) {
@@ -256,16 +258,16 @@ public class Structure extends Blueprint {
                             for (int dy = 0; dy <= shift * 2; ++dy) {
                                 if (Math.sqrt(dx * dx + dy * dy / 4.0 + dz * dz) <= radius) {
                                     int nx = x + dx, ny = y + dy, nz = z + dz;
-                                    if (    nx < -MELT_DISTANCE || nx >= width + MELT_DISTANCE ||
-                                            ny < -MELT_DISTANCE || ny >= height + MELT_DISTANCE ||
-                                            nz < -MELT_DISTANCE || nz >= length + MELT_DISTANCE) {
+                                    if (    nx < -MELT || nx >= width + MELT ||
+                                            ny < -MELT || ny >= height + MELT ||
+                                            nz < -MELT || nz >= length + MELT) {
                                         continue;
                                     }
                                     if (    nx < 0 || nx >= width ||
                                             ny < 0 || ny >= height ||
                                             nz < 0 || nz >= length ||
                                             skin.get(getIndex(nx, ny, nz))) {
-                                        melt.set(getMeltIndex(nx, ny, nz), true);
+                                        melt.set(meltVolume.getIndex(nx + MELT, ny + MELT, nz + MELT), true);
                                     }
                                 }
                             }
@@ -285,11 +287,12 @@ public class Structure extends Blueprint {
                 .post("METHOD", method.name)
                 .post("BIOME", biome.name)
                 .post("LIFT", String.valueOf(lift))
-                .post("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]");
+                .post(super.report());
     }
 
     /* Project structure to the world */
-    void project(World world, Posture posture, boolean liana, long seed) throws IOException {
+    @Override
+    void project(World world, Posture posture, long seed) throws IOException {
 
         /* Prepare tiles */
         Random random = new Random(seed);
@@ -298,35 +301,50 @@ public class Structure extends Blueprint {
         loadData();
 
         /* Iterate over volume and paste blocks */
-        for (int index = 0; index < width * height * length; ++index) {
+        for (int index = 0; index < posture.getVolume(); ++index) {
             if (!skin.get(index)) {
-                paste(world, index, posture, random);
+                BlockPos worldPos = posture.getWorldPos(index);
+                Block block = Blocks.getBlockVanilla(blocks[index]);
+                if (block == null) {
+                    return;
+                }
+                int metaData = posture.getWorldMeta(block, meta[index]);
+                Universe.setBlockState(world, worldPos, Blocks.state(block, metaData));
+                Tiles.load(Universe.getTileEntity(world, worldPos), tiles[index], random.nextLong());
             }
         }
 
         /* Iterate over volume and melt area */
-        for (int x = -MELT_DISTANCE; x < width + MELT_DISTANCE; ++x) {
-            for (int z = -MELT_DISTANCE; z < length + MELT_DISTANCE; ++z) {
-                for (int y = -MELT_DISTANCE; y < height + MELT_DISTANCE; ++y) {
-                    if (!melt.get(getMeltIndex(x, y, z))) {
-                        continue;
-                    }
-                    BlockPos worldPos = posture.getWorldPos(x, y, z);
-                    IBlockState state = Universe.getBlockState(world, worldPos);
-                    if (Classifier.isBlock(SOIL, state) || Classifier.isBlock(OVERLOOK, state)) {
-                        Universe.setBlockState(world, worldPos, Blocks.state(Blocks.AIR));
-                    }
-                }
+        Posture meltPosture = getMeltPosture(posture);
+        for (int index = 0; index < meltPosture.getVolume(); ++index) {
+            if (!melt.get(index)) {
+                continue;
+            }
+            BlockPos worldPos = meltPosture.getWorldPos(index);
+            IBlockState state = Universe.getBlockState(world, worldPos);
+            if (Classifier.isBlock(SOIL, state) || Classifier.isBlock(OVERLOOK, state)) {
+                Universe.setBlockState(world, worldPos, Blocks.state(Blocks.AIR));
             }
         }
 
         /* Do liana fix, works only for basic structures */
-        if (liana && method == Method.BASIC) {
+        if (method == Method.BASIC) {
             for (int x = 0; x < width; ++x) {
                 for (int z = 0; z < length; ++z) {
                     int index = getIndex(x, 0, z);
                     if (!skin.get(index)) {
-                        lianaFix(world, posture.getWorldPos(x, 0, z));
+                        BlockPos pos = posture.getWorldPos(x, 0, z);
+                        IBlockState state = Universe.getBlockState(world, pos);
+                        if (Classifier.isBlock(SOIL, state)) {
+                            for (int y = pos.getY() - 1, count = 0; y >= 0 && count < 16; --y, ++count) {
+                                BlockPos nPos = new BlockPos(pos.getX(), y, pos.getZ());
+                                if (Classifier.isBlock(OVERLOOK, Universe.getBlockState(world, nPos))) {
+                                    Universe.setBlockState(world, nPos, state);
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -366,34 +384,6 @@ public class Structure extends Blueprint {
                 Universe.spawnEntity(world, mob, blockPosFloor);
             }
             --count;
-        }
-    }
-
-    /* Paste structure block in the world */
-    private void paste(World world, int index, Posture posture, Random random) {
-        int x = getX(index), y = getY(index), z = getZ(index);
-        BlockPos worldPos = posture.getWorldPos(x, y, z);
-        Block block = Blocks.idToBlock(blocks[index]);
-        if (block == null) {
-            return;
-        }
-        int metaData = posture.getWorldMeta(block, meta[index]);
-        Universe.setBlockState(world, worldPos, Blocks.state(block, metaData));
-        Tiles.load(Universe.getTileEntity(world, worldPos), tiles[index], random.nextLong());
-    }
-
-    /* Do block-liana fix for specific position */
-    private void lianaFix(World world, BlockPos pos) {
-        IBlockState state = Universe.getBlockState(world, pos);
-        if (Classifier.isBlock(SOIL, state)) {
-            for (int y = pos.getY() - 1, count = 0; y >= 0 && count < 16; --y, ++count) {
-                BlockPos nPos = new BlockPos(pos.getX(), y, pos.getZ());
-                if (Classifier.isBlock(OVERLOOK, Universe.getBlockState(world, nPos))) {
-                    Universe.setBlockState(world, nPos, state);
-                } else {
-                    break;
-                }
-            }
         }
     }
 
@@ -469,9 +459,16 @@ public class Structure extends Blueprint {
         return Math.max(4, Math.min(posY, 255));
     }
 
-    /* Get index in melt area relative structure position */
-    private int getMeltIndex(int x, int y, int z) {
-        return getIndex(x, y, z) - getIndex(-MELT_DISTANCE, -MELT_DISTANCE, -MELT_DISTANCE);
+    /* Get melt volume */
+    private Volume getMeltVolume() {
+        return new Volume(width + 2 * MELT, height + 2 * MELT, length + 2 * MELT);
+    }
+
+    /* Get melt posture */
+    public Posture getMeltPosture(Posture posture) {
+        return getMeltVolume().getPosture(posture.getPosX() - MELT, posture.getPosY() - MELT, posture.getPosZ() - MELT,
+                posture.getRotateX(), posture.getRotateY(), posture.getRotateZ(),
+                posture.isFlipX(), posture.isFlipY(), posture.isFlipZ());
     }
 
     /* Check structure hostile for players */

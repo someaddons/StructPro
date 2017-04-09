@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 /* Tile entities controller */
 public class Tiles {
 
+    /* Load tile entity data from NBT tag */
     public static void load(TileEntity tile, NBTTagCompound tag, long seed) {
         if (tile == null) {
             return;
@@ -36,19 +37,20 @@ public class Tiles {
         if (tile instanceof TileEntityMobSpawner) {
             load((TileEntityMobSpawner)tile, tag, seed);
         }
-        if (tile instanceof TileEntitySign && tag != null) {
+        if (tile instanceof TileEntitySign) {
             load((TileEntitySign)tile, tag, seed);
             return;
         }
-        if (tile instanceof TileEntityCommandBlock && tag != null) {
+        if (tile instanceof TileEntityCommandBlock) {
             load((TileEntityCommandBlock)tile, tag, seed);
             return;
         }
-        if (tile instanceof IInventory && tag != null) {
+        if (tile instanceof IInventory) {
             load((IInventory)tile, tag, seed);
         }
     }
 
+    /* Load chest data from NBT tag */
     private static void load(TileEntityChest chest, NBTTagCompound tag, long seed) {
         Random random = new Random(seed);
         if (Configurator.LOOT_CHANCE < random.nextDouble()) {
@@ -93,6 +95,7 @@ public class Tiles {
         }
     }
 
+    /* Load mob-spawner data from NBT tag */
     private static void load(TileEntityMobSpawner spawner, NBTTagCompound tag, long seed) {
         Random random = new Random(seed);
         MobSpawnerBaseLogic logic = spawner.getSpawnerBaseLogic();
@@ -111,7 +114,11 @@ public class Tiles {
         }
     }
 
+    /* Load sign data from NBT tag */
     private static void load(TileEntitySign sign, NBTTagCompound tag, long seed) {
+        if (tag == null) {
+            return;
+        }
         Random random = new Random(seed);
         for (int i = 0; i < 4; ++i) {
             try {
@@ -122,8 +129,9 @@ public class Tiles {
         }
     }
 
+    /* Load inventory data from NBT tag */
     private static void load(IInventory inventory, NBTTagCompound tag, long seed) {
-        if (!Configurator.NATIVE_LOOT) {
+        if (tag == null || !Configurator.NATIVE_LOOT) {
             return;
         }
         Random random = new Random(seed);
@@ -139,7 +147,11 @@ public class Tiles {
         }
     }
 
+    /* Load command data from NBT tag */
     private static void load(TileEntityCommandBlock commandBlock, NBTTagCompound tag, long seed) {
+        if (tag == null) {
+            return;
+        }
         Random random = new Random(seed);
         CommandBlockBaseLogic logic = commandBlock.getCommandBlockLogic();
         logic.setCommand(tag.getString("Command"));

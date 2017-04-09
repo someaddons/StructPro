@@ -1,42 +1,41 @@
 package com.ternsip.structpro.Structure;
 
 import com.ternsip.structpro.Utils.Report;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 
-/* Construct projection that determines structure state in the world */
+/* Construct projection that determines blueprint state in the world */
 public class Projection {
 
     private World world;
-    private Structure structure;
+    private Blueprint blueprint;
     private Posture posture;
-    private boolean liana;
     private long seed;
 
-    public Projection(World world, Structure structure, Posture posture, boolean liana, long seed) {
+    public Projection(World world, Blueprint blueprint, Posture posture, long seed) {
         this.world = world;
-        this.structure = structure;
+        this.blueprint = blueprint;
         this.posture = posture;
-        this.liana = liana;
         this.seed = seed;
     }
 
     /* Generate projection report */
     public Report report() {
-        return structure.report()
+        return blueprint.report()
                 .post(posture.report())
                 .post("WORLD", world.getWorldInfo().getWorldName())
                 .post("DIMENSION", String.valueOf(world.provider.getDimension()));
     }
 
-    /* Project structure into the world according it posture and flags */
+    /* Project blueprint into the world according it posture and flags */
     public Report project() {
         Report result = report();
         long startTime = System.currentTimeMillis();
         try {
-            structure.project(world, posture, liana, seed);
+            blueprint.project(world, posture, seed);
             result.pref("PASTED", "SUCCESS");
         } catch (IOException ioe) {
             result.pref("NOT PASTED", ioe.getMessage());
@@ -44,5 +43,16 @@ public class Projection {
         long spentTime = (System.currentTimeMillis() - startTime);
         return result.post("SPENT TIME", new DecimalFormat("###0.00").format(spentTime / 1000.0) + "s");
     }
-    
+
+    public Blueprint getBlueprint() {
+        return blueprint;
+    }
+
+    public Posture getPosture() {
+        return posture;
+    }
+
+    public World getWorld() {
+        return world;
+    }
 }

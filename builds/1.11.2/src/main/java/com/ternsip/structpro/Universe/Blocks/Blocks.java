@@ -59,18 +59,23 @@ public class Blocks extends net.minecraft.init.Blocks {
     }}.toArray(new Block[256]);
 
     /* Check if the block have vanilla index */
-    public static boolean isVanillaID(int blockID) {
+    public static boolean isVanilla(int blockID) {
         return blockID >= 0 && blockID < 256;
     }
 
     /* Block id from block*/
-    public static int blockID(Block block) {
+    public static int getID(Block block) {
         return Block.getIdFromBlock(block);
     }
 
     /* Block from block id */
-    public static Block idToBlock(int blockID) {
-        return isVanillaID(blockID) ? blocks[blockID] : null;
+    public static Block getBlockVanilla(int blockID) {
+        return isVanilla(blockID) ? blocks[blockID] : null;
+    }
+
+    /* Block from block id */
+    public static Block getBlock(int blockID) {
+        return Block.getBlockById(blockID);
     }
 
     /* Block from block state */
@@ -79,8 +84,8 @@ public class Blocks extends net.minecraft.init.Blocks {
     }
 
     /* Block id from block state */
-    public static int blockID(IBlockState block) {
-        return blockID(getBlock(block));
+    public static int getID(IBlockState block) {
+        return getID(getBlock(block));
     }
 
     /* Block state from block */
