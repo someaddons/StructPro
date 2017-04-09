@@ -181,13 +181,14 @@ public class Blueprint extends Volume {
                     int index = getIndex(ix, iy, iz);
                     BlockPos worldPos = posture.getWorldPos(ix, iy, iz);
                     Universe.setBlockState(world, worldPos, Blocks.state(Blocks.getBlock(blocks[index]), meta[index]));
-                    TileEntity tile = Universe.getTileEntity(world, worldPos);
-                    if (tile != null && tiles[index] != null) {
+                    Universe.removeTileEntity(world, worldPos);
+                    if (tiles[index] != null) {
                         NBTTagCompound tag = tiles[index].copy();
                         tag.setInteger("x", worldPos.getX());
                         tag.setInteger("y", worldPos.getY());
                         tag.setInteger("z", worldPos.getZ());
-                        tile.readFromNBT(tag);
+                        TileEntity entity = TileEntity.create(world, tag);
+                        Universe.setTileEntity(world, worldPos, entity);
                     }
                 }
             }

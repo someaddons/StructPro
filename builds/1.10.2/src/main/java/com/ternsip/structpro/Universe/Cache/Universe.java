@@ -90,6 +90,11 @@ public class Universe {
         return world.getTileEntity(blockPos);
     }
 
+    /* Set tile entity from the world */
+    public static void setTileEntity(World world, BlockPos blockPos, TileEntity tileEntity) {
+        world.setTileEntity(blockPos, tileEntity);
+    }
+
     /* Get height in the world */
     public static int getHeight(World world, BlockPos blockPos, Classifier classifier) {
         return getChunkster(world, blockPos).getHeight(classifier, blockPos);

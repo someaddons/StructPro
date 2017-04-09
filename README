@@ -3,7 +3,7 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 2.0
+Latest mod version: 2.2
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
 Repository: https://github.com/ternsip/StructPro
@@ -201,6 +201,11 @@ Fix major bug command /structpro save not saves tile entities
 Fix bedrock replace bug
 Small performance increasment
 Improve some default configurations
+Version 2.1
+Fix major bug appeared in version 2.0 - Melting space around structure was incorrect
+Add undo command
+Version 2.2
+Fix bug that don't let undo restore tile entities from external mods
 
 Known bugs
 ----------------------------------------------
