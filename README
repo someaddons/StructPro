@@ -3,7 +3,7 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 2.2
+Latest mod version: 2.3 (extremely recommended)
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
 Repository: https://github.com/ternsip/StructPro
@@ -124,6 +124,8 @@ Notice: To allow items from other mods set ONLY_VANILLA_LOOT = false
 
 Commands
 --------------------------------
+Aliases: /structpro or /spro
+
 Pasting schematic in the world. Each field may not be specified. Available only for creative users.
 /structpro paste
 name = Select random schematic which path contains this name (default = "")
@@ -147,6 +149,9 @@ posZ = Position Z in the world (default = Player position Z)
 width = Schematic width
 height = Schematic height
 length = Schematic length
+
+Restore previous world data. Also works for village paste. Restores blocks for external mods. May be unsafe.
+/structpro undo
 
 FAQ
 --------------------------------
@@ -206,11 +211,18 @@ Fix major bug appeared in version 2.0 - Melting space around structure was incor
 Add undo command
 Version 2.2
 Fix bug that don't let undo restore tile entities from external mods
+Version 2.3 (release)
+Extremely improve post tick-performance that prevents ugly spikes after spawning
+Fixed super-major bug appeared in 2.2 - structure stop generates when block is null
+Rotation metadata fully fixed
+Fix undo liana under basic buildings
+Add commands sound-effects
 
 Known bugs
 ----------------------------------------------
-Sometimes spawned structures have incorrect rotation metadata: Portals, Electrical Rails
-Sometimes creative command "paste" may produce structures with invisible mobs
+Sometimes spawned structures break nether-portals
+Sometimes creative command "paste" may produce structures with temporary-invisible mobs
+Falled-down sand/gravel can not be undone with /spro undo
 
 Suggestions
 ----------------------------------------------

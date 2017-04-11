@@ -5,6 +5,8 @@ import com.ternsip.structpro.Universe.Entities.Mobs;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -113,6 +115,11 @@ public class Universe {
             entry.getValue().update();
         }
         unload();
+    }
+
+    public static void sound(World world, BlockPos pos, SoundEvent event, SoundCategory category, float volume) {
+        Random random = new Random(System.currentTimeMillis());
+        world.playSound(null, pos, event, category, 1.0F, 2.6F + (random.nextFloat() - random.nextFloat()) * 0.8F);
     }
 
     /* Get dimension name of the world */

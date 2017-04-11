@@ -8,7 +8,6 @@ import com.ternsip.structpro.Universe.Entities.Mobs;
 import com.ternsip.structpro.Universe.Entities.Tiles;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
-import javafx.geometry.Pos;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -306,7 +305,7 @@ public class Structure extends Blueprint {
                 BlockPos worldPos = posture.getWorldPos(index);
                 Block block = Blocks.getBlockVanilla(blocks[index]);
                 if (block == null) {
-                    return;
+                    continue;
                 }
                 int metaData = posture.getWorldMeta(block, meta[index]);
                 Universe.setBlockState(world, worldPos, Blocks.state(block, metaData));
@@ -336,9 +335,9 @@ public class Structure extends Blueprint {
                         BlockPos pos = posture.getWorldPos(x, 0, z);
                         IBlockState state = Universe.getBlockState(world, pos);
                         if (Classifier.isBlock(SOIL, state)) {
-                            for (int y = pos.getY() - 1, count = 0; y >= 0 && count < 16; --y, ++count) {
+                            for (int y = pos.getY() - 1, count = 0; y >= 0 && count < MELT; --y, ++count) {
                                 BlockPos nPos = new BlockPos(pos.getX(), y, pos.getZ());
-                                if (Classifier.isBlock(OVERLOOK, Universe.getBlockState(world, nPos))) {
+                                if (Classifier.isBlock(HEAT_RAY, Universe.getBlockState(world, nPos))) {
                                     Universe.setBlockState(world, nPos, state);
                                 } else {
                                     break;

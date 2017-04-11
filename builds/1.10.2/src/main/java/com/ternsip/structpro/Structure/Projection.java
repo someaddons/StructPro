@@ -1,7 +1,6 @@
 package com.ternsip.structpro.Structure;
 
 import com.ternsip.structpro.Utils.Report;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.io.IOException;

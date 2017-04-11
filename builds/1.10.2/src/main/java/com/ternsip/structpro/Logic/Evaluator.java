@@ -4,6 +4,8 @@ import com.ternsip.structpro.Structure.*;
 import com.ternsip.structpro.Universe.Cache.Universe;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -65,6 +67,7 @@ class Evaluator {
             saveUndo(projection);
             Report report = projection.project();
             report.print();
+            Universe.sound(world, new BlockPos(posX, posY, posZ), SoundEvents.BLOCK_GLASS_PLACE, SoundCategory.BLOCKS, 1.0f);
             return report.toString();
         }
     }
@@ -85,6 +88,7 @@ class Evaluator {
             report.post("NOT SAVED", ioe.getMessage());
         }
         report.print();
+        Universe.sound(world, new BlockPos(posX, posY, posZ), SoundEvents.BLOCK_ENDERCHEST_CLOSE, SoundCategory.BLOCKS, 0.5f);
         return report.toString();
     }
 
@@ -107,6 +111,8 @@ class Evaluator {
         }
         for (Projection projection : undo) {
             projection.project().print();
+            Posture pst = projection.getPosture();
+            Universe.sound(projection.getWorld(), new BlockPos(pst.getPosX(), pst.getPosY(), pst.getPosZ()), SoundEvents.ENTITY_ENDERMEN_TELEPORT, SoundCategory.HOSTILE, 1.0f);
         }
         undo.clear();
         return "Undo done";

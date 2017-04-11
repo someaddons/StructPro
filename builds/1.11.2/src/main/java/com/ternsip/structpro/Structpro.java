@@ -20,7 +20,7 @@ public class Structpro {
 
     public static final String MODID = "structpro";
     public static final String MODNAME = "StructPro";
-    public static final String VERSION = "2.2";
+    public static final String VERSION = "2.3";
     public static final String AUTHOR = "Ternsip";
 
     @Mod.EventHandler

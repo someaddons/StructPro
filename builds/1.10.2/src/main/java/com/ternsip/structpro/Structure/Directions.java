@@ -26,8 +26,8 @@ class Directions {
     private static final Map<BlockType, Integer> masks = new HashMap<BlockType, Integer>();
 
     public enum BlockType {
-        LOG, DISPENSER, BED, RAIL_NORMAL, RAIL_CURVE, RAIL_ASC, RAIL_POWERED, RAIL_POWERED_ASC, TORCH, STAIR, CHEST, SIGNPOST,
-        DOOR, LEVER, BUTTON, REDSTONE_REPEATER, TRAPDOOR, VINE, SKULL, ANVIL,
+        LOG, BED, RAIL_NORMAL, RAIL_CURVE, RAIL_ASC, RAIL_POWERED, RAIL_POWERED_ASC, TORCH, STAIR, CHEST, SIGNPOST,
+        DOOR, LEVER, BUTTON, REDSTONE_REPEATER, TRAPDOOR, VINE, ANVIL,
         MUSHROOM, MUSHROOM_CAP_CORNER, MUSHROOM_CAP_SIDE, IDLE
     }
 
@@ -44,7 +44,16 @@ class Directions {
         if (block instanceof BlockStairs) {
             return BlockType.STAIR;
         }
-        if (block instanceof BlockChest || block instanceof BlockEnderChest || block instanceof BlockFurnace || block instanceof BlockLadder || Block.getIdFromBlock(block) == Block.getIdFromBlock(Blocks.WALL_SIGN)) {
+        if (    block instanceof BlockChest ||
+                block instanceof BlockEnderChest ||
+                block instanceof BlockFurnace ||
+                block instanceof BlockLadder ||
+                Block.getIdFromBlock(block) == Block.getIdFromBlock(Blocks.WALL_SIGN) ||
+                block instanceof BlockSkull ||
+                block instanceof BlockDispenser ||
+                block instanceof BlockPistonBase ||
+                block instanceof BlockPistonExtension ||
+                block instanceof BlockHopper) {
             return BlockType.CHEST;
         }
         if (Block.getIdFromBlock(block) == Block.getIdFromBlock(Blocks.STANDING_SIGN)) {
@@ -65,17 +74,11 @@ class Directions {
         if (block instanceof BlockVine) {
             return BlockType.VINE;
         }
-        if (block instanceof BlockSkull) {
-            return BlockType.SKULL;
-        }
         if (block instanceof BlockAnvil) {
             return BlockType.ANVIL;
         }
         if (block instanceof BlockLog) {
             return BlockType.LOG;
-        }
-        if (block instanceof BlockDispenser || block instanceof BlockPistonBase || block instanceof BlockPistonExtension || block instanceof BlockHopper) {
-            return BlockType.DISPENSER;
         }
         if (block instanceof BlockTorch) {
             return BlockType.TORCH;
@@ -122,169 +125,156 @@ class Directions {
         for (Map.Entry<Integer, Integer> entry : metaToDir.entrySet()) {
             dirToMeta.put(entry.getValue(), entry.getKey());
         }
+        int[] from = {WEST, EAST, NORTH, SOUTH, UP, DOWN};
+        int[] to = {EAST, WEST, SOUTH, NORTH, DOWN, UP};
+        for (int k = 0; k < from.length; ++k) {
+            if (!dirToMeta.containsKey(from[k]) && dirToMeta.containsKey(to[k])) {
+                dirToMeta.put(from[k], dirToMeta.get(to[k]));
+            }
+        }
         metaToDirection.put(blockType, metaToDir);
         directionToMeta.put(blockType, dirToMeta);
         masks.put(blockType, mask);
     }
 
     static {
-        HashMap<Integer, Integer> metaToDir;
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, UP);
-        metaToDir.put(0x4, EAST);
-        metaToDir.put(0x8, SOUTH);
-        addMappings(metaToDir, BlockType.LOG, 0xC);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, UP);
+            put(0x4, EAST);
+            put(0x8, SOUTH);
+        }}, BlockType.LOG, 0xC);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, DOWN);
-        metaToDir.put(0x1, UP);
-        metaToDir.put(0x2, NORTH);
-        metaToDir.put(0x3, SOUTH);
-        metaToDir.put(0x4, WEST);
-        metaToDir.put(0x5, EAST);
-        addMappings(metaToDir, BlockType.CHEST, 0x7);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, DOWN);
+            put(0x1, UP);
+            put(0x2, NORTH);
+            put(0x3, SOUTH);
+            put(0x4, WEST);
+            put(0x5, EAST);
+        }}, BlockType.CHEST, 0x7);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, DOWN);
-        metaToDir.put(0x1, UP);
-        metaToDir.put(0x2, NORTH);
-        metaToDir.put(0x3, SOUTH);
-        metaToDir.put(0x4, WEST);
-        metaToDir.put(0x5, EAST);
-        addMappings(metaToDir, BlockType.SKULL, 0x7);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, SOUTH);
+            put(0x1, NORTH);
+            put(0x2, EAST);
+            put(0x3, WEST);
+        }}, BlockType.TRAPDOOR, 0x3);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, DOWN);
-        metaToDir.put(0x1, UP);
-        metaToDir.put(0x2, NORTH);
-        metaToDir.put(0x3, SOUTH);
-        metaToDir.put(0x4, WEST);
-        metaToDir.put(0x5, EAST);
-        addMappings(metaToDir, BlockType.DISPENSER, 0x7);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, SOUTH);
+            put(0x1, WEST);
+            put(0x2, NORTH);
+            put(0x3, EAST);
+        }}, BlockType.BED, 0x3);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, WEST);
-        metaToDir.put(0x1, SOUTH);
-        metaToDir.put(0x2, EAST);
-        metaToDir.put(0x3, NORTH);
-        addMappings(metaToDir, BlockType.TRAPDOOR, 0x3);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x1, SOUTH);
+            put(0x2, WEST);
+            put(0x4, NORTH);
+            put(0x8, EAST);
+        }}, BlockType.VINE, 0xF);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, SOUTH);
-        metaToDir.put(0x1, WEST);
-        metaToDir.put(0x2, NORTH);
-        metaToDir.put(0x3, EAST);
-        addMappings(metaToDir, BlockType.BED, 0x3);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, NORTH);
+            put(0x1, EAST);
+        }}, BlockType.RAIL_NORMAL, 0xF);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x1, SOUTH);
-        metaToDir.put(0x2, WEST);
-        metaToDir.put(0x4, NORTH);
-        metaToDir.put(0x8, EAST);
-        addMappings(metaToDir, BlockType.VINE, 0xF);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x2, EAST);
+            put(0x3, WEST);
+            put(0x4, NORTH);
+            put(0x5, SOUTH);
+        }}, BlockType.RAIL_ASC, 0xF);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, NORTH);
-        metaToDir.put(0x1, EAST);
-        addMappings(metaToDir, BlockType.RAIL_NORMAL, 0xF);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x6, EAST);
+            put(0x7, SOUTH);
+            put(0x8, WEST);
+            put(0x9, NORTH);
+        }}, BlockType.RAIL_CURVE, 0xF);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x2, EAST);
-        metaToDir.put(0x3, WEST);
-        metaToDir.put(0x4, NORTH);
-        metaToDir.put(0x5, SOUTH);
-        addMappings(metaToDir, BlockType.RAIL_ASC, 0xF);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, NORTH);
+            put(0x1, EAST);
+        }}, BlockType.RAIL_POWERED, 0x7);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x6, EAST);
-        metaToDir.put(0x7, SOUTH);
-        metaToDir.put(0x8, WEST);
-        metaToDir.put(0x9, NORTH);
-        addMappings(metaToDir, BlockType.RAIL_CURVE, 0xF);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x2, EAST);
+            put(0x3, WEST);
+            put(0x4, NORTH);
+            put(0x5, SOUTH);
+        }}, BlockType.RAIL_POWERED_ASC, 0x7);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, NORTH);
-        metaToDir.put(0x1, EAST);
-        addMappings(metaToDir, BlockType.RAIL_POWERED, 0x7);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, EAST);
+            put(0x1, WEST);
+            put(0x2, SOUTH);
+            put(0x3, NORTH);
+        }}, BlockType.STAIR, 0x3);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x2, EAST);
-        metaToDir.put(0x3, WEST);
-        metaToDir.put(0x4, NORTH);
-        metaToDir.put(0x5, SOUTH);
-        addMappings(metaToDir, BlockType.RAIL_POWERED_ASC, 0x7);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x1, EAST);
+            put(0x2, WEST);
+            put(0x3, SOUTH);
+            put(0x4, NORTH);
+            put(0x5, UP);
+        }}, BlockType.TORCH, 0xF);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, EAST);
-        metaToDir.put(0x1, WEST);
-        metaToDir.put(0x2, SOUTH);
-        metaToDir.put(0x3, NORTH);
-        addMappings(metaToDir, BlockType.STAIR, 0x3);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, DOWN);
+            put(0x1, EAST);
+            put(0x2, WEST);
+            put(0x3, SOUTH);
+            put(0x4, NORTH);
+            put(0x5, UP);
+        }}, BlockType.BUTTON, 0x7);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x1, EAST);
-        metaToDir.put(0x2, WEST);
-        metaToDir.put(0x3, SOUTH);
-        metaToDir.put(0x4, NORTH);
-        metaToDir.put(0x5, UP);
-        addMappings(metaToDir, BlockType.TORCH, 0xF);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, DOWN);
+            put(0x1, EAST);
+            put(0x2, WEST);
+            put(0x3, SOUTH);
+            put(0x4, NORTH);
+            put(0x5, UP);
+            put(0x6, UP);
+            put(0x7, DOWN);
+        }}, BlockType.LEVER, 0x7);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, DOWN);
-        metaToDir.put(0x1, EAST);
-        metaToDir.put(0x2, WEST);
-        metaToDir.put(0x3, SOUTH);
-        metaToDir.put(0x4, NORTH);
-        metaToDir.put(0x5, UP);
-        addMappings(metaToDir, BlockType.BUTTON, 0x7);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, WEST);
+            put(0x1, NORTH);
+            put(0x2, EAST);
+            put(0x3, SOUTH);
+        }}, BlockType.DOOR, 0x3);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, DOWN);
-        metaToDir.put(0x1, EAST);
-        metaToDir.put(0x2, WEST);
-        metaToDir.put(0x3, SOUTH);
-        metaToDir.put(0x4, NORTH);
-        metaToDir.put(0x5, UP);
-        metaToDir.put(0x6, UP);
-        metaToDir.put(0x7, DOWN);
-        addMappings(metaToDir, BlockType.LEVER, 0x7);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, NORTH);
+            put(0x1, EAST);
+            put(0x2, SOUTH);
+            put(0x3, WEST);
+        }}, BlockType.REDSTONE_REPEATER, 0x3);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, WEST);
-        metaToDir.put(0x1, NORTH);
-        metaToDir.put(0x2, EAST);
-        metaToDir.put(0x3, SOUTH);
-        addMappings(metaToDir, BlockType.DOOR, 0x3);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x0, SOUTH);
+            put(0x1, EAST);
+        }}, BlockType.ANVIL, 0x1);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, NORTH);
-        metaToDir.put(0x1, EAST);
-        metaToDir.put(0x2, SOUTH);
-        metaToDir.put(0x3, WEST);
-        addMappings(metaToDir, BlockType.REDSTONE_REPEATER, 0x3);
+        addMappings(new HashMap<Integer, Integer>(){{}}, BlockType.MUSHROOM, 0xF);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x0, SOUTH);
-        metaToDir.put(0x1, EAST);
-        addMappings(metaToDir, BlockType.ANVIL, 0x1);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x1, WEST);
+            put(0x3, NORTH);
+            put(0x7, SOUTH);
+            put(0x9, EAST);
+        }}, BlockType.MUSHROOM_CAP_CORNER, 0xF);
 
-        metaToDir = new HashMap<Integer, Integer>();
-        addMappings(metaToDir, BlockType.MUSHROOM, 0xF);
-
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x1, WEST);
-        metaToDir.put(0x3, NORTH);
-        metaToDir.put(0x7, SOUTH);
-        metaToDir.put(0x9, EAST);
-        addMappings(metaToDir, BlockType.MUSHROOM_CAP_CORNER, 0xF);
-
-        metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x2, NORTH);
-        metaToDir.put(0x4, WEST);
-        metaToDir.put(0x6, EAST);
-        metaToDir.put(0x8, SOUTH);
-        addMappings(metaToDir, BlockType.MUSHROOM_CAP_SIDE, 0xF);
+        addMappings(new HashMap<Integer, Integer>(){{
+            put(0x2, NORTH);
+            put(0x4, WEST);
+            put(0x6, EAST);
+            put(0x8, SOUTH);
+        }}, BlockType.MUSHROOM_CAP_SIDE, 0xF);
 
 
     }

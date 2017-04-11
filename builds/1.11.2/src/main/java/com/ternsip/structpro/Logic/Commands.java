@@ -1,8 +1,8 @@
 package com.ternsip.structpro.Logic;
 
+import com.ternsip.structpro.Universe.Cache.Universe;
 import com.ternsip.structpro.Utils.Utils;
 import com.ternsip.structpro.Utils.Variables;
-import com.ternsip.structpro.Universe.Cache.Universe;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;

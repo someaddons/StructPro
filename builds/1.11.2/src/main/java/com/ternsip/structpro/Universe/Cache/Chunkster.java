@@ -187,6 +187,7 @@ class Chunkster {
         }
         cosmetics();
         notifyPlayers();
+        world.tickUpdates(true);
         return true;
     }
 

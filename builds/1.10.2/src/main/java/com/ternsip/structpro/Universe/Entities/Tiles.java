@@ -12,7 +12,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.*;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.util.Constants;
@@ -61,7 +60,8 @@ public class Tiles {
             NBTTagList items = tag.getTagList("Items", Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < items.tagCount(); ++i) {
                 NBTTagCompound stackTag = items.getCompoundTagAt(i);
-                Pattern iPattern = Pattern.compile(Pattern.quote(stackTag.getString("id")), Pattern.CASE_INSENSITIVE);
+                String itemName = stackTag.getString("id").replaceAll(".*:", "");
+                Pattern iPattern = Pattern.compile(Pattern.quote(itemName), Pattern.CASE_INSENSITIVE);
                 Item item = Utils.select(Items.items.select(iPattern), random.nextLong());
                 byte cnt = items.getCompoundTagAt(i).getByte("Count");
                 int dmg = items.getCompoundTagAt(i).getShort("Damage");
@@ -138,7 +138,9 @@ public class Tiles {
         NBTTagList items = tag.getTagList("Items", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < items.tagCount() && i < inventory.getSizeInventory(); ++i) {
             NBTTagCompound stackTag = items.getCompoundTagAt(i);
-            Item item = Item.REGISTRY.getObject(new ResourceLocation(stackTag.getString("id")));
+            String itemName = stackTag.getString("id").replaceAll(".*:", "");
+            Pattern iPattern = Pattern.compile(Pattern.quote(itemName), Pattern.CASE_INSENSITIVE);
+            Item item = Utils.select(Items.items.select(iPattern), random.nextLong());
             byte count = items.getCompoundTagAt(i).getByte("Count");
             int damage = items.getCompoundTagAt(i).getShort("Damage");
             if (item != null && count > 0) {

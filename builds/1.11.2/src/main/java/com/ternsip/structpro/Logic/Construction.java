@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
-import static com.ternsip.structpro.Universe.Blocks.Classifier.BOTTOM;
+import static com.ternsip.structpro.Universe.Blocks.Classifier.HEAT_RAY;
 import static com.ternsip.structpro.Universe.Blocks.Classifier.OVERLOOK;
 
 /* Distributes single structures */
@@ -102,7 +102,7 @@ class Construction {
         Posture posture = candidate.getPosture(worldX, 64, worldZ, rotX, rotY, rotZ, flipX, flipY, flipZ);
         candidate.matchBiome(Biome.valueOf(Universe.getBiome(world, new BlockPos(posture.getPosX(), posture.getPosY(), posture.getPosZ()))));
         Region surface = new Region(world, posture.getPosX(), posture.getPosZ(), posture.getSizeX(), posture.getSizeZ(), OVERLOOK);
-        Region bottom = new Region(world, posture.getPosX(), posture.getPosZ(), posture.getSizeX(), posture.getSizeZ(), BOTTOM);
+        Region bottom = new Region(world, posture.getPosX(), posture.getPosZ(), posture.getSizeX(), posture.getSizeZ(), HEAT_RAY);
         candidate.matchAccuracy(surface, bottom);
         int worldY = candidate.getBestY(surface, bottom, random.nextLong());
         posture = candidate.getPosture(worldX, worldY, worldZ, rotX, rotY, rotZ, flipX, flipY, flipZ);
