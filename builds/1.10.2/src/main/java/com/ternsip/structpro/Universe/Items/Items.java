@@ -40,6 +40,7 @@ public class Items extends net.minecraft.init.Items {
         for (Item item: acceptable) {
             if (item.getRegistryName() != null) {
                 add(item.getRegistryName().getResourcePath(), item);
+                add(String.valueOf(Item.getIdFromItem(item)), item);
             }
         }
     }};

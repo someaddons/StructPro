@@ -3,7 +3,8 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 2.3 (extremely recommended)
+Latest mod version: 2.4
+Recomened mod version: 2.3+
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
 Repository: https://github.com/ternsip/StructPro
@@ -96,8 +97,8 @@ Mod Configuration
 Config file located in config/structpro.cfg
 DENSITY {Double} [0..+INF, Overflowing probability, Recomended 0.0035] Spawn probability per chunk
 DENSITY_VILLAGE {Double} [0..+INF, Overflowing probability, Recomended 0.00035] Village probability per chunk
-ACCURACY {Double} [0..+INF, Recommended 1.0] Calibration accuracy criteria, 0.5 means two times more accurate
-FORCE_LIFT {Integer} [-INF; +INF, Recomended 0] Force lift up every structure (recommended 0)
+ACCURACY {Double} [0..+INF, Recomended 1.0] Calibration accuracy criteria, 0.5 means two times more accurate
+FORCE_LIFT {Integer} [-INF; +INF, Recomended 0] Force lift up every structure (recomended 0)
 NATIVE_LOOT {Boolean} [Recomended false] Set chest spawn priority to native loot if it exists
 ONLY_VANILLA_LOOT {Boolean} [Recomended true] Ban modded items from spawning
 LOOT_CHANCE {Double} [0..1, Normilized probability, Recomended 0.5] Chest loot chance
@@ -169,7 +170,7 @@ FAQ
 
 Change log
 ----------------------------------------------
-Each new version have code improvements and at least small bug-fixes. It's recommended to use newest version.
+Each new version have code improvements and at least small bug-fixes. It's recomended to use newest version.
 Version 1.2
 Fixed lift bug
 Allowed to save schematics 
@@ -217,6 +218,10 @@ Fixed super-major bug appeared in 2.2 - structure stop generates when block is n
 Rotation metadata fully fixed
 Fix undo liana under basic buildings
 Add commands sound-effects
+Version 2.4 (release)
+Native loot works with ids and names
+fix native loot bugs (incorrect slots, ids, missing)
+Items also can be configured by id
 
 Known bugs
 ----------------------------------------------

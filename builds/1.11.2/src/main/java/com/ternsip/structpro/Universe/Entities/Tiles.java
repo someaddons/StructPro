@@ -61,6 +61,7 @@ public class Tiles {
             for (int i = 0; i < items.tagCount(); ++i) {
                 NBTTagCompound stackTag = items.getCompoundTagAt(i);
                 String itemName = stackTag.getString("id").replaceAll(".*:", "");
+                itemName = itemName.isEmpty() ? String.valueOf(stackTag.getShort("id")) : itemName;
                 Pattern iPattern = Pattern.compile(Pattern.quote(itemName), Pattern.CASE_INSENSITIVE);
                 Item item = Utils.select(Items.items.select(iPattern), random.nextLong());
                 byte cnt = items.getCompoundTagAt(i).getByte("Count");
@@ -139,12 +140,15 @@ public class Tiles {
         for (int i = 0; i < items.tagCount() && i < inventory.getSizeInventory(); ++i) {
             NBTTagCompound stackTag = items.getCompoundTagAt(i);
             String itemName = stackTag.getString("id").replaceAll(".*:", "");
+            itemName = itemName.isEmpty() ? String.valueOf(stackTag.getShort("id")) : itemName;
             Pattern iPattern = Pattern.compile(Pattern.quote(itemName), Pattern.CASE_INSENSITIVE);
             Item item = Utils.select(Items.items.select(iPattern), random.nextLong());
             byte count = items.getCompoundTagAt(i).getByte("Count");
             int damage = items.getCompoundTagAt(i).getShort("Damage");
+            int slot = stackTag.hasKey("Slot", Constants.NBT.TAG_BYTE) ? stackTag.getByte("Slot") : i;
+            slot = (slot < 0 || slot >= inventory.getSizeInventory()) ? i : slot;
             if (item != null && count > 0) {
-                inventory.setInventorySlotContents(i, new ItemStack(item, count, damage));
+                inventory.setInventorySlotContents(slot, new ItemStack(item, count, damage));
             }
         }
     }
