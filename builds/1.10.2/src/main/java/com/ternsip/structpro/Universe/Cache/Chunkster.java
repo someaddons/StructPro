@@ -1,14 +1,13 @@
 package com.ternsip.structpro.Universe.Cache;
 
 import com.ternsip.structpro.Logic.Configurator;
-import com.ternsip.structpro.Utils.Timer;
 import com.ternsip.structpro.Universe.Blocks.Blocks;
 import com.ternsip.structpro.Universe.Blocks.Classifier;
+import com.ternsip.structpro.Utils.Timer;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketChunkData;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -17,6 +16,7 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
 import java.util.BitSet;
 import java.util.HashMap;
+import java.util.Random;
 
 import static com.ternsip.structpro.Universe.Blocks.Classifier.*;
 
@@ -36,7 +36,7 @@ class Chunkster {
     /* Chunk world coordinates */
     private final int chunkX, chunkZ;
 
-    /* Chunk world start coordinates */
+    /* Chunk block world coordinates */
     private final int chunkStartX, chunkStartZ;
 
     /* Timer since last chunk action */
@@ -46,7 +46,7 @@ class Chunkster {
     private boolean modified = false;
 
     /* Height-maps of chunk for each type of classifier */
-    private HashMap<Classifier, HashMap<Integer, Integer>> heights = new HashMap<Classifier, HashMap<Integer, Integer>>();
+    private final HashMap<Classifier, HashMap<Integer, Integer>> heights = new HashMap<Classifier, HashMap<Integer, Integer>>();
 
     /* Block state changes */
     private final BitSet changes = new BitSet(CHUNK_SIZE_X * CHUNK_PART_Y * CHUNK_SIZE_Z);
@@ -62,8 +62,8 @@ class Chunkster {
         this.chunk = world.getChunkFromChunkCoords(chunkX, chunkZ);
         this.chunkX = chunkX;
         this.chunkZ = chunkZ;
-        chunkStartX = chunkX * CHUNK_SIZE_X;
-        chunkStartZ = chunkZ * CHUNK_SIZE_Z;
+        chunkStartX = this.chunkX * CHUNK_SIZE_X;
+        chunkStartZ = this.chunkZ * CHUNK_SIZE_Z;
     }
 
     /* Get block storage array for y-coordinate */
@@ -133,6 +133,7 @@ class Chunkster {
 
     /* Do blocks cosmetics */
     private void cosmetics() {
+        Random random = new Random(0);
         for (int x = 0, wx = chunkStartX; x < CHUNK_SIZE_X; ++x, ++wx) {
             for (int z = 0, wz = chunkStartZ; z < CHUNK_SIZE_Z; ++z, ++wz) {
                 boolean grassed = false;
@@ -150,12 +151,15 @@ class Chunkster {
                     int index = getIndex(x, y, z);
                     if (changes.get(index)) {
                         changes.set(index, false);
-                        if (!Configurator.IGNORE_LIGHT && Classifier.isBlock(LIGHT, block)) {
-                            world.checkLight(pos);
-                        }
+                        IBlockState state = getBlockState(x, y, z);
+                        block = Blocks.getBlock(state);
                         try {
                             world.notifyNeighborsOfStateChange(pos, block);
+                            world.immediateBlockTick(pos, state, random);
                         } catch (Throwable ignored) {}
+                        if (!Configurator.IGNORE_LIGHT && (Configurator.IDEAL_LIGHT || Classifier.isBlock(LIGHT, block))) {
+                            world.checkLight(pos);
+                        }
                     }
                 }
             }
@@ -169,8 +173,7 @@ class Chunkster {
                 EntityPlayerMP playerMP = (EntityPlayerMP) player;
                 if (    Math.abs(playerMP.chunkCoordX - chunkX) <= PLAYER_NOTIFY_RADIUS &&
                         Math.abs(playerMP.chunkCoordZ - chunkZ) <= PLAYER_NOTIFY_RADIUS) {
-                    Packet<?> packet = new SPacketChunkData(chunk, 65535);
-                    playerMP.connection.sendPacket(packet);
+                    playerMP.connection.sendPacket(new SPacketChunkData(chunk, 65535));
                 }
             }
         }
@@ -187,7 +190,6 @@ class Chunkster {
         }
         cosmetics();
         notifyPlayers();
-        world.tickUpdates(true);
         return true;
     }
 

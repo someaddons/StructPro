@@ -2,6 +2,7 @@ package com.ternsip.structpro.Universe.Entities;
 
 import com.ternsip.structpro.Logic.Configurator;
 import com.ternsip.structpro.Structure.Biome;
+import com.ternsip.structpro.Universe.Blocks.Blocks;
 import com.ternsip.structpro.Universe.Cache.Universe;
 import com.ternsip.structpro.Universe.Items.Items;
 import com.ternsip.structpro.Utils.Utils;
@@ -12,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.*;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.util.Constants;
@@ -46,6 +48,18 @@ public class Tiles {
         }
         if (tile instanceof IInventory) {
             load((IInventory)tile, tag, seed);
+        }
+        if (tile instanceof TileEntityBanner) {
+            load((TileEntityBanner)tile, tag, seed);
+        }
+        if (tile instanceof TileEntityComparator) {
+            load((TileEntityComparator)tile, tag, seed);
+        }
+        if (tile instanceof TileEntityFlowerPot) {
+            load((TileEntityFlowerPot)tile, tag, seed);
+        }
+        if (tile instanceof TileEntityNote) {
+            load((TileEntityNote)tile, tag, seed);
         }
     }
 
@@ -167,6 +181,48 @@ public class Tiles {
         if (tag.hasKey("TrackOutput")) {
             logic.setTrackOutput(tag.getBoolean("TrackOutput"));
         }
+    }
+
+    /* Load banner data from NBT tag */
+    private static void load(TileEntityBanner banner, NBTTagCompound tag, long seed) {
+        Random random = new Random(seed);
+        banner.setItemValues(new ItemStack(Blocks.WOOL, 1, random.nextInt(16)), false);
+    }
+
+    /* Load comparator data from NBT tag */
+    private static void load(TileEntityComparator comparator, NBTTagCompound tag, long seed) {
+        if (tag == null) {
+            return;
+        }
+        Random random = new Random(seed);
+        comparator.setOutputSignal(tag.getInteger("OutputSignal"));
+    }
+
+    /* Load pot data from NBT tag */
+    private static void load(TileEntityFlowerPot pot, NBTTagCompound tag, long seed) {
+        if (tag == null) {
+            return;
+        }
+        Random random = new Random(seed);
+        if (tag.hasKey("Item", Constants.NBT.TAG_STRING)) {
+            String itemName = tag.getString("Item").replaceAll(".*:", "");
+            itemName = itemName.isEmpty() ? String.valueOf(tag.getInteger("Item")) : itemName;
+            Pattern iPattern = Pattern.compile(Pattern.quote(itemName), Pattern.CASE_INSENSITIVE);
+            Item item = Utils.select(Items.items.select(iPattern), random.nextLong());
+            if (item != null) {
+                pot.setItemStack(new ItemStack(item, 1, tag.getInteger("Data")));
+            }
+        }
+    }
+
+    /* Load note data from NBT tag */
+    private static void load(TileEntityNote note, NBTTagCompound tag, long seed) {
+        if (tag == null) {
+            return;
+        }
+        Random random = new Random(seed);
+        note.note = (byte) MathHelper.clamp(tag.getByte("note"), 0, 24);
+        note.previousRedstoneState = tag.getBoolean("powered");
     }
 
 }

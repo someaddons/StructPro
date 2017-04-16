@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 class Evaluator {
 
     /* Undo projections */
-    private static ArrayList<Projection> undo = new ArrayList<Projection>();
+    private static final ArrayList<Projection> undo = new ArrayList<Projection>();
 
     /* Paste schematic that has most similar name */
     static String cmdPaste(World world,
@@ -30,12 +30,12 @@ class Evaluator {
         final Pattern nPattern = Pattern.compile(".*" + Pattern.quote(name) + ".*", Pattern.CASE_INSENSITIVE);
         undo.clear();
         if (village) {
-            ArrayList<Structure> vlg = Utils.select(Structures.villages.select(nPattern));
-            if (vlg == null) {
+            ArrayList<Structure> town = Utils.select(Structures.villages.select(nPattern));
+            if (town == null) {
                 return "No matching villages";
             }
             int chunkX = Universe.getStartChunkX(posX), chunkZ = Universe.getStartChunkZ(posZ);
-            ArrayList<Projection> projections = Village.combine(world, vlg, chunkX, chunkZ, System.currentTimeMillis());
+            ArrayList<Projection> projections = Village.combine(world, town, chunkX, chunkZ, System.currentTimeMillis());
             for (Projection projection : projections) {
                 saveUndo(projection);
             }
@@ -82,7 +82,7 @@ class Evaluator {
             Blueprint blueprint = new Blueprint(world, new BlockPos(posX, posY, posZ), new Volume(width, height, length));
             File file = new File(Configurator.getSchematicsSavesFolder(), name + ".schematic");
             blueprint.saveSchematic(file);
-            Structures.loadStructure(file);
+            Structures.load(file);
             report.post("SAVED", file.getPath());
         } catch (IOException ioe) {
             report.post("NOT SAVED", ioe.getMessage());
@@ -96,12 +96,14 @@ class Evaluator {
     static String cmdHelp() {
         return "You can pass arguments by name" +
                 "\n" +
-                "PASTE SCHEMATIC: /structpro paste " +
+                "PASTE SCHEMATIC: /spro paste " +
                 "name=<string> posX=<int> posY=<int> posZ=<int> rotateX=<int> " +
                 "rotateY=<int> rotateZ=<int> flipX=<bool> flipY=<bool> flipZ=<bool> village=<bool>" +
                 "\n" +
-                "SAVE SCHEMATIC: /structpro save " +
-                "name=<string> posX=<int> posY=<int> posZ=<int> width=<int> height=<int> length=<int>";
+                "SAVE SCHEMATIC: /spro save " +
+                "name=<string> posX=<int> posY=<int> posZ=<int> width=<int> height=<int> length=<int>" +
+                "\n" +
+                "UNDO LAST ACTION: /spro undo";
     }
 
     /* Undo all session history */

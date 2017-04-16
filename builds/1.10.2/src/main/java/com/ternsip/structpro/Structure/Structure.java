@@ -28,7 +28,7 @@ import static com.ternsip.structpro.Universe.Blocks.Classifier.*;
 public class Structure extends Blueprint {
 
     /* Structure version */
-    private static final int VERSION = 109;
+    private static final int VERSION = 110;
 
     /* Directory for dump files */
     private static final File DUMP_DIR = new File("sprodump", "structures");

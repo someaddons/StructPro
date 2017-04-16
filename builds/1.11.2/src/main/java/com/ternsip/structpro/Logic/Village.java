@@ -72,7 +72,7 @@ class Village extends Construction {
     }
 
     /* Get random for world chunk */
-    static Random getRandom(World world, int chunkX, int chunkZ) {
+    private static Random getRandom(World world, int chunkX, int chunkZ) {
         long seed = world.getSeed();
         long chunkIndex = (long)chunkX << 32 | chunkZ & 0xFFFFFFFFL;
         Random random = new Random(chunkIndex);

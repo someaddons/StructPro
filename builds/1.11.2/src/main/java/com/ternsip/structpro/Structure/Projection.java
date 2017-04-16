@@ -9,10 +9,10 @@ import java.text.DecimalFormat;
 /* Construct projection that determines blueprint state in the world */
 public class Projection {
 
-    private World world;
-    private Blueprint blueprint;
-    private Posture posture;
-    private long seed;
+    private final World world;
+    private final Blueprint blueprint;
+    private final Posture posture;
+    private final long seed;
 
     public Projection(World world, Blueprint blueprint, Posture posture, long seed) {
         this.world = world;

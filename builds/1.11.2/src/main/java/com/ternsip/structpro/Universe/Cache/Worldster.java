@@ -41,9 +41,11 @@ class Worldster {
 
     /* Update all chunksters */
     void update() {
+        world.tickUpdates(true);
         for (ConcurrentHashMap.Entry <Long, Chunkster> entry : chunksters.entrySet()) {
             entry.getValue().update();
         }
+        world.tickUpdates(true);
     }
 
     /* Get chunk key */

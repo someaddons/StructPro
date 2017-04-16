@@ -3,8 +3,10 @@ package com.ternsip.structpro.Logic;
 import com.ternsip.structpro.Structure.Biome;
 import com.ternsip.structpro.Structure.Method;
 import com.ternsip.structpro.Structure.Structure;
+import com.ternsip.structpro.Utils.Pool;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Selector;
+import com.ternsip.structpro.Utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
 
 /* Structures control class */
@@ -23,65 +26,75 @@ class Structures {
     static final Selector<ArrayList<Structure>> villages = new Selector<ArrayList<Structure>>();
     static final Selector<Structure> saves = new Selector<Structure>();
 
-    /* Load structure from file */
-    static void loadStructure(File file) {
-        try {
-            final Structure structure = new Structure(file);
-            if (file.getPath().contains(Configurator.getSchematicsSavesFolder().getPath())) {
-                saves.add(structure.getMethod(), structure);
-                saves.add(structure.getBiome(), structure);
-                saves.add(structure.getFile().getPath(), structure);
-                return;
-            }
-            structures.add(structure.getMethod(), structure);
-            structures.add(structure.getBiome(), structure);
-            structures.add(structure.getFile().getPath(), structure);
-            String parent = file.getParent().toLowerCase().replace("\\", "/").replace("//", "/");
-            if (parent.contains("/village/") || parent.contains("/town/")) {
-                Pattern pPattern = Pattern.compile(Pattern.quote(parent), Pattern.CASE_INSENSITIVE);
-                ArrayList<ArrayList<Structure>> village = villages.select(pPattern);
-                if (village.isEmpty()) {
-                    villages.add(parent, new ArrayList<Structure>(){{add(structure);}});
-                } else {
-                    village.get(0).add(structure);
-                }
-            }
-            int width = structure.getWidth();
-            int height = structure.getHeight();
-            int length = structure.getLength();
-            if (Configurator.ADDITIONAL_OUTPUT) {
-                new Report()
-                        .post("LOAD", file.getPath())
-                        .post("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]")
-                        .post("LIFT", String.valueOf(structure.getLift()))
-                        .post("METHOD", structure.getMethod().name)
-                        .post("BIOME", structure.getBiome().name)
-                        .print();
-            }
-        } catch (IOException ioe) {
-            if (Configurator.ADDITIONAL_OUTPUT) {
-                new Report()
-                        .post("CAN'T LOAD SCHEMATIC", file.getPath())
-                        .post("ERROR", ioe.getMessage())
-                        .print();
+    /* Register new structure */
+    private static void load(final Structure structure) {
+        if (structure.getFile().getPath().contains(Configurator.getSchematicsSavesFolder().getPath())) {
+            saves.add(structure.getMethod(), structure);
+            saves.add(structure.getBiome(), structure);
+            saves.add(structure.getFile().getPath(), structure);
+            return;
+        }
+        structures.add(structure.getMethod(), structure);
+        structures.add(structure.getBiome(), structure);
+        structures.add(structure.getFile().getPath(), structure);
+        String parent = structure.getFile().getParent().toLowerCase().replace("\\", "/").replace("//", "/");
+        if (parent.contains("/village/") || parent.contains("/town/")) {
+            Pattern pPattern = Pattern.compile(Pattern.quote(parent), Pattern.CASE_INSENSITIVE);
+            ArrayList<ArrayList<Structure>> village = villages.select(pPattern);
+            if (village.isEmpty()) {
+                villages.add(parent, new ArrayList<Structure>(){{add(structure);}});
+            } else {
+                village.get(0).add(structure);
             }
         }
     }
 
     /* Load structures from folder */
-    private static void loadStructures(File folder) {
+    static void load(File folder) {
         new Report().post("LOADING SCHEMATICS FROM", folder.getPath()).print();
         Stack<File> folders = new Stack<File>();
         folders.add(folder);
+        final ConcurrentLinkedQueue<Structure> loads = new ConcurrentLinkedQueue<Structure>();
+        Pool pool = new Pool();
         while (!folders.empty()) {
-            File[] listOfFiles = folders.pop().listFiles();
-            for (File file : listOfFiles != null ? listOfFiles : new File[0]) {
+            for (final File file : Utils.getFileList(folders.pop())) {
                 if (file.isFile()) {
-                    loadStructure(file);
+                    Thread action = new Thread() {
+                        public void run() {
+                            try {
+                                Structure structure = new Structure(file);
+                                int width = structure.getWidth();
+                                int height = structure.getHeight();
+                                int length = structure.getLength();
+                                if (Configurator.ADDITIONAL_OUTPUT) {
+                                    new Report()
+                                            .post("LOAD", file.getPath())
+                                            .post("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]")
+                                            .post("LIFT", String.valueOf(structure.getLift()))
+                                            .post("METHOD", structure.getMethod().name)
+                                            .post("BIOME", structure.getBiome().name)
+                                            .print();
+                                }
+                                loads.add(structure);
+                            } catch (IOException ioe) {
+                                if (Configurator.ADDITIONAL_OUTPUT) {
+                                    new Report()
+                                            .post("CAN'T LOAD SCHEMATIC", file.getPath())
+                                            .post("ERROR", ioe.getMessage())
+                                            .print();
+                                }
+                            }
+                        }
+                    };
+                    pool.add(action);
                 } else if (file.isDirectory()) {
                     folders.add(file);
                 }
             }
+        }
+        pool.wait(3600);
+        for (Structure structure : loads) {
+            load(structure);
         }
         sortVillages();
     }
@@ -101,9 +114,10 @@ class Structures {
         }
     }
 
+    /* Statical initialization */
     static {
         long startTime = System.currentTimeMillis();
-        loadStructures(Configurator.SCHEMATIC_FOLDER);
+        load(Configurator.SCHEMATIC_FOLDER);
         long loadTime = (System.currentTimeMillis() - startTime);
         Report report = new Report();
         for (Method method : Method.values()) {

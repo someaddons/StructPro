@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.*;
@@ -18,6 +19,9 @@ public class Utils {
 
     /* Join tokens into one string, separated with delimiter */
     public static String join(String[] args, String delimiter) {
+        if (args.length == 0) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < args.length - 1; ++i) {
             sb.append(args[i]).append(delimiter);
@@ -115,15 +119,25 @@ public class Utils {
     }
 
     /* Set class field value, returns success status */
-    public static Object getFieldValue(Class clazz, String field) throws NoSuchFieldException, IllegalAccessException {
+    public static Object getFieldValue(Class clazz, Object target, String fieldName) throws NoSuchFieldException, IllegalAccessException {
         HashMap<String, Object> result = new HashMap<String, Object>();
-        return clazz.getDeclaredField(field).get(clazz);
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        return field.get(target);
     }
 
     /* Set class field value, returns success status */
-    public static void setFieldValue(Class clazz, String field, Object value) throws NoSuchFieldException, IllegalAccessException {
+    public static void setFieldValue(Class clazz, Object target, String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
         HashMap<String, Object> result = new HashMap<String, Object>();
-        clazz.getDeclaredField(field).set(clazz, value);
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        field.set(target, value);
     }
 
     /* Write tags to file */
@@ -149,6 +163,14 @@ public class Utils {
         } finally {
             fis.close();
         }
+    }
+
+    /* Get complete list of files in folder */
+    public static File[] getFileList(File file) {
+        if (file.isFile() && !file.isDirectory()) {
+            return new File[]{file};
+        }
+        return file.listFiles() != null ? file.listFiles() : new File[0];
     }
 
 }

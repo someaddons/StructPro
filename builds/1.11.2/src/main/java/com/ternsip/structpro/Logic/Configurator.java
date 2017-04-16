@@ -56,17 +56,19 @@ public class Configurator {
     /* [Recommended false] Ignore light, enabling may speed-up pasting process but broke light */
     public static boolean IGNORE_LIGHT = false;
 
+    /* [Recommended false] Ideal structures light, enabling highly-decrease paste-performance */
+    public static boolean IDEAL_LIGHT = false;
+
     /* [0..+INF, Measured in chunks, Recommended 4096] Generation border */
     public static int WORLD_CHUNK_BORDER = 4096;
 
     /* [Relative path, Use "/", Recommended schematics] Schematics goes this folder */
     public static File SCHEMATIC_FOLDER = new File("schematics");
 
-    /* [Case sensitive, Recommended -1, 0, 1] Allow spawning structures only in this dimensions */
+    /* [Case sensitive, Recommended -1, 0] Allow spawning structures only in this dimensions */
     public static HashSet<String> SPAWN_DIMENSIONS = new HashSet<String>() {{
         add("-1");
         add("0");
-        add("1");
     }};
 
     /* [Case sensitive, Recommended 0] Allow spawning villages only in specified dimensions */
@@ -99,6 +101,7 @@ public class Configurator {
         add(".*VOID.*");
         add(".*SHULKER.*");
         add(".*STRUCTURE.*");
+        add(".*SPAWNER.*");
     }};
 
     /* Get schematics savings file */
@@ -145,14 +148,14 @@ public class Configurator {
                 for (String field : Utils.getFields(Configurator.class)) {
                     try {
                         String property = config.getProperty(field);
-                        Object origin = Utils.getFieldValue(Configurator.class, field);
+                        Object origin = Utils.getFieldValue(Configurator.class, Configurator.class, field);
                         if (property == null) {
                             throw new IOException("Field doesn't exists");
                         }
                         if (origin == null) {
                             throw new IOException("Field has a null value");
                         }
-                        Utils.setFieldValue(Configurator.class, field, parse(property, origin.getClass()));
+                        Utils.setFieldValue(Configurator.class, Configurator.class, field, parse(property, origin.getClass()));
                     } catch (Throwable throwable) {
                         new Report().post("FIELD", field).post("ERROR", throwable.getMessage()).print();
                     }
@@ -174,7 +177,11 @@ public class Configurator {
             FileOutputStream fos = new FileOutputStream(file);
             try {
                 for (String field : Utils.getFields(Configurator.class)) {
-                    config.setProperty(field, combine(Utils.getFieldValue(Configurator.class, field)));
+                    try {
+                        config.setProperty(field, combine(Utils.getFieldValue(Configurator.class, Configurator.class, field)));
+                    } catch (Throwable throwable) {
+                        new Report().post("FIELD", field).post("ERROR", throwable.getMessage()).print();
+                    }
                 }
                 config.store(fos, null);
             } catch (Throwable throwable) {
@@ -199,7 +206,7 @@ public class Configurator {
         Report report = new Report();
         for (String field : Utils.getFields(Configurator.class)) {
             try {
-                report.post(field, combine(Utils.getFieldValue(Configurator.class, field)));
+                report.post(field, combine(Utils.getFieldValue(Configurator.class, Configurator.class, field)));
             } catch (Throwable ignored) {}
         }
         report.print();
