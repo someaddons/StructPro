@@ -230,6 +230,7 @@ public enum Classifier {
         setBlock(CARDINAL, Blocks.DARK_OAK_FENCE_GATE);
 
         /* Set light emitters */
+        setBlock(LIGHT, Blocks.BEACON);
         setBlock(LIGHT, Blocks.TORCH);
         setBlock(LIGHT, Blocks.GLOWSTONE);
         setBlock(LIGHT, Blocks.LAVA);
@@ -244,6 +245,13 @@ public enum Classifier {
         setBlock(LIGHT, Blocks.REDSTONE_TORCH);
         setBlock(LIGHT, Blocks.BREWING_STAND);
         setBlock(LIGHT, Blocks.DRAGON_EGG);
+        setBlock(LIGHT, Blocks.SEA_LANTERN);
+        setBlock(LIGHT, Blocks.END_ROD);
+        setBlock(LIGHT, Blocks.ENCHANTING_TABLE);
+        setBlock(LIGHT, Blocks.ENDER_CHEST);
+        setBlock(LIGHT, Blocks.MAGMA);
+        setBlock(LIGHT, Blocks.BROWN_MUSHROOM_BLOCK);
+        setBlock(LIGHT, Blocks.END_PORTAL_FRAME);
 
         /* HEAT_RAY - combination of liquid and overlook */
         for (int blockID = 0; blockID < 256; ++blockID) {

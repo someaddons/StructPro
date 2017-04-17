@@ -1,6 +1,6 @@
 package com.ternsip.structpro.Universe.Cache;
 
-import com.ternsip.structpro.Logic.Configurator;
+import com.ternsip.structpro.Structure.Volume;
 import com.ternsip.structpro.Universe.Blocks.Blocks;
 import com.ternsip.structpro.Universe.Blocks.Classifier;
 import com.ternsip.structpro.Utils.Timer;
@@ -18,7 +18,8 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Random;
 
-import static com.ternsip.structpro.Universe.Blocks.Classifier.*;
+import static com.ternsip.structpro.Universe.Blocks.Classifier.OVERLOOK;
+import static com.ternsip.structpro.Universe.Blocks.Classifier.SOIL;
 
 /* Chunk control class */
 class Chunkster {
@@ -29,6 +30,7 @@ class Chunkster {
     private static final int CHUNK_SIZE_Z = 16;
     private static final int CHUNK_PART_Y = 16;
     private static final int PLAYER_NOTIFY_RADIUS = 32;
+    private static final Volume VOLUME = new Volume(CHUNK_SIZE_X, CHUNK_SIZE_Y, CHUNK_SIZE_Z);
 
     private final World world;
     private final Chunk chunk;
@@ -50,11 +52,6 @@ class Chunkster {
 
     /* Block state changes */
     private final BitSet changes = new BitSet(CHUNK_SIZE_X * CHUNK_PART_Y * CHUNK_SIZE_Z);
-
-    /* Get internal chunk index */
-    private int getIndex(int x, int y, int z) {
-        return x + y * CHUNK_SIZE_X * CHUNK_SIZE_Z + z * CHUNK_SIZE_X;
-    }
 
     /* Construct new chunk cache in certain position in the world */
     Chunkster(World world, int chunkX, int chunkZ) {
@@ -85,7 +82,7 @@ class Chunkster {
         if (storage != null) {
             Universe.removeTileEntity(world, new BlockPos(x + chunkStartX, y, z + chunkStartZ));
             storage.set(x, y % CHUNK_PART_Y, z, blockState);
-            changes.set(getIndex(x, y, z), true);
+            changes.set(VOLUME.getIndex(x, y, z), true);
             modified = true;
         }
     }
@@ -148,7 +145,7 @@ class Chunkster {
                         setBlockState(x, y, z, Blocks.state(Blocks.GRASS));
                         grassed = true;
                     }
-                    int index = getIndex(x, y, z);
+                    int index = VOLUME.getIndex(x, y, z);
                     if (changes.get(index)) {
                         changes.set(index, false);
                         IBlockState state = getBlockState(x, y, z);
@@ -157,9 +154,6 @@ class Chunkster {
                             world.notifyNeighborsOfStateChange(pos, block);
                             world.immediateBlockTick(pos, state, random);
                         } catch (Throwable ignored) {}
-                        if (!Configurator.IGNORE_LIGHT && (Configurator.IDEAL_LIGHT || Classifier.isBlock(LIGHT, block))) {
-                            world.checkLight(pos);
-                        }
                     }
                 }
             }
@@ -185,9 +179,7 @@ class Chunkster {
             return false;
         }
         modified = false;
-        if (!Configurator.IGNORE_LIGHT) {
-            chunk.generateSkylightMap();
-        }
+        chunk.generateSkylightMap();
         cosmetics();
         notifyPlayers();
         return true;

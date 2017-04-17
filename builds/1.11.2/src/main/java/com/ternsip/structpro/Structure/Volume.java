@@ -21,22 +21,22 @@ public class Volume {
     }
 
     /* Get index using relative position */
-    int getIndex(int x, int y, int z) {
+    public int getIndex(int x, int y, int z) {
         return x + y * width * length + z * width;
     }
 
     /* Get X-relative position using index */
-    int getX(int index) {
+    public int getX(int index) {
         return index % width;
     }
 
     /* Get Y-relative position using index */
-    int getY(int index) {
+    public int getY(int index) {
         return index / (width * length);
     }
 
     /* Get Z-relative position using index */
-    int getZ(int index) {
+    public int getZ(int index) {
         return (index / width) % length;
     }
 
@@ -54,6 +54,10 @@ public class Volume {
 
     int getVolume() {
         return width * height * length;
+    }
+
+    public boolean isInside(int x, int y, int z) {
+        return  x >= 0 && x < width && y >= 0 && y < height && z >= 0 && z < length;
     }
 
 }

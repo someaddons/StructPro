@@ -1,20 +1,25 @@
 package com.ternsip.structpro.Universe.Cache;
 
+import com.ternsip.structpro.Structure.Volume;
 import com.ternsip.structpro.Universe.Blocks.Classifier;
 import com.ternsip.structpro.Universe.Entities.Mobs;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.Queue;
 import java.util.Random;
 
 /* Memoize world block communication */
@@ -130,6 +135,57 @@ public class Universe {
     /* Get dimension id from the world */
     public static int getDimensionID(World world) {
         return world.provider.getDimension();
+    }
+
+    /* Recheck world light in region */
+    public static void checkLight(World world, int wx, int wy, int wz, int width, int height, int length) {
+        int LIGHT_MAX_LENGTH = 16;
+        wx -= LIGHT_MAX_LENGTH;
+        wy -= LIGHT_MAX_LENGTH;
+        wz -= LIGHT_MAX_LENGTH;
+        width += 2 * LIGHT_MAX_LENGTH;
+        height += 2 * LIGHT_MAX_LENGTH;
+        length += 2 * LIGHT_MAX_LENGTH;
+        Volume volume = new Volume(width, height, length);
+        int[] light = new int[width * height * length];
+        int[] opacity = new int[width * height * length];
+        Queue<Integer> queue = new ArrayDeque<Integer>();
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                for (int z = 0; z < length; ++z) {
+                    int index = volume.getIndex(x, y, z);
+                    IBlockState state = getBlockState(world, new BlockPos(wx + x, wy + y, wz + z));
+                    light[index] = state.getLightValue();
+                    opacity[index] = state.getLightOpacity();
+                    if (light[index] > 0) {
+                        queue.add(volume.getIndex(x, y, z));
+                    }
+                }
+            }
+        }
+        while (!queue.isEmpty()) {
+            int top = queue.poll();
+            BlockPos pos = new BlockPos(volume.getX(top), volume.getY(top), volume.getZ(top));
+            for (EnumFacing facing : EnumFacing.values()) {
+                BlockPos nPos = pos.offset(facing);
+                if (volume.isInside(nPos.getX(), nPos.getY(), nPos.getZ())) {
+                    int next = volume.getIndex(nPos.getX(), nPos.getY(), nPos.getZ());
+                    int level = Math.max(0, light[top] - opacity[next] - 1);
+                    if (level > light[next]) {
+                        light[next] = level;
+                        queue.add(next);
+                    }
+                }
+            }
+        }
+        for (int x = 0; x < width; ++x) {
+            for (int z = 0; z < length; ++z) {
+               for (int y = 0; y < height; ++y) {
+                    BlockPos pos = new BlockPos(wx + x, wy + y, wz + z);
+                    world.setLightFor(EnumSkyBlock.BLOCK, pos, light[volume.getIndex(x, y, z)]);
+                }
+            }
+        }
     }
 
 }

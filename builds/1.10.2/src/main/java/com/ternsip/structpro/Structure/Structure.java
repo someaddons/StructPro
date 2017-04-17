@@ -354,11 +354,16 @@ public class Structure extends Blueprint {
             populate(world, posture, seed);
         }
 
-        /* Update universe changes */
-        Universe.update();
+        /* Check light for generated structure */
+        Universe.checkLight(world, meltPosture.getPosX(), meltPosture.getPosY(), meltPosture.getPosZ(), meltPosture.getWidth(), meltPosture.getHeight(), meltPosture.getLength());
 
         /* Free structure memory */
         free();
+
+        /* Update universe changes */
+        Universe.update();
+
+
     }
 
     /* Populate structure with entities */

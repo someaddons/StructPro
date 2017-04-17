@@ -52,13 +52,7 @@ public class Configurator {
 
     /* [Recommended true] Print details about schematics loading and failed paste attempts */
     public static boolean ADDITIONAL_OUTPUT = true;
-
-    /* [Recommended false] Ignore light, enabling may speed-up pasting process but broke light */
-    public static boolean IGNORE_LIGHT = false;
-
-    /* [Recommended false] Ideal structures light, enabling highly-decrease paste-performance */
-    public static boolean IDEAL_LIGHT = false;
-
+    
     /* [0..+INF, Measured in chunks, Recommended 4096] Generation border */
     public static int WORLD_CHUNK_BORDER = 4096;
 
