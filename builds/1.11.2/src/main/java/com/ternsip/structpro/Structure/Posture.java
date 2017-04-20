@@ -18,6 +18,7 @@ public class Posture extends Volume {
                    int rotateX, int rotateY, int rotateZ,
                    boolean flipX, boolean flipY, boolean flipZ,
                    int width, int height, int length) {
+        super(width, height, length);
         this.posX = posX;
         this.posY = posY;
         this.posZ = posZ;
@@ -27,9 +28,6 @@ public class Posture extends Volume {
         this.flipX = flipX;
         this.flipY = flipY;
         this.flipZ = flipZ;
-        this.width = width;
-        this.height = height;
-        this.length = length;
         if (width <= 0 || height <= 0 || length <= 0) {
             throw new IllegalArgumentException("Bad dimensions: [W=" + width + ";H=" + height + ";L=" + length + "]");
         }
@@ -79,8 +77,8 @@ public class Posture extends Volume {
         for (int i = 0; i < rotateY; ++i) {
             int tmp = x; x = l - z - 1; z = tmp; tmp = w; w = l; l = tmp;
         }
-        /* ADD X rotations */
         /* ADD Z rotations */
+        /* ADD X rotations */
         x = flipX ? w - x - 1 : x;
         y = flipY ? h - y - 1 : y;
         z = flipZ ? l - z - 1 : z;
@@ -127,6 +125,10 @@ public class Posture extends Volume {
             return Directions.getMeta(meta, rotationsY[(3 + rotY) % 4], blockType) | overlap;
         }
         return meta | overlap;
+    }
+
+    public Posture extend(int x, int y, int z) {
+        return super.extend(x, y, z).getPosture(posX - x, posY - y, posZ - z, rotateX, rotateY, rotateZ, flipX, flipY, flipZ);
     }
 
     /* Generate posture report */

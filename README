@@ -3,7 +3,7 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 2.6
+Latest mod version: 2.7
 Recomened mod version: 2.3+
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
@@ -230,10 +230,15 @@ Make block and world ticks a bit smarter during spawning
 Added many cardinal-blocks to registry that makes area cleaning/remelting better
 Added support for entire part of tile entities: TileEntityBanner, TileEntityComparator, TileEntityFlowerPot, TileEntityNote
 Make Parallel-threads for loading process
-Version 2.6 (release) (LIGHT-SHADOW UPDATE)
+Version 2.6 (Beta) (LIGHT-SHADOW UPDATE)
 New full-light calculation algorithm integrated (ideal accuracy)
 Huge performance growth (now light calculations not required only for ticking)
 Remove configuration IDEAL_LIGHT and IGNORE_LIGHT because now light not cost performance
+Version 2.7 (relaese) sky-Light fix
+Replace world and chunk caching to direct access
+Fix sky light bugs
+Increase performance
+Added new option TICKER to config that allows additional force ticking
  
 Known bugs
 ----------------------------------------------

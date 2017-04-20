@@ -2,7 +2,7 @@ package com.ternsip.structpro.Logic;
 
 import com.ternsip.structpro.Structure.Projection;
 import com.ternsip.structpro.Structure.Structure;
-import com.ternsip.structpro.Universe.Cache.Universe;
+import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.world.World;

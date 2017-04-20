@@ -3,7 +3,7 @@ package com.ternsip.structpro.Structure;
 import com.ternsip.structpro.Logic.Configurator;
 import com.ternsip.structpro.Universe.Blocks.Blocks;
 import com.ternsip.structpro.Universe.Blocks.Classifier;
-import com.ternsip.structpro.Universe.Cache.Universe;
+import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Universe.Entities.Mobs;
 import com.ternsip.structpro.Universe.Entities.Tiles;
 import com.ternsip.structpro.Utils.Report;
@@ -34,7 +34,7 @@ public class Structure extends Blueprint {
     private static final File DUMP_DIR = new File("sprodump", "structures");
 
     /* Melting distance measured in blocks */
-    private static final int MELT = 5;
+    public static final int MELT = 5;
 
     private File fileStructure;
     private File fileFlag;
@@ -235,7 +235,7 @@ public class Structure extends Blueprint {
     private BitSet getMelt() {
 
         /* Create melt using cardinal blocks */
-        Volume meltVolume = getMeltVolume();
+        Volume meltVolume = extend(MELT, MELT, MELT);
         BitSet melt = new BitSet(meltVolume.getVolume());
 
         /* Skip underwater melting*/
@@ -257,15 +257,10 @@ public class Structure extends Blueprint {
                             for (int dy = 0; dy <= shift * 2; ++dy) {
                                 if (Math.sqrt(dx * dx + dy * dy / 4.0 + dz * dz) <= radius) {
                                     int nx = x + dx, ny = y + dy, nz = z + dz;
-                                    if (    nx < -MELT || nx >= width + MELT ||
-                                            ny < -MELT || ny >= height + MELT ||
-                                            nz < -MELT || nz >= length + MELT) {
+                                    if (!meltVolume.isInside(nx, ny, nz)) {
                                         continue;
                                     }
-                                    if (    nx < 0 || nx >= width ||
-                                            ny < 0 || ny >= height ||
-                                            nz < 0 || nz >= length ||
-                                            skin.get(getIndex(nx, ny, nz))) {
+                                    if (!isInside(nx, ny, nz) || skin.get(getIndex(nx, ny, nz))) {
                                         melt.set(meltVolume.getIndex(nx + MELT, ny + MELT, nz + MELT), true);
                                     }
                                 }
@@ -314,7 +309,7 @@ public class Structure extends Blueprint {
         }
 
         /* Iterate over volume and melt area */
-        Posture meltPosture = getMeltPosture(posture);
+        Posture meltPosture = posture.extend(MELT, MELT, MELT);
         for (int index = 0; index < meltPosture.getVolume(); ++index) {
             if (!melt.get(index)) {
                 continue;
@@ -354,15 +349,13 @@ public class Structure extends Blueprint {
             populate(world, posture, seed);
         }
 
-        /* Check light for generated structure */
-        Universe.checkLight(world, meltPosture.getPosX(), meltPosture.getPosY(), meltPosture.getPosZ(), meltPosture.getWidth(), meltPosture.getHeight(), meltPosture.getLength());
-
         /* Free structure memory */
         free();
 
-        /* Update universe changes */
-        Universe.update();
-
+        /* Check light for generated structure */
+        Universe.grassFix(world, meltPosture);
+        Universe.checkLight(world, meltPosture);
+        Universe.notifyPosture(world, meltPosture);
 
     }
 
@@ -461,18 +454,6 @@ public class Structure extends Blueprint {
             posY += Configurator.FORCE_LIFT;
         }
         return Math.max(4, Math.min(posY, 255));
-    }
-
-    /* Get melt volume */
-    private Volume getMeltVolume() {
-        return new Volume(width + 2 * MELT, height + 2 * MELT, length + 2 * MELT);
-    }
-
-    /* Get melt posture */
-    public Posture getMeltPosture(Posture posture) {
-        return getMeltVolume().getPosture(posture.getPosX() - MELT, posture.getPosY() - MELT, posture.getPosZ() - MELT,
-                posture.getRotateX(), posture.getRotateY(), posture.getRotateZ(),
-                posture.isFlipX(), posture.isFlipY(), posture.isFlipZ());
     }
 
     /* Check structure hostile for players */

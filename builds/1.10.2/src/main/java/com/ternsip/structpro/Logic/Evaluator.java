@@ -1,7 +1,7 @@
 package com.ternsip.structpro.Logic;
 
 import com.ternsip.structpro.Structure.*;
-import com.ternsip.structpro.Universe.Cache.Universe;
+import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.init.SoundEvents;
@@ -34,8 +34,7 @@ class Evaluator {
             if (town == null) {
                 return "No matching villages";
             }
-            int chunkX = Universe.getStartChunkX(posX), chunkZ = Universe.getStartChunkZ(posZ);
-            ArrayList<Projection> projections = Village.combine(world, town, chunkX, chunkZ, System.currentTimeMillis());
+            ArrayList<Projection> projections = Village.combine(world, town, posX >> 4, posZ >> 4, System.currentTimeMillis());
             for (Projection projection : projections) {
                 saveUndo(projection);
             }
@@ -123,8 +122,7 @@ class Evaluator {
     /* Save undo data to history for projection */
     private static void saveUndo(Projection projection) {
         if (projection.getBlueprint() instanceof Structure) {
-            Structure structure = (Structure) projection.getBlueprint();
-            Posture mp = structure.getMeltPosture(projection.getPosture());
+            Posture mp = projection.getPosture().extend(Structure.MELT, Structure.MELT, Structure.MELT);
             BlockPos start = new BlockPos(mp.getPosX(), mp.getPosY(), mp.getPosZ());
             Volume volume = new Volume(mp.getSizeX(), mp.getSizeY(), mp.getSizeZ());
             Blueprint blueprint = new Blueprint(projection.getWorld(), start, volume);

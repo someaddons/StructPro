@@ -1,13 +1,12 @@
 package com.ternsip.structpro.Structure;
 
 import com.ternsip.structpro.Universe.Blocks.Blocks;
-import com.ternsip.structpro.Universe.Cache.Universe;
+import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
@@ -64,15 +63,11 @@ public class Blueprint extends Volume {
                     int index = getIndex(ix, iy, iz);
                     blocks[index] = (short) blockID;
                     meta[index] = (byte) Blocks.getMeta(state);
-                    TileEntity tile = Universe.getTileEntity(world, pos);
-                    if (tile != null) {
-                        tiles[index] = new NBTTagCompound();
-                        try {
-                            tile.writeToNBT(tiles[index]);
-                            tiles[index].setInteger("x", ix);
-                            tiles[index].setInteger("y", iy);
-                            tiles[index].setInteger("z", iz);
-                        } catch (Throwable ignored) {}
+                    tiles[index] = Universe.getTileTag(world, pos);
+                    if (tiles[index] != null) {
+                        tiles[index].setInteger("x", ix);
+                        tiles[index].setInteger("y", iy);
+                        tiles[index].setInteger("z", iz);
                     }
                 }
             }
@@ -181,19 +176,12 @@ public class Blueprint extends Volume {
                     int index = getIndex(ix, iy, iz);
                     BlockPos worldPos = posture.getWorldPos(ix, iy, iz);
                     Universe.setBlockState(world, worldPos, Blocks.state(Blocks.getBlock(blocks[index]), meta[index]));
-                    Universe.removeTileEntity(world, worldPos);
-                    if (tiles[index] != null) {
-                        NBTTagCompound tag = tiles[index].copy();
-                        tag.setInteger("x", worldPos.getX());
-                        tag.setInteger("y", worldPos.getY());
-                        tag.setInteger("z", worldPos.getZ());
-                        TileEntity entity = TileEntity.create(world, tag);
-                        Universe.setTileEntity(world, worldPos, entity);
-                    }
+                    Universe.setTileTag(world, worldPos, tiles[index]);
                 }
             }
         }
-        Universe.update();
+        Universe.checkLight(world, posture);
+        Universe.notifyPosture(world, posture);
     }
 
     /* Generate blueprint report */

@@ -1,8 +1,7 @@
 package com.ternsip.structpro.Structure;
 
 import com.ternsip.structpro.Universe.Blocks.Classifier;
-import com.ternsip.structpro.Universe.Cache.Universe;
-import net.minecraft.util.math.BlockPos;
+import com.ternsip.structpro.Universe.Universe;
 import net.minecraft.world.World;
 
 /* Face of region */
@@ -30,7 +29,7 @@ public class Region {
         double squareSum = 0;
         for (int x = 0, wx = startX; x < sizeX; ++x, ++wx) {
             for (int z = 0, wz = startZ; z < sizeZ; ++z, ++wz) {
-                int level = Universe.getHeight(world, new BlockPos(wx, 0, wz), classifier);
+                int level = Universe.getHeight(world, classifier, wx, wz);
                 major = Math.max(major, level);
                 minor = Math.min(minor, level);
                 total += level;

@@ -1,6 +1,5 @@
 package com.ternsip.structpro.Logic;
 
-import com.ternsip.structpro.Universe.Cache.Universe;
 import com.ternsip.structpro.Utils.Utils;
 import com.ternsip.structpro.Utils.Variables;
 import net.minecraft.command.CommandException;
@@ -67,7 +66,6 @@ public class Commands implements ICommand {
         String cmd = args[0];
         Variables vars = new Variables(Utils.join(args, " "));
         Random random = new Random();
-        Universe.unload();
         if (cmd.equalsIgnoreCase("paste")) {
             String name = vars.get("name", "");
             int posX = vars.get("posx", sender.getPosition().getX());

@@ -52,6 +52,9 @@ public class Configurator {
 
     /* [Recommended true] Print details about schematics loading and failed paste attempts */
     public static boolean ADDITIONAL_OUTPUT = true;
+
+    /* [Recommended true] Additional world ticks for spawning process */
+    public static boolean TICKER = true;
     
     /* [0..+INF, Measured in chunks, Recommended 4096] Generation border */
     public static int WORLD_CHUNK_BORDER = 4096;
@@ -80,10 +83,10 @@ public class Configurator {
         add("LAPIS_BLOCK -> STONE");
         add("EMERALD_BLOCK -> STONE");
         add(".*COMMAND.* -> REDSTONE_BLOCK");
-        add(".*SPAWNER.* -> IRON_BLOCK");
         add(".*STRUCTURE.* -> GOLD_BLOCK");
         add("WOOL -> LOG");
         add("BEACON -> QUARTZ_BLOCK");
+        add("FIRE -> AIR");
     }};
 
     /* [Item names, Comma separated, Case non-sensitive] Exclude items from possible loot */
@@ -96,6 +99,7 @@ public class Configurator {
         add(".*SHULKER.*");
         add(".*STRUCTURE.*");
         add(".*SPAWNER.*");
+        add(".*PORTAL.*");
     }};
 
     /* Get schematics savings file */

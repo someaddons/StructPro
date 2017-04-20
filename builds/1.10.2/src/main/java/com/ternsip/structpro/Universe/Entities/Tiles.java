@@ -3,7 +3,7 @@ package com.ternsip.structpro.Universe.Entities;
 import com.ternsip.structpro.Logic.Configurator;
 import com.ternsip.structpro.Structure.Biome;
 import com.ternsip.structpro.Universe.Blocks.Blocks;
-import com.ternsip.structpro.Universe.Cache.Universe;
+import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Universe.Items.Items;
 import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.entity.Entity;
@@ -48,18 +48,23 @@ public class Tiles {
         }
         if (tile instanceof IInventory) {
             load((IInventory)tile, tag, seed);
+            return;
         }
         if (tile instanceof TileEntityBanner) {
             load((TileEntityBanner)tile, tag, seed);
+            return;
         }
         if (tile instanceof TileEntityComparator) {
             load((TileEntityComparator)tile, tag, seed);
+            return;
         }
         if (tile instanceof TileEntityFlowerPot) {
             load((TileEntityFlowerPot)tile, tag, seed);
+            return;
         }
         if (tile instanceof TileEntityNote) {
             load((TileEntityNote)tile, tag, seed);
+            return;
         }
     }
 

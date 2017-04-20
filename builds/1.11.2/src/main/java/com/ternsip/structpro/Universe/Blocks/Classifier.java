@@ -13,6 +13,7 @@ import net.minecraft.block.state.IBlockState;
 * HEAT_RAY - OVERLOOKS + LIQUID
 * GAS - Air, gases, etc.
 * SOP - GAS + LIQUID
+* TRANSPARENT - non solid blocks
 */
 public enum Classifier {
     SOIL (0x00),
@@ -22,7 +23,8 @@ public enum Classifier {
     LIGHT (0x04),
     HEAT_RAY(0x05),
     GAS(0x06),
-    SOP(0x07);
+    SOP(0x07),
+    TRANSPARENT(0x8);
 
     private final int value;
 
@@ -253,20 +255,25 @@ public enum Classifier {
         setBlock(LIGHT, Blocks.BROWN_MUSHROOM_BLOCK);
         setBlock(LIGHT, Blocks.END_PORTAL_FRAME);
 
-        /* HEAT_RAY - combination of liquid and overlook */
-        for (int blockID = 0; blockID < 256; ++blockID) {
-            if (isBlock(OVERLOOK, blockID) || isBlock(LIQUID, blockID)) {
-                setBlock(HEAT_RAY, blockID);
-            }
-        }
-
         /* Set gas */
         setBlock(GAS, Blocks.AIR);
 
-        /* SOP - combination of liquid and overlook */
         for (int blockID = 0; blockID < 256; ++blockID) {
+            Block block = Blocks.getBlockVanilla(blockID);
+            if (block == null) {
+                continue;
+            }
+             /* HEAT_RAY - combination of liquid and overlook */
+            if (isBlock(OVERLOOK, blockID) || isBlock(LIQUID, blockID)) {
+                setBlock(HEAT_RAY, blockID);
+            }
+            /* SOP - combination of liquid and overlook */
             if (isBlock(GAS, blockID) || isBlock(LIQUID, blockID)) {
                 setBlock(SOP, blockID);
+            }
+            /* TRANSPARENT - non solid blocks */
+            if (Blocks.getOpacity(block) < 16) {
+                setBlock(TRANSPARENT, blockID);
             }
         }
 

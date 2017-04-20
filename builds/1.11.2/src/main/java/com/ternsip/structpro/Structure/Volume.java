@@ -52,12 +52,20 @@ public class Volume {
         return height;
     }
 
-    int getVolume() {
+    public int getVolume() {
         return width * height * length;
     }
 
     public boolean isInside(int x, int y, int z) {
         return  x >= 0 && x < width && y >= 0 && y < height && z >= 0 && z < length;
+    }
+
+    public boolean isInside(int index) {
+        return isInside(getX(index), getY(index), getZ(index));
+    }
+
+    public Volume extend(int x, int y, int z) {
+        return new Volume(width + 2 * x, height + 2 * y, length + 2 * z);
     }
 
 }

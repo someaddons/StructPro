@@ -360,4 +360,25 @@ public class Blocks extends net.minecraft.init.Blocks {
         } catch (Throwable ignored) {}
         return result;
     }
+
+    /* Get light level that emits block state */
+    public static int getLight(IBlockState state) {
+        return state.getLightValue();
+    }
+
+    /* Get opacity of block state */
+    public static int getOpacity(IBlockState state) {
+        return state.getLightOpacity();
+    }
+
+    /* Get light level that emits block */
+    public static int getLight(Block block) {
+        return state(block).getLightValue();
+    }
+
+    /* Get opacity of block */
+    public static int getOpacity(Block block) {
+        return state(block).getLightOpacity();
+    }
+
 }

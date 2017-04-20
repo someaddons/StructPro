@@ -1,17 +1,15 @@
 package com.ternsip.structpro.Universe.Entities;
 
-import com.ternsip.structpro.Utils.Selector;
 import com.ternsip.structpro.Structure.Biome;
 import com.ternsip.structpro.Structure.Method;
+import com.ternsip.structpro.Utils.Selector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.monster.*;
 import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.projectile.EntityWitherSkull;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.GameData;
 
 import java.util.Map;
 
