@@ -15,10 +15,15 @@ import java.util.Random;
 import static com.ternsip.structpro.Universe.Blocks.Classifier.HEAT_RAY;
 import static com.ternsip.structpro.Universe.Blocks.Classifier.OVERLOOK;
 
-/* Distributes single structures */
-class Construction {
+/**
+ * Single structure distributor
+ * Unequivocally determine structure positions
+ * @author  Ternsip
+ * @since JDK 1.6
+ */
+public class Construction {
 
-    /* Structures spawn sets in attempting order */
+    /** Structures calibrate sets in attempting order */
     private static final ArrayList<ArrayList<Structure>> spawnOrder = new ArrayList<ArrayList<Structure>>(){{
         add(Structures.structures.select());
         add(Structures.structures.select(new Method[]{Method.BASIC}));
@@ -34,8 +39,14 @@ class Construction {
         add(Structures.structures.select(new Biome[]{Biome.END}));
     }};
 
-    /* Process chunk generations */
-    static ArrayList<Projection> generate(final World world, final int chunkX, final int chunkZ) {
+    /**
+     * Obtain array of construction projections calibrated inside chunk
+     * @param world Target world object
+     * @param chunkX Chunk X coordinate
+     * @param chunkZ Chunk Z coordinate
+     * @return Array of spawned projections
+     */
+    public static ArrayList<Projection> obtain(final World world, final int chunkX, final int chunkZ) {
         return new ArrayList<Projection>() {{
             for (int drop = drops(world, chunkX, chunkZ); drop > 0; --drop) {
                 Random random = getRandom(world, chunkX, chunkZ);
@@ -45,7 +56,7 @@ class Construction {
                     int cz = chunkZ * 16 + Math.abs(random.nextInt()) % 16;
                     Structure structure = Utils.select(structures, random.nextLong());
                     if (structure != null) {
-                        Projection projection = construct(world, structure, cx, cz, random.nextLong());
+                        Projection projection = construct(world, cx, cz, random.nextLong(), structure);
                         if (projection != null) {
                             add(projection);
                             spawned = true;
@@ -54,25 +65,40 @@ class Construction {
                     }
                 }
                 if (!spawned) {
-                    new Report().post("GIVE UP SPAWNING IN CHUNK", "[X=" + chunkX + ";Z=" + chunkZ + "]").print();
+                    new Report().post("GIVE UP CALIBRATE IN CHUNK", "[X=" + chunkX + ";Z=" + chunkZ + "]").print();
                 }
             }
         }};
     }
 
-    /* Construct projection in the world in specific position */
-    static Projection construct(World world, Structure structure, int worldX, int worldZ, long seed) {
+    /**
+     * Construct projection in the world in specific position
+     * In case structure can not be constructed null will be returned
+     * @param world Target world object
+     * @param worldX World block X starting coordinate
+     * @param worldZ World block Z starting coordinate
+     * @param seed Constructing seed
+     * @param structure Structure to construct
+     * @return Constructed projection or null
+     */
+    static Projection construct(World world, int worldX, int worldZ, long seed, Structure structure) {
         try {
-            return spawn(world, structure, worldX, worldZ, seed);
+            return calibrate(world, worldX, worldZ, seed, structure);
         } catch (IOException ioe) {
             if (Configurator.ADDITIONAL_OUTPUT) {
-                structure.report().pref(new Report().post("NOT SPAWNED", ioe.getMessage()).post("AT", "[X=" + worldX + ";Z=" + worldZ + "]")).print();
+                structure.report().pref(new Report().post("NOT CALIBRATED", ioe.getMessage()).post("AT", "[X=" + worldX + ";Z=" + worldZ + "]")).print();
             }
             return null;
         }
     }
 
-    /* Get drops in certain chunk in the world */
+    /**
+     * Get number of structures which spawns in chunk
+     * @param world Target world object
+     * @param chunkX Chunk X coordinate
+     * @param chunkZ Chunk Z coordinate
+     * @return Number of structures
+     */
     private static int drops(World world, int chunkX, int chunkZ) {
         if (outsideBorder(chunkX, chunkZ)) {
             return 0;
@@ -88,14 +114,29 @@ class Construction {
         return (int) density + (random.nextDouble() <= (density - (int) density) ? 1 : 0);
     }
 
-    /* Check if a chunk is outside of the border */
+    /**
+     * Check if a chunk is outside of the border
+     * @param chunkX Chunk X coordinate
+     * @param chunkZ Chunk Z coordinate
+     * @return chunk is outside of a border
+     */
     static boolean outsideBorder(int chunkX, int chunkZ) {
         return  chunkX > Configurator.WORLD_CHUNK_BORDER || chunkX < -Configurator.WORLD_CHUNK_BORDER ||
                 chunkZ > Configurator.WORLD_CHUNK_BORDER || chunkZ < -Configurator.WORLD_CHUNK_BORDER;
     }
 
-    /* Spawn candidate in certain position in the world */
-    static Projection spawn(World world, Structure candidate, int worldX, int worldZ, long seed) throws IOException {
+    /**
+     * Calibrate candidate in certain position in the world
+     * @param world Target world object
+     * @param worldX World block X starting coordinate
+     * @param worldZ World block Z starting coordinate
+     * @param seed calibrate seed
+     * @param candidate Desired structure to construct
+     * @throws IOException Structure can't calibrate due conditions
+     * @return Calibrated projection
+     */
+    @SuppressWarnings({"ConstantConditions"})
+    public static Projection calibrate(World world, int worldX, int worldZ, long seed, Structure candidate) throws IOException {
         Random random = new Random(seed);
         int rotX = 0, rotY = random.nextInt() % 4, rotZ = 0;
         boolean flipX = random.nextBoolean(), flipY = false, flipZ = random.nextBoolean();
@@ -109,7 +150,13 @@ class Construction {
         return new Projection(world, candidate, posture, random.nextLong());
     }
 
-    /* Get random for world chunk */
+    /**
+     * Get random generator for specific world chunk
+     * @param world Target world object
+     * @param chunkX Chunk X coordinate
+     * @param chunkZ Chunk Z coordinate
+     * @return Random generator
+     */
     private static Random getRandom(World world, int chunkX, int chunkZ) {
         long seed = world.getSeed();
         long chunkIndex = (long)chunkX << 32 | chunkZ & 0xFFFFFFFFL;

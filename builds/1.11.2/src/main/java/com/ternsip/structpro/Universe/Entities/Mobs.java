@@ -16,11 +16,15 @@ import net.minecraftforge.fml.common.registry.GameData;
 
 import java.util.Map;
 
-/* Mobs control class*/
+/**
+ * Mobs control class
+ * @author  Ternsip
+ * @since JDK 1.6
+ */
 @SuppressWarnings({"WeakerAccess", "deprecation"})
 public class Mobs {
 
-    /* Selector for all eggs mobs */
+    /** Selector for all eggs mobs */
     public static final Selector<Class<? extends Entity>> eggs = new Selector<Class<? extends Entity>>(){{
         for (Map.Entry<ResourceLocation, EntityList.EntityEggInfo> e : EntityList.ENTITY_EGGS.entrySet()) {
             Class<? extends Entity> mob = EntityList.getClass(e.getKey());
@@ -28,7 +32,7 @@ public class Mobs {
         }
     }};
 
-    /* Selector for all eggs mobs */
+    /** Selector for all eggs mobs */
     public static final Selector<Class<? extends Entity>> mobs = new Selector<Class<? extends Entity>>(){{
         for (EntityEntry e : GameData.getEntityRegistry()) {
             Class<? extends Entity> mob = e.getEntityClass();
@@ -36,7 +40,7 @@ public class Mobs {
         }
     }};
 
-    /* Selector for hostile mobs */
+    /** Selector for hostile mobs */
     public static final Selector<Class<? extends Entity>> hostile = new Selector<Class<? extends Entity>>(){{
         for (Biome biome : Biome.values()) {
             add(biome, EntitySkeleton.class);
@@ -56,17 +60,26 @@ public class Mobs {
         add(Method.AFLOAT, EntityWitch.class);
     }};
 
-    /* Selector for village mobs */
+    /** Selector for village mobs */
     public static final Selector<Class<? extends Entity>> village = new Selector<Class<? extends Entity>>(){{
         add(EntityVillager.class);
     }};
 
-    /* Transform entity class to name */
+    /**
+     * Transform entity class to name
+     * @param mob Target mob class
+     * @return Name
+     */
     public static ResourceLocation classToName(Class<? extends Entity> mob) {
         return EntityList.getKey(mob);
     }
 
-    /* Construct entity by class in the world */
+    /**
+     * Construct entity by class in the world
+     * @param world Target world
+     * @param mob Target mob class
+     * @return Spawned entity
+     * */
     public static Entity construct(World world, Class<? extends Entity> mob) {
         return EntityList.newEntity(mob, world);
     }

@@ -23,10 +23,20 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-/* Tile entities controller */
+/**
+ * Tile entities controller
+ * @author  Ternsip
+ * @since JDK 1.6
+ */
+@SuppressWarnings("unused")
 public class Tiles {
 
-    /* Load tile entity data from NBT tag */
+    /**
+     * Load tile entity data from NBT tag
+     * @param tile Target tile
+     * @param tag Tag to load
+     * @param seed Loading seed
+     */
     public static void load(TileEntity tile, NBTTagCompound tag, long seed) {
         if (tile == null) {
             return;
@@ -64,11 +74,15 @@ public class Tiles {
         }
         if (tile instanceof TileEntityNote) {
             load((TileEntityNote)tile, tag, seed);
-            return;
         }
     }
 
-    /* Load chest data from NBT tag */
+    /**
+     * Load chest data from NBT tag
+     * @param chest Target chest
+     * @param tag tag to load
+     * @param seed Loading seed
+     */
     private static void load(TileEntityChest chest, NBTTagCompound tag, long seed) {
         Random random = new Random(seed);
         if (Configurator.LOOT_CHANCE < random.nextDouble()) {
@@ -85,7 +99,7 @@ public class Tiles {
                 Item item = Utils.select(Items.items.select(iPattern), random.nextLong());
                 byte cnt = items.getCompoundTagAt(i).getByte("Count");
                 int dmg = items.getCompoundTagAt(i).getShort("Damage");
-                if (item != null && cnt > 0 && cnt <= Items.itemMaxStack(item) && dmg >= 0 && dmg <= Items.itemMaxMeta(item)) {
+                if (item != null && cnt > 0 && cnt <= Items.itemMaxStack(item) && Items.getPossibleMeta(item).contains(dmg)) {
                     forceItems.add(new ItemStack(item, cnt, dmg));
                 }
             }
@@ -104,7 +118,10 @@ public class Tiles {
             if (item == null) {
                 continue;
             }
-            int stackMeta = random.nextInt(Math.abs(Items.itemMaxMeta(item)) + 1);
+            Integer stackMeta = Utils.select(Items.getPossibleMeta(item), random.nextLong());
+            if (stackMeta == null) {
+                continue;
+            }
             if (idx < forceItems.size()) {
                 item = forceItems.get(idx).getItem();
                 stackMeta = forceItems.get(idx).getItemDamage();
@@ -115,7 +132,12 @@ public class Tiles {
         }
     }
 
-    /* Load mob-spawner data from NBT tag */
+    /**
+     * Load mob-spawner data from NBT tag
+     * @param spawner Target spawner
+     * @param tag tag to load
+     * @param seed Loading seed
+     */
     private static void load(TileEntityMobSpawner spawner, NBTTagCompound tag, long seed) {
         Random random = new Random(seed);
         MobSpawnerBaseLogic logic = spawner.getSpawnerBaseLogic();
@@ -134,7 +156,12 @@ public class Tiles {
         }
     }
 
-    /* Load sign data from NBT tag */
+    /**
+     * Load sign data from NBT tag
+     * @param sign Target sign
+     * 0@param tag tag to load
+     * @param seed Loading seed
+     */
     private static void load(TileEntitySign sign, NBTTagCompound tag, long seed) {
         if (tag == null) {
             return;
@@ -149,7 +176,12 @@ public class Tiles {
         }
     }
 
-    /* Load inventory data from NBT tag */
+    /**
+     * Load inventory data from NBT tag
+     * @param inventory Target inventory
+     * @param tag tag to load
+     * @param seed Loading seed
+     */
     private static void load(IInventory inventory, NBTTagCompound tag, long seed) {
         if (tag == null || !Configurator.NATIVE_LOOT) {
             return;
@@ -166,13 +198,18 @@ public class Tiles {
             int damage = items.getCompoundTagAt(i).getShort("Damage");
             int slot = stackTag.hasKey("Slot", Constants.NBT.TAG_BYTE) ? stackTag.getByte("Slot") : i;
             slot = (slot < 0 || slot >= inventory.getSizeInventory()) ? i : slot;
-            if (item != null && count > 0) {
+            if (item != null && count > 0 && Items.getPossibleMeta(item).contains(damage)) {
                 inventory.setInventorySlotContents(slot, new ItemStack(item, count, damage));
             }
         }
     }
 
-    /* Load command data from NBT tag */
+    /**
+     * Load command data from NBT tag
+     * @param commandBlock Target command block
+     * @param tag tag to load
+     * @param seed Loading seed
+     */
     private static void load(TileEntityCommandBlock commandBlock, NBTTagCompound tag, long seed) {
         if (tag == null) {
             return;
@@ -188,13 +225,23 @@ public class Tiles {
         }
     }
 
-    /* Load banner data from NBT tag */
+    /**
+     * Load banner data from NBT tag
+     * @param banner Target banner
+     * @param tag tag to load
+     * @param seed Loading seed
+     */
     private static void load(TileEntityBanner banner, NBTTagCompound tag, long seed) {
         Random random = new Random(seed);
         banner.setItemValues(new ItemStack(Blocks.WOOL, 1, random.nextInt(16)), false);
     }
 
-    /* Load comparator data from NBT tag */
+    /**
+     * Load comparator data from NBT tag
+     * @param comparator Target comparator
+     * @param tag tag to load
+     * @param seed Loading seed
+     */
     private static void load(TileEntityComparator comparator, NBTTagCompound tag, long seed) {
         if (tag == null) {
             return;
@@ -203,7 +250,12 @@ public class Tiles {
         comparator.setOutputSignal(tag.getInteger("OutputSignal"));
     }
 
-    /* Load pot data from NBT tag */
+    /**
+     * Load pot data from NBT tag
+     * @param pot Target pot
+     * @param tag tag to load
+     * @param seed Loading seed
+     */
     private static void load(TileEntityFlowerPot pot, NBTTagCompound tag, long seed) {
         if (tag == null) {
             return;
@@ -220,7 +272,12 @@ public class Tiles {
         }
     }
 
-    /* Load note data from NBT tag */
+    /**
+     * Load note data from NBT tag
+     * @param note Target note
+     * @param tag tag to load
+     * @param seed Loading seed
+     */
     private static void load(TileEntityNote note, NBTTagCompound tag, long seed) {
         if (tag == null) {
             return;

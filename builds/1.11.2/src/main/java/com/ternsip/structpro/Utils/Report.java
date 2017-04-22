@@ -2,50 +2,79 @@ package com.ternsip.structpro.Utils;
 
 import com.ternsip.structpro.Structpro;
 
-/* Console message reporter [key = value] */
+/**
+ * Console message reporter [key = value]
+ * @author Ternsip
+ * @since JDK 1.6
+ */
 public class Report {
 
+    /** Report resulting storage */
     private String result = "";
 
-    /* Add new word mapping */
+    /**
+     * Add new word mapping
+     * @param key Posting key
+     * @param value Posting value
+     * @return Self instance
+     */
     public Report post(String key, String value) {
         result = result + combine(key, value);
         return this;
     }
 
-    /* Add new word mapping */
+    /**
+     * Add new word mapping
+     * @param key Prefixing key
+     * @param value Prefixing value
+     * @return Self instance
+     */
     public Report pref(String key, String value) {
         result = combine(key, value) + result;
         return this;
     }
 
-    /* Add new word mapping */
+    /**
+     * Post another report to the end
+     * @param report Report to post
+     * @return Self instance
+     */
     public Report post(Report report) {
-        result = result + report.getResult();
+        result = result + report.result;
         return this;
     }
 
-    /* Add new word mapping */
+    /**
+     * Prefix another report to start
+     * @param report Report to prefix
+     * @return Self instance
+     */
     public Report pref(Report report) {
-        result = report.getResult() + result;
+        result = report.result + result;
         return this;
     }
 
-    private String getResult() {
-        return result;
-    }
-
-    /* Combine into one */
+    /**
+     * Combine into one
+     * @param key Combining key
+     * @param value Combining value
+     * @return Combined key-value
+     */
     private String combine(String key, String value) {
         String k = key == null ? "NULL" : key.replace("\n", "");
         String v = value == null ? "NULL" : value.replace("\n", "");
         return  "[" + k + " = " + v + "]";
     }
 
+    /** Print report to console */
     public void print() {
         System.out.println(toString());
     }
 
+    /**
+     * Convert report to string with mod sign
+     * @return Converted result
+     */
     @Override
     public String toString() {
         return "[" + Structpro.MODNAME + " v" + Structpro.VERSION + "]" + result;

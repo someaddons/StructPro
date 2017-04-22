@@ -8,29 +8,45 @@ import java.util.Map;
 
 
 /**
- * This class transforms block metadata (rotate n times and flip)
- * @author Ternsip (ternsip@gmail.com)
+ * Transforms block metadata
+ * Are able to rotate n times and flip
+ * Directions can be combined with each other using pipe
+ * @author Ternsip
+ * @since JDK 1.6
  */
+@SuppressWarnings({"WeakerAccess"})
 class Directions {
 
-    private static final int UNKNOWN = 0x00;
+    static final int UNKNOWN = 0x00;
     static final int SOUTH = 0x01;
     static final int WEST = 0x02;
     static final int EAST = 0x04;
     static final int NORTH = 0x08;
-    private static final int UP = 0x10;
-    private static final int DOWN = 0x20;
+    static final int UP = 0x10;
+    static final int DOWN = 0x20;
 
+    /** Mapping block rotation type to it meta to direction map */
     private static final Map<BlockType, HashMap<Integer, Integer>> metaToDirection = new HashMap<BlockType, HashMap<Integer, Integer>>();
+
+    /** Mapping block rotation type to it direction to metadata map */
     private static final Map<BlockType, HashMap<Integer, Integer>> directionToMeta = new HashMap<BlockType, HashMap<Integer, Integer>>();
+
+    /** Masks for each block rotation type */
     private static final Map<BlockType, Integer> masks = new HashMap<BlockType, Integer>();
 
+    /** Block rotation type enumeration */
     public enum BlockType {
         LOG, BED, RAIL_NORMAL, RAIL_CURVE, RAIL_ASC, RAIL_POWERED, RAIL_POWERED_ASC, TORCH, STAIR, CHEST, SIGNPOST,
         DOOR, LEVER, BUTTON, REDSTONE_REPEATER, TRAPDOOR, VINE, ANVIL,
         MUSHROOM, MUSHROOM_CAP_CORNER, MUSHROOM_CAP_SIDE, IDLE
     }
 
+    /**
+     * Get block type by block state
+     * @param block Target block
+     * @param meta Block metadata value
+     * @return Block rotation type
+     */
     static BlockType getBlockType(Block block, int meta) {
         if (block instanceof BlockBed || block instanceof BlockPumpkin || block instanceof BlockFenceGate || block instanceof BlockEndPortalFrame || block instanceof BlockTripWireHook || block instanceof BlockCocoa) {
             return BlockType.BED;
@@ -92,10 +108,21 @@ class Directions {
         return BlockType.IDLE;
     }
 
+    /**
+     * Detect if block type is double directed
+     * Double directed blocks have two directions for example south-west
+     * @return Block double directed
+     */
     static boolean isDoubleDirected(BlockType blockType) {
         return blockType == BlockType.MUSHROOM_CAP_CORNER || blockType == BlockType.RAIL_CURVE;
     }
 
+    /**
+     * Get block direction by meta and block type
+     * @param meta Block metadaa
+     * @param blockType Block rotation type
+     * @return Block direction
+     */
     static Integer getDirection(int meta, BlockType blockType) {
         if (metaToDirection.containsKey(blockType)) {
             HashMap<Integer, Integer> metaToDir = metaToDirection.get(blockType);
@@ -106,6 +133,12 @@ class Directions {
         return UNKNOWN;
     }
 
+    /**
+     * Get metadata by block and direction
+     * @param defaultMeta Metadata that will be returned in unefined case
+     * @param direction Block direction
+     * @param blockType block rotation type
+     */
     static Integer getMeta(int defaultMeta, int direction, BlockType blockType) {
         if (directionToMeta.containsKey(blockType)) {
             HashMap<Integer, Integer> biMap = directionToMeta.get(blockType);
@@ -116,10 +149,22 @@ class Directions {
         return defaultMeta;
     }
 
+    /**
+     * Get metadata mask that covers rotations
+     * @param blockType block rotation type
+     * @return Mask that covers rotations
+     */
     static int getMask(BlockType blockType) {
         return masks.containsKey(blockType) ? masks.get(blockType) : 0;
     }
 
+    /**
+     * Add mappings from meta to direction map and block type and mask
+     * In case the opposite direction not exists it will be added automatically
+     * @param metaToDir Metadata to direction map
+     * @param blockType Block rotation type
+     * @param mask Metadata mask that covers rotations
+     */
     private static void addMappings(HashMap<Integer, Integer> metaToDir, BlockType blockType, int mask) {
         HashMap<Integer, Integer> dirToMeta = new HashMap<Integer, Integer>();
         for (Map.Entry<Integer, Integer> entry : metaToDir.entrySet()) {

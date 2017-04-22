@@ -1,5 +1,9 @@
-package com.ternsip.structpro.Logic;
+package com.ternsip.structpro.Universe.Commands;
 
+import com.ternsip.structpro.Logic.Configurator;
+import com.ternsip.structpro.Logic.Construction;
+import com.ternsip.structpro.Logic.Structures;
+import com.ternsip.structpro.Logic.Village;
 import com.ternsip.structpro.Structure.*;
 import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Utils.Report;
@@ -14,13 +18,32 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
-/* Commands evaluator */
+/**
+ * Commands evaluator
+ * @author  Ternsip
+ * @since JDK 1.6
+ */
 class Evaluator {
 
-    /* Undo projections */
+    /** Undo projections */
     private static final ArrayList<Projection> undo = new ArrayList<Projection>();
 
-    /* Paste schematic that has most similar name */
+    /**
+     * Paste schematic that has most similar name
+     * @param world Target world
+     * @param name Structure name
+     * @param posX X starting position
+     * @param posY Y starting position
+     * @param posZ Z starting position
+     * @param rotateX X axis rotation
+     * @param rotateY Y axis rotation
+     * @param rotateZ Z axis rotation
+     * @param flipX X axis flip
+     * @param flipY Y axis flip
+     * @param flipZ Z axis flip
+     * @param village Paste entire village
+     * @return Execution status
+     */
     static String cmdPaste(World world,
                            String name,
                            int posX, int posY, int posZ,
@@ -56,7 +79,7 @@ class Evaluator {
             Projection projection = new Projection(world, structure, posture, System.currentTimeMillis());
             if (posY == 0) {
                 try {
-                    projection = Construction.spawn(world, structure, posX, posZ, System.currentTimeMillis());
+                    projection = Construction.calibrate(world, posX, posZ, System.currentTimeMillis(), structure);
                 } catch (IOException ioe) {
                     Report report = structure.report().pref(new Report().post("NOT SPAWNED", ioe.getMessage()));
                     report.print();
@@ -71,7 +94,18 @@ class Evaluator {
         }
     }
 
-    /* Save schematic */
+    /**
+     * Save schematic
+     * @param world Target world
+     * @param name Structure name
+     * @param posX X starting position
+     * @param posY Y starting position
+     * @param posZ Z starting position
+     * @param width X axis size
+     * @param height Y axis size
+     * @param length Z axis size
+     * @return Execution status
+     */
     static String cmdSave(World world, String name, int posX, int posY, int posZ, int width, int height, int length) {
         Report report = new Report()
                 .post("WORLD FRAGMENT", name)
@@ -91,7 +125,10 @@ class Evaluator {
         return report.toString();
     }
 
-    /* Print command help information */
+    /**
+     * Print command help information
+     * @return Command execution status
+     */
     static String cmdHelp() {
         return "You can pass arguments by name" +
                 "\n" +
@@ -105,7 +142,10 @@ class Evaluator {
                 "UNDO LAST ACTION: /spro undo";
     }
 
-    /* Undo all session history */
+    /**
+     * Undo all session history
+     * @return Command execution status
+     */
     static String cmdUndo() {
         if (undo.isEmpty()) {
             return "No undo data";
@@ -119,7 +159,10 @@ class Evaluator {
         return "Undo done";
     }
 
-    /* Save undo data to history for projection */
+    /**
+     * Save undo data to history for projection
+     * @param projection Projection to save
+     */
     private static void saveUndo(Projection projection) {
         if (projection.getBlueprint() instanceof Structure) {
             Posture mp = projection.getPosture().extend(Structure.MELT, Structure.MELT, Structure.MELT);

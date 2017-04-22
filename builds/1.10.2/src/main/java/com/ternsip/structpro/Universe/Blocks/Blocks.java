@@ -13,11 +13,16 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-/* Blocks control class */
-@SuppressWarnings({"WeakerAccess", "deprecation"})
+/**
+ * Blocks control class
+ * Provide block transformation
+ * @author Ternsip
+ * @since JDK 1.6
+ */
+@SuppressWarnings({"WeakerAccess", "deprecation", "unused"})
 public class Blocks extends net.minecraft.init.Blocks {
 
-    /* Default vanilla blocks by classical indices */
+    /** Default vanilla blocks by classical indices */
     private static final Block[] blocks = new ArrayList<Block>() {{
 
         /* Construct default vanilla blocks */
@@ -312,73 +317,126 @@ public class Blocks extends net.minecraft.init.Blocks {
         }
     }}.toArray(new Block[256]);
 
-    /* Check if the block have vanilla index */
+    /**
+     * Check if the block have vanilla index
+     * @param blockID Block index
+     * @return True if block has vanilla ID
+     */
     public static boolean isVanilla(int blockID) {
         return blockID >= 0 && blockID < 256;
     }
 
-    /* Block id from block*/
+    /**
+     * Block id from block
+     * @param block Target block
+     * @return Block index
+     */
     public static int getID(Block block) {
         return Block.getIdFromBlock(block);
     }
 
-    /* Block from block id */
+    /**
+     * Vanilla block from block id
+     * @param blockID Block index
+     * @return Minecraft native block or null
+     */
     public static Block getBlockVanilla(int blockID) {
         return isVanilla(blockID) ? blocks[blockID] : null;
     }
 
-    /* Block from block id */
+    /**
+     * Get block from block id
+     * @param blockID Block index
+     * @return Converted block
+     */
     public static Block getBlock(int blockID) {
         return Block.getBlockById(blockID);
     }
 
-    /* Block from block state */
+    /**
+     * Get block from block state
+     * @param state Block state
+     * @return Extracted block
+     */
     public static Block getBlock(IBlockState state) {
         return state.getBlock();
     }
 
-    /* Block id from block state */
-    public static int getID(IBlockState block) {
-        return getID(getBlock(block));
+    /**
+     * Get Block id from block state
+     * @param state Block state
+     * @return Block index
+     */
+    public static int getID(IBlockState state) {
+        return getID(getBlock(state));
     }
 
-    /* Block state from block */
-    public static IBlockState state(Block block) {
+    /**
+     * Get Block state from block
+     * @param block Target block
+     * @return Block state
+     */
+    public static IBlockState getState(Block block) {
         return block.getDefaultState();
     }
 
-    /* Block metadata from block state */
+    /**
+     * Get Block metadata from block state
+     * @param state Target block state
+     * @return index
+     */
     public static int getMeta(IBlockState state) {
         return state.getBlock().getMetaFromState(state);
     }
 
-    /* Block state from block and metadata */
-    public static IBlockState state(Block block, int meta) {
-        IBlockState result = state(block);
+    /**
+     * Get Block state from block and metadata
+     * @param block Target block
+     * @param meta Block metadata
+     * @return Converted block state
+     */
+    public static IBlockState getState(Block block, int meta) {
+        IBlockState result = getState(block);
         try {
             result = block.getStateFromMeta(meta);
         } catch (Throwable ignored) {}
         return result;
     }
 
-    /* Get light level that emits block state */
+    /**
+     * Get light level that emits block state
+     * @param state Target block state
+     * @return block light value
+     */
     public static int getLight(IBlockState state) {
         return state.getLightValue();
     }
 
-    /* Get opacity of block state */
+    /**
+     * Get opacity of block state
+     * @param state Target block state
+     * @return Block opacity level
+     */
     public static int getOpacity(IBlockState state) {
         return state.getLightOpacity();
     }
 
-    /* Get light level that emits block */
+    /**
+     * Get light level that emits block
+     * @param block Target block
+     * @return block light value
+     */
     public static int getLight(Block block) {
-        return state(block).getLightValue();
+        return getState(block).getLightValue();
     }
 
-    /* Get opacity of block */
+    /**
+     * Get light level that emits block
+     * @param block Target block
+     * @return Block opacity level
+     */
     public static int getOpacity(Block block) {
-        return state(block).getLightOpacity();
+        return getState(block).getLightOpacity();
     }
 
 }

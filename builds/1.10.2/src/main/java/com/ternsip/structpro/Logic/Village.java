@@ -11,11 +11,21 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
-/* Village constructor */
-class Village extends Construction {
+/**
+ * Village constructor
+ * @author  Ternsip
+ * @since JDK 1.6
+ */
+public class Village extends Construction {
 
-    /* Process chunk generations */
-    static ArrayList<Projection> generate(final World world, final int chunkX, final int chunkZ) {
+    /**
+     * Obtain array of village projections calibrated inside chunk
+     * @param world Target world object
+     * @param chunkX Chunk X coordinate
+     * @param chunkZ Chunk Z coordinate
+     * @return Array of spawned projections
+     */
+    public static ArrayList<Projection> obtain(final World world, final int chunkX, final int chunkZ) {
         return new ArrayList<Projection>() {{
             for (int drop = drops(world, chunkX, chunkZ); drop > 0; --drop) {
                 Random random = getRandom(world, chunkX, chunkZ);
@@ -27,8 +37,16 @@ class Village extends Construction {
         }};
     }
 
-    /* Generate projection set combined from village that spawned in specific position */
-    static ArrayList<Projection> combine(final World world, final ArrayList<Structure> village, final int chunkX, final int chunkZ, final long seed) {
+    /**
+     * Generate projection set combined from village that spawned in specific position
+     * @param world Target world object
+     * @param village Village structures
+     * @param chunkX Chunk X coordinate
+     * @param chunkZ Chunk Z coordinate
+     * @param seed Combination seed
+     * @return Array of spawned projections
+     */
+    public static ArrayList<Projection> combine(final World world, final ArrayList<Structure> village, final int chunkX, final int chunkZ, final long seed) {
         ArrayList<Projection> result = new ArrayList<Projection>();
         Random random = new Random(seed);
         String villageName = village.get(0).getFile().getParent();
@@ -46,7 +64,7 @@ class Village extends Construction {
             int curSize = Math.max(candidate.getWidth(), candidate.getLength());
             maxSize = Math.max(maxSize, curSize);
             offsetX += maxSize;
-            Projection projection = construct(world, candidate, realX, realZ, random.nextLong());
+            Projection projection = construct(world, realX, realZ, random.nextLong(), candidate);
             if (projection != null) {
                 result.add(projection);
             }
@@ -55,7 +73,13 @@ class Village extends Construction {
         return result;
     }
 
-    /* Get drops in certain chunk in the world */
+    /**
+     * Get drops in certain chunk in the world
+     * @param world Target world object
+     * @param chunkX Chunk X coordinate
+     * @param chunkZ Chunk Z coordinate
+     * @return Amount of villages spawned in chunk
+     */
     private static int drops(World world, int chunkX, int chunkZ) {
         if (outsideBorder(chunkX, chunkZ)) {
             return 0;
@@ -71,7 +95,13 @@ class Village extends Construction {
         return (int) density + (random.nextDouble() <= (density - (int) density) ? 1 : 0);
     }
 
-    /* Get random for world chunk */
+    /**
+     * Get random for world chunk
+     * @param world Target world object
+     * @param chunkX Chunk X coordinate
+     * @param chunkZ Chunk Z coordinate
+     * @return Random generator
+     */
     private static Random getRandom(World world, int chunkX, int chunkZ) {
         long seed = world.getSeed();
         long chunkIndex = (long)chunkX << 32 | chunkZ & 0xFFFFFFFFL;

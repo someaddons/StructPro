@@ -2,7 +2,6 @@ package com.ternsip.structpro.Structure;
 
 import com.ternsip.structpro.Universe.Blocks.Blocks;
 import com.ternsip.structpro.Universe.Universe;
-import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -14,42 +13,52 @@ import net.minecraftforge.common.util.Constants;
 import java.io.File;
 import java.io.IOException;
 
-/* Schematic - Classical Minecraft schematic storage. Provide data access and world control */
+/**
+ * Schematic - Classical Minecraft schematic storage
+ * Provide controls for schematic
+ * @author  Ternsip
+ * @since JDK 1.6
+ */
 public class Blueprint extends Volume {
 
-    /* Tag file size limit in bytes */
+    /** Tag file size limit in bytes */
     private static final long TAG_FILE_SIZE_LIMIT = 1024 * 1024 * 16;
 
-    /* Blueprint abstract limitations */
+    /** Volume width limitation */
     private static final int WIDTH_LIMIT = 1024;
+
+    /** Volume height limitation */
     private static final int HEIGHT_LIMIT = 256;
+
+    /** Volume length limitation */
     private static final int LENGTH_LIMIT = 1024;
+
+    /** Volume size limitation */
     private static final long VOLUME_LIMIT = 256 * 256 * 256;
 
+    /** Block ID array */
     short[] blocks;
+
+    /** Block metadata array */
     byte[] meta;
+
+    /** Tag array */
     NBTTagCompound[] tiles;
 
+    /** Empty constructor */
     Blueprint() {}
 
+    /**
+     * Construct from extracted world part
+     * @param world World instance
+     * @param start Starting position
+     * @param volume Volume dimensions
+     */
     public Blueprint(World world, BlockPos start, Volume volume) {
-        loadSchematic(world, start, volume);
-    }
-
-    /* Load schematic from file */
-    void loadSchematic(File file) throws IOException {
-        if (file.length() > TAG_FILE_SIZE_LIMIT) {
-            throw new IOException("File is too large: " + file.length());
-        }
-        readSchematic(Utils.readTags(file));
-    }
-
-    /* Load schematic from world fragment */
-    private void loadSchematic(World world, BlockPos start, Volume volume) {
         this.width = volume.getWidth();
         this.height = volume.getHeight();
         this.length = volume.getLength();
-        int size = getVolume();
+        int size = getSize();
         blocks = new short[size];
         meta = new byte[size];
         tiles = new NBTTagCompound[size];
@@ -74,12 +83,32 @@ public class Blueprint extends Volume {
         }
     }
 
-    /* Save blueprint as schematic */
+    /**
+     * Load schematic from file
+     * @param file File to load
+     * @throws IOException If schematic can not be loaded
+     */
+    void loadSchematic(File file) throws IOException {
+        if (file.length() > TAG_FILE_SIZE_LIMIT) {
+            throw new IOException("File is too large: " + file.length());
+        }
+        readSchematic(Utils.readTags(file));
+    }
+
+    /**
+     * Save as schematic to file
+     * @param file Destination file
+     * @throws IOException If schematic can not be saved
+     */
     public void saveSchematic(File file) throws IOException {
         Utils.writeTags(file, getSchematic());
     }
 
-    /* Read Schematic blueprint from tags */
+    /**
+     * Read from schematic tag
+     * @param tag Control tag
+     * @throws IOException If schematic tag can not be read
+     */
     private void readSchematic(NBTTagCompound tag) throws IOException {
         String materials = tag.getString("Materials");
         if (!materials.equals("Alpha")) {
@@ -96,7 +125,7 @@ public class Blueprint extends Volume {
         if (width > WIDTH_LIMIT || height > HEIGHT_LIMIT || length > LENGTH_LIMIT) {
             throw new IOException("Schematic dimensions are too large: " + dimensions + "/" + dimLimit);
         }
-        int volume = getVolume();
+        int volume = getSize();
         if (volume > VOLUME_LIMIT) {
             throw new IOException("Schematic is too big: " + volume + "/" + VOLUME_LIMIT);
         }
@@ -124,7 +153,10 @@ public class Blueprint extends Volume {
         }
     }
 
-    /* Read Schematic blueprint from tags */
+    /**
+     * Write to schematic tags
+     * @return Control tag
+     */
     private NBTTagCompound getSchematic() {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setString("Materials", "Alpha");
@@ -148,7 +180,12 @@ public class Blueprint extends Volume {
         return tag;
     }
 
-    /* Combine all 8b-blocksID and 8b-addBlocks to 16b-block */
+    /**
+     * Combine all 8b-blocksID and 8b-addBlocks to 16b-block
+     * @param blocksID Vanilla block array
+     * @param addBlocks Additional postfix array
+     * @return Combined array of vanilla and additional blocks
+     */
     private static short[] compose(byte[] blocksID, byte[] addBlocks) {
         short[] blocks = new short[blocksID.length];
         for (int index = 0; index < blocksID.length; index++) {
@@ -165,28 +202,27 @@ public class Blueprint extends Volume {
         return blocks;
     }
 
-    /*
-    * Inject blueprint into specific position in the world
-    * Unsafe for cross-versioned data
-    */
+    /**
+     * Inject blueprint into specific position in the world
+     * Unsafe for cross-versioned data
+     * It's not a transaction
+     * @param world World instance
+     * @param posture Transformation state
+     * @param seed Projection seed
+     * @throws IOException If blueprint failed to project
+     */
     void project(World world, Posture posture, long seed) throws IOException {
         for (int ix = 0; ix < width; ++ix) {
             for (int iy = 0; iy < height; ++iy) {
                 for (int iz = 0; iz < length; ++iz) {
                     int index = getIndex(ix, iy, iz);
                     BlockPos worldPos = posture.getWorldPos(ix, iy, iz);
-                    Universe.setBlockState(world, worldPos, Blocks.state(Blocks.getBlock(blocks[index]), meta[index]));
+                    Universe.setBlockState(world, worldPos, Blocks.getState(Blocks.getBlock(blocks[index]), meta[index]));
                     Universe.setTileTag(world, worldPos, tiles[index]);
                 }
             }
         }
-        Universe.checkLight(world, posture);
+        Universe.updateLight(world, posture);
         Universe.notifyPosture(world, posture);
     }
-
-    /* Generate blueprint report */
-    public Report report() {
-        return new Report().post("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]");
-    }
-
 }

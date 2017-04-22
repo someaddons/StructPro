@@ -3,19 +3,23 @@ package com.ternsip.structpro.Universe.Blocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 
-/*
-* Block type classifier enumeration
-* SOIL - ground soil blocks
-* OVERLOOK - plants, stuff, web, fire, decorations, etc.
-* CARDINAL - blocks with cardinal influence
-* LIQUID - liquid blocks
-* LIGHT - blocks that emits light
-* HEAT_RAY - OVERLOOKS + LIQUID
-* GAS - Air, gases, etc.
-* SOP - GAS + LIQUID
-* TRANSPARENT - non solid blocks
-*/
+/**
+ * Block type classifier enumeration
+ * SOIL - ground soil blocks
+ * OVERLOOK - plants, stuff, web, fire, decorations, etc.
+ * CARDINAL - blocks with cardinal influence
+ * LIQUID - liquid blocks
+ * LIGHT - blocks that emits light
+ * HEAT_RAY - OVERLOOKS + LIQUID
+ * GAS - Air, gases, etc.
+ * SOP - GAS + LIQUID
+ * TRANSPARENT - non solid blocks
+ * @author Ternsip
+ * @since JDK 1.6
+ */
+@SuppressWarnings({"unused"})
 public enum Classifier {
+
     SOIL (0x00),
     OVERLOOK (0x01),
     CARDINAL(0x02),
@@ -32,30 +36,62 @@ public enum Classifier {
         this.value = value;
     }
 
-    /* Ground soil blocks */
+    /** Ground soil blocks */
     private static final boolean[][] blocks = new boolean[Classifier.values().length][256];
 
-    /* Check if block of specific class by id */
+    /**
+     * Check if block of specific class by ID
+     * @param type Classifier type
+     * @param blockID Target block ID
+     * @return If class block of type
+     */
     public static boolean isBlock(Classifier type, int blockID) {
         return Blocks.isVanilla(blockID) && blocks[type.value][blockID];
     }
 
-    /* Check if block of specific class by block */
+    /**
+     * Check if block of specific class by ID
+     * @param type Classifier type
+     * @param block Target block
+     * @return If class block of type
+     */
     public static boolean isBlock(Classifier type, Block block) {
         return isBlock(type, Blocks.getID(block));
     }
 
-    /* Check if block of specific class by state */
+    /**
+     * Check if block of specific class by ID
+     * @param type Classifier type
+     * @param state Target block state
+     * @return If class block of type
+     */
     public static boolean isBlock(Classifier type, IBlockState state) {
         return isBlock(type, Blocks.getBlock(state));
     }
 
-    /* Set block class */
+    /**
+     * Set block class by block state
+     * @param type Classifier type
+     * @param state Target block state
+     */
+    private static void setBlock(Classifier type, IBlockState state) {
+        setBlock(type, Blocks.getID(state));
+    }
+
+    /**
+     * Set block class by block
+     * @param type Classifier type
+     * @param block Target block
+     */
     private static void setBlock(Classifier type, Block block) {
         setBlock(type, Blocks.getID(block));
     }
 
-    /* Set block class */
+    /**
+     * Set block class by block ID
+     * @param type Classifier type
+     * @param blockID Target block ID
+     */
     private static void setBlock(Classifier type, int blockID) {
         if (Blocks.isVanilla(blockID)) {
             blocks[type.value][blockID] = true;

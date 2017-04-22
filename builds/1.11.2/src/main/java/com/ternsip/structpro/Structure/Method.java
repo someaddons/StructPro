@@ -2,15 +2,19 @@ package com.ternsip.structpro.Structure;
 
 import java.io.File;
 
-/*
-* Spawn methods
-* Basic - spawn on ground and pass water
-* Underground - spawn under soil stratum
-* Underwater - spawn under water on bottom
-* Sky - spawn floating in the sky
-* Hill - spawn on ground without roughness bias
-*/
+/**
+ * Spawning methods
+ * Have to cover all known structure spawn methods
+ * Basic - calibrate on ground and pass water
+ * Underground - calibrate under soil stratum
+ * Underwater - calibrate under water on bottom
+ * Sky - calibrate floating in the sky
+ * Hill - calibrate on ground without roughness bias
+ * @author Ternsip
+ * @since JDK 1.6
+ */
 public enum Method {
+
     BASIC (0x00, "BASIC"),
     UNDERGROUND (0x01, "UNDERGROUND"),
     UNDERWATER(0x02, "UNDERWATER"),
@@ -21,12 +25,21 @@ public enum Method {
     public final int value;
     public final String name;
 
+    /**
+     * Default method constructor
+     * @param value Method index
+     * @param name Method name
+     */
     Method(int value, String name) {
         this.value = value;
         this.name = name;
     }
 
-    /* Get method by it internal value */
+    /**
+     * Get method by it internal value
+     * @param value Method index
+     * @return The method
+     */
     public static Method valueOf(int value) {
         for (Method sample : Method.values()) {
             if (sample.value == value) {
@@ -36,7 +49,11 @@ public enum Method {
         return BASIC;
     }
 
-    /* Get method by file name */
+    /**
+     * Get method by file name, works only with path
+     * @param file Target file name
+     * @return The method
+     */
     public static Method valueOf(File file) {
         String path = file.getPath().toLowerCase().replace("\\", "/").replace("//", "/");
         if (path.contains("/underground/"))     return Method.UNDERGROUND;

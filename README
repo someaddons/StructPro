@@ -3,7 +3,7 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 2.7
+Latest mod version: 2.8
 Recomened mod version: 2.3+
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
@@ -108,7 +108,7 @@ MAX_CHEST_STACK_SIZE {Integer} [0..64, Recomended 12] Max item stack size for ch
 SPAWN_MOBS {Boolean} [Recomended true] Spawn mobs in generated structures
 MOB_SPAWNERS_EGGS_ONLY {Boolean} [Recomended true] Pasting mob spawners only with mobs that have eggs
 ADDITIONAL_OUTPUT {Boolean} [Recomended true] Print details about schematics loading and failed paste attempts
-IGNORE_LIGHT {Boolean} [Recomended false] Ignore light, enabling may speed-up pasting process but broke light
+TICKER {Boolean}[[Recommended true] Additional World ticks for spawning process
 WORLD_CHUNK_BORDER {Integer} [0..+INF, Measured in chunks, Recomended 4096] Generation border
 SCHEMATICS_FOLDER {File} [Relative path, Use "/", Recomended schematics] Schematics goes this folder
 SPAWN_DIMENSIONS {Set} [Case sensitive, Recomended -1, 0, 1] Allow spawning structures only in this dimensions
@@ -239,6 +239,10 @@ Replace world and chunk caching to direct access
 Fix sky light bugs
 Increase performance
 Added new option TICKER to config that allows additional force ticking
+Version 2.8 (release) Item missingno fix
+Prevent inventories to contain bad items with missing texture
+Documented code
+Improve command shortcuts (for example now you can use /spro save w=5 h=10 l=20)
  
 Known bugs
 ----------------------------------------------

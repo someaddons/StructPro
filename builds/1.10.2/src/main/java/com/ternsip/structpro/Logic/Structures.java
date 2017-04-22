@@ -18,15 +18,28 @@ import java.util.Stack;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
 
-/* Structures control class */
-class Structures {
+/**
+ * Structure static storage
+ * Holds all loaded structures in selectors
+ * Are able to load structures on fly
+ * @author  Ternsip
+ * @since JDK 1.6
+ */
+public class Structures {
 
-    /* Selector for all types of structures */
-    static final Selector<Structure> structures = new Selector<Structure>();
-    static final Selector<ArrayList<Structure>> villages = new Selector<ArrayList<Structure>>();
-    static final Selector<Structure> saves = new Selector<Structure>();
+    /** Selector for structures */
+    public static final Selector<Structure> structures = new Selector<Structure>();
 
-    /* Register new structure */
+    /** Selector for villages */
+    public static final Selector<ArrayList<Structure>> villages = new Selector<ArrayList<Structure>>();
+
+    /** Selector for savings */
+    public static final Selector<Structure> saves = new Selector<Structure>();
+
+    /**
+     * Register structure to storage
+     * @param structure Structure instance
+     */
     private static void load(final Structure structure) {
         if (structure.getFile().getPath().contains(Configurator.getSchematicsSavesFolder().getPath())) {
             saves.add(structure.getMethod(), structure);
@@ -49,8 +62,12 @@ class Structures {
         }
     }
 
-    /* Load structures from folder */
-    static void load(File folder) {
+    /**
+     * Load all structures from folder or from file
+     * Works in parallel threads
+     * @param folder Folder with structures or Structure File to load
+     */
+    public static void load(File folder) {
         new Report().post("LOADING SCHEMATICS FROM", folder.getPath()).print();
         Stack<File> folders = new Stack<File>();
         folders.add(folder);
@@ -99,7 +116,10 @@ class Structures {
         sortVillages();
     }
 
-    /* Sort village structures by size */
+    /**
+     * Sort village structures by size
+     * Firstly goes structures with smallest clearance
+     */
     private static void sortVillages() {
         for (ArrayList<Structure> village : villages.select()) {
             Collections.sort(village, new Comparator<Structure>(){
@@ -114,7 +134,6 @@ class Structures {
         }
     }
 
-    /* Statical initialization */
     static {
         long startTime = System.currentTimeMillis();
         load(Configurator.SCHEMATIC_FOLDER);

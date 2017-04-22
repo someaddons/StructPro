@@ -4,22 +4,35 @@ import com.ternsip.structpro.Universe.Blocks.Classifier;
 import com.ternsip.structpro.Universe.Universe;
 import net.minecraft.world.World;
 
-/* Face of region */
+/**
+ * Region statistics calculator
+ * @author Ternsip
+ * @since JDK 1.6
+ */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class Region {
 
-    /* Characterizes roughness */
+    /** Characterizes roughness */
     private double variance;
 
-    /* Average blocks height */
+    /** Average blocks height */
     private double average;
 
-    /* Max block height in region */
+    /** Max block height in region */
     private int major;
 
-    /* Min block height in region */
+    /** Min block height in region */
     private int minor;
 
+    /**
+     * Construct region calculated over area according classifier
+     * @param world Target world
+     * @param startX Starting X position
+     * @param startZ Starting Z position
+     * @param sizeX Size on X axis
+     * @param sizeZ Size on Z axis
+     * @param classifier passing block classifier
+     */
     public Region(World world, int startX, int startZ, int sizeX, int sizeZ, Classifier classifier) {
         variance = 0;
         average = 0;

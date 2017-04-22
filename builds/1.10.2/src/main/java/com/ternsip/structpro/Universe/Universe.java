@@ -30,11 +30,21 @@ import java.util.Random;
 import static com.ternsip.structpro.Universe.Blocks.Classifier.GAS;
 import static com.ternsip.structpro.Universe.Blocks.Classifier.SOIL;
 
-/* Memoize world block communication */
+/**
+ * Fast universal accessor for world-based interaction
+ * @author Ternsip
+ * @since JDK 1.6
+ */
 @SuppressWarnings({"WeakerAccess"})
 public class Universe {
 
-    /* Get block storage array for y-coordinate */
+    /**
+     * Get block storage array for y-coordinate
+     * Returns null in case block is outside
+     * @param chunk Target chunk
+     * @param y Block height inside chunk
+     * @return Block storage or null
+     */
     private static ExtendedBlockStorage getStorage(Chunk chunk, int y) {
         ExtendedBlockStorage[] storage = chunk.getBlockStorageArray();
         if (y < 0 || y >= 256) {
@@ -47,12 +57,23 @@ public class Universe {
         return storage[i];
     }
 
-    /* Get block biome in the world */
-    public static Biome getBiome(World world, BlockPos blockPos) {
-        return world.getBiome(blockPos);
+    /**
+     * Get block biome in the world
+     * @param world Target world
+     * @param pos Block position
+     * @return Mineraft native biome
+     */
+    public static Biome getBiome(World world, BlockPos pos) {
+        return world.getBiome(pos);
     }
 
-    /* Spawn entity in the world */
+    /**
+     * Spawn entity in the world
+     * @param world Target world
+     * @param mob Mob class to spawn
+     * @param pos Block position where entity going to spawn
+     * @return Spawned entity
+     */
     public static Entity spawnEntity(World world, Class<? extends Entity> mob, BlockPos pos) {
         Entity entity = Mobs.construct(world, mob);
         entity.setLocationAndAngles(pos.getX() + 0.5, pos.getY() + 0.1, pos.getZ() + 0.5, new Random(System.currentTimeMillis()).nextFloat() * 360.0F, 0.0F);
@@ -61,22 +82,41 @@ public class Universe {
         return entity;
     }
 
-    /* Remove tile entity in the world */
-    public static void removeTileEntity(World world, BlockPos blockPos) {
-        world.removeTileEntity(blockPos);
+    /**
+     * Remove tile entity in the world
+     * @param world Target world
+     * @param pos Block position over tile entity
+     */
+    public static void removeTileEntity(World world, BlockPos pos) {
+        world.removeTileEntity(pos);
     }
 
-    /* Get tile entity from the world */
+    /**
+     * Get tile entity from the world
+     * @param world Target world
+     * @param pos Block position over tile entity
+     * @return Tile entity on the block
+     */
     public static TileEntity getTileEntity(World world, BlockPos pos) {
         return world.getTileEntity(pos);
     }
 
-    /* Set tile entity from the world */
-    public static void setTileEntity(World world, BlockPos pos, TileEntity tileEntity) {
-        world.setTileEntity(pos, tileEntity);
+    /**
+     * Set tile entity from the world
+     * @param world Target world
+     * @param pos Block position over tile entity
+     * @param tile Tile entity to set
+     */
+    public static void setTileEntity(World world, BlockPos pos, TileEntity tile) {
+        world.setTileEntity(pos, tile);
     }
 
-    /* Set tile entity as NBT tag */
+    /**
+     * Set tile entity as NBT tag
+     * @param world Target world
+     * @param pos Block position over tile entity
+     * @param tile Tile entity NBT tag
+     */
     public static void setTileTag(World world, BlockPos pos, NBTTagCompound tile) {
         if (tile == null) {
             return;
@@ -90,13 +130,23 @@ public class Universe {
         Universe.setTileEntity(world, pos, entity);
     }
 
-    /* Get tile entity as NBT tag */
+    /**
+     * Get tile entity as NBT tag
+     * @param world Target world
+     * @param pos Block position over tile entity
+     * @return Serialized to NBT tag tile entity
+     */
     public static NBTTagCompound getTileTag(World world, BlockPos pos) {
         TileEntity tile = getTileEntity(world, pos);
         return tile == null ? null : tile.serializeNBT();
     }
 
-    /* Set block state in the world */
+    /**
+     * Set block state in the world
+     * @param world Target world
+     * @param pos Block position
+     * @param state Block state to set
+     */
     public static void setBlockState(World world, BlockPos pos, IBlockState state) {
         ExtendedBlockStorage storage = getStorage(world.getChunkFromBlockCoords(pos), pos.getY());
         if (storage != null) {
@@ -105,31 +155,49 @@ public class Universe {
         }
     }
 
-    /* Get block state from the world */
+    /**
+     * Get block state from the world
+     * @param world Target world
+     * @param pos Block position
+     * @return Block state
+     */
     public static IBlockState getBlockState(World world, BlockPos pos) {
         ExtendedBlockStorage storage = getStorage(world.getChunkFromBlockCoords(pos), pos.getY());
         if (storage != null) {
             return storage.get(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
         }
-        return Blocks.state(Blocks.AIR);
+        return Blocks.getState(Blocks.AIR);
     }
 
-    /* Set light for block */
+    /**
+     * Set light for block
+     * @param world Target world
+     * @param pos Block position
+     * @param light Block light value
+     * @param sky Set for sky
+     */
+    @SuppressWarnings({"ConstantConditions"})
     public static void setLight(World world, BlockPos pos, int light, boolean sky) {
         ExtendedBlockStorage storage = getStorage(world.getChunkFromBlockCoords(pos), pos.getY());
         if (storage != null) {
             if (sky) {
-                if (storage.getSkylightArray() == null) {
-                    return;
+                if (storage.getSkylightArray() != null) {
+                    storage.setExtSkylightValue(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15, light);
                 }
-                storage.setExtSkylightValue(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15, light);
             } else {
                 storage.setExtBlocklightValue(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15, light);
             }
         }
     }
 
-    /* Get height passed by classifier */
+    /**
+     * Get height passed by classifier
+     * @param world Target world
+     * @param classifier Skip block of this class
+     * @param x X-block position
+     * @param z Z-block position
+     * @return Height level
+     */
     public static int getHeight(World world, Classifier classifier, int x, int z) {
         int y = 255;
         String dimName = Universe.getDimensionName(world);
@@ -141,13 +209,24 @@ public class Universe {
         return y + 1;
     }
 
-    /* Play sound at the world */
+    /**
+     * Play sound at the world
+     * @param world Target world
+     * @param pos Block position to play
+     * @param event Sound event
+     * @param category Sound category
+     * @param volume volume level
+     */
     public static void sound(World world, BlockPos pos, SoundEvent event, SoundCategory category, float volume) {
         Random random = new Random(System.currentTimeMillis());
         world.playSound(null, pos, event, category, volume, 2.6F + (random.nextFloat() - random.nextFloat()) * 0.8F);
     }
 
-    /* Updates queued data */
+    /**
+     * Updates queued data
+     * @param world Target world
+     * @param pos Block position to update
+     */
     public static void updateBlock(World world, BlockPos pos) {
         ExtendedBlockStorage storage = getStorage(world.getChunkFromBlockCoords(pos), pos.getY());
         if (storage != null) {
@@ -160,7 +239,11 @@ public class Universe {
         }
     }
 
-    /* Notify all nearby players about chunk changes */
+    /**
+     * Notify all nearby players about chunk changes
+     * @param world Target world
+     * @param chunk Chunk to notify
+     */
     public static void notifyChunk(World world, Chunk chunk) {
         for (EntityPlayer player : world.playerEntities) {
             if (player instanceof EntityPlayerMP) {
@@ -173,7 +256,11 @@ public class Universe {
         }
     }
 
-    /* Updates queued data */
+    /**
+     * Updates queued data
+     * @param world Target world
+     * @param posture Posture area going to update
+     */
     public static void notifyPosture(World world, Posture posture) {
         if (Configurator.TICKER) {
             world.tickUpdates(true);
@@ -200,17 +287,29 @@ public class Universe {
         }
     }
 
-    /* Get dimension name of the world */
+    /**
+     * Get dimension name of the world
+     * @param world Target world
+     * @return Dimension name
+     */
     public static String getDimensionName(World world) {
         return world.provider.getDimensionType().getName();
     }
 
-    /* Get dimension id from the world */
+    /**
+     * Get dimension id from the world
+     * @param world Target world
+     * @return Dimension index
+     */
     public static int getDimensionID(World world) {
         return world.provider.getDimension();
     }
 
-    /* Fix grass */
+    /**
+     * Fix grass and dirt
+     * @param world Target world
+     * @param posture Posture area going to fix
+     */
     public static void grassFix(World world, Posture posture) {
         for (int x = posture.getPosX(); x <= posture.getEndX(); ++x) {
             for (int z = posture.getPosZ(); z <= posture.getEndZ(); ++z) {
@@ -219,11 +318,11 @@ public class Universe {
                 for (int y = 255; y >= 0; --y) {
                     Block curBlock = Blocks.getBlock(getBlockState(world, new BlockPos(x, y, z)));
                     if (curBlock == Blocks.GRASS && Classifier.isBlock(SOIL, block)) {
-                        setBlockState(world, new BlockPos(x, y, z), Blocks.state(Blocks.DIRT));
+                        setBlockState(world, new BlockPos(x, y, z), Blocks.getState(Blocks.DIRT));
                         block = Blocks.DIRT;
                     } else if (!grassed && curBlock == Blocks.DIRT && !Classifier.isBlock(SOIL, block)) {
                         grassed = true;
-                        setBlockState(world, new BlockPos(x, y, z), Blocks.state(Blocks.GRASS));
+                        setBlockState(world, new BlockPos(x, y, z), Blocks.getState(Blocks.GRASS));
                         block = Blocks.GRASS;
                     } else {
                         block = curBlock;
@@ -233,39 +332,38 @@ public class Universe {
         }
     }
 
-    /* Recheck world light in region */
-    public static void checkLight(World world, Posture posture) {
+    /**
+     * Recheck world light in region
+     * @param world Target world
+     * @param posture Posture area going to update light
+     */
+    public static void updateLight(World world, Posture posture) {
         int wx = posture.getPosX(), wy = posture.getPosY(), wz = posture.getPosZ();
         int width = posture.getSizeX(), height = posture.getSizeY(), length = posture.getSizeZ();
         Volume volume = new Volume(width, height, length);
-        int[] light = new int[volume.getVolume()];
-        int[] opacity = new int[volume.getVolume()];
+        int[] light = new int[volume.getSize()];
+        int[] opacity = new int[volume.getSize()];
         int[][] heights = new int[width][length];
         for (int x = 0; x < heights.length; ++x) {
             for (int z = 0; z < heights[x].length; ++z) {
                 heights[x][z] = getHeight(world, GAS, wx + x, wz + z);
             }
         }
-        Queue<Integer> queue = new ArrayDeque<Integer>();
-        for (int x = 0; x < width; ++x) {
-            for (int z = 0; z < length; ++z) {
-                for (int y = 0; y < height; ++y) {
-                    int index = volume.getIndex(x, y, z);
-                    IBlockState state = getBlockState(world, new BlockPos(wx + x, wy + y, wz + z));
-                    opacity[index] = Math.max(Blocks.getOpacity(state), 1);
-                    light[index] = Blocks.getLight(state);
-                    if (light[index] > 0) {
-                        queue.add(index);
-                    }
-                }
-            }
-        }
+        /* Iterate 2 times first - for block light, second - for sky light */
         for (int k = 0; k < 2; ++k) {
-            if (k == 1) {
-                for (int x = 0; x < width; ++x) {
-                    for (int z = 0; z < length; ++z) {
-                        for (int y = 0; y < height; ++y) {
-                            int index = volume.getIndex(x, y, z);
+            Queue<Integer> queue = new ArrayDeque<Integer>();
+            for (int x = 0; x < width; ++x) {
+                for (int z = 0; z < length; ++z) {
+                    for (int y = 0; y < height; ++y) {
+                        int index = volume.getIndex(x, y, z);
+                        if (k == 0) {
+                            IBlockState state = getBlockState(world, new BlockPos(wx + x, wy + y, wz + z));
+                            opacity[index] = Math.max(Blocks.getOpacity(state), 1);
+                            light[index] = Blocks.getLight(state);
+                            if (light[index] > 0) {
+                                queue.add(index);
+                            }
+                        } else {
                             if (wy + y < heights[x][z]) {
                                 light[index] = 0;
                             } else {

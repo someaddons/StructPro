@@ -6,7 +6,12 @@ import net.minecraft.block.Block;
 import java.io.File;
 import java.util.HashMap;
 
-/* Possible structure biome styles. Have to completely cover all known biomes */
+/**
+ * Possible structure biome styles
+ * Have to completely cover all known biomes
+ * @author  Ternsip
+ * @since JDK 1.6
+ */
 public enum Biome {
 
     COMMON (0x00, "COMMON"),
@@ -18,6 +23,25 @@ public enum Biome {
     END (0x07, "END"),
     WATER (0x08, "WATER");
 
+    public final int value;
+    public final String name;
+
+    /**
+     * Default biome constructor
+     * @param value Biome index
+     * @param name Biome name
+     */
+    Biome(int value, String name) {
+        this.value = value;
+        this.name = name;
+    }
+
+    /**
+     * Biome names map
+     * Reflect biome to potential biome sub-name array
+     * If sub-name contains in game-biome full-name then it depends to this biome enum
+     * In case game-biome depends to multiple biome enums random is selected
+     */
     static final HashMap<Biome, String[]> bioNames = new HashMap<Biome, String[]>(){{
         put(COMMON, new String[]{});
         put(SNOW, new String[]{"Frozen", "Ice", "Cold", "Alps", "Arctic", "Frost", "Icy", "Snow", "Coniferous", "Tundra", "Glacier"});
@@ -29,6 +53,11 @@ public enum Biome {
         put(END, new String[]{"TheEnd"});
     }};
 
+    /**
+     * Biome blocks map
+     * Reflect biome to potenial biome block array
+     * Used for counting blocks of each biome
+     */
     static final HashMap<Biome, Block[]> bioBlocks = new HashMap<Biome, Block[]>(){{
         put(COMMON, new Block[]{});
         put(SNOW, new Block[]{Blocks.SNOW_LAYER, Blocks.SNOW, Blocks.ICE});
@@ -40,15 +69,11 @@ public enum Biome {
         put(END, new Block[]{Blocks.END_STONE});
     }};
 
-    public final int value;
-    public final String name;
-
-    Biome(int value, String name) {
-        this.value = value;
-        this.name = name;
-    }
-
-    /* Get biome by it internal value */
+    /**
+     * Get biome by it internal value
+     * @param value Biome internal number
+     * @return The biome
+     */
     public static Biome valueOf(int value) {
         for (Biome sample : Biome.values()) {
             if (sample.value == value) {
@@ -58,7 +83,11 @@ public enum Biome {
         return COMMON;
     }
 
-    /* Detect Biome.Style by given set of blocks */
+    /**
+     * Get biome by given set of blocks
+     * @param blocks array of blocks
+     * @return The biome
+     */
     static Biome valueOf(short[] blocks) {
 
         /* Counts [0..SIZE] of each vanilla blocks */
@@ -100,7 +129,11 @@ public enum Biome {
 
     }
 
-    /* Determine Biome by given Minecraft Biome */
+    /**
+     * Determine Biome by given Minecraft Biome
+     * @param biome Minecraft native biome
+     * @return The biome
+     */
     public static Biome valueOf(net.minecraft.world.biome.Biome biome) {
         String biomeName = biome.getBiomeName().toLowerCase().replace(" ", "");
         for (HashMap.Entry<Biome, String[]> entry : bioNames.entrySet()) {
@@ -113,7 +146,11 @@ public enum Biome {
         return Biome.COMMON;
     }
 
-    /* Get biome by given file path */
+    /**
+     * Get biome by given file, works only with path
+     * @param file target file
+     * @return The biome
+     */
     static Biome valueOf(File file) {
         String path = file.getPath().toLowerCase().replace("\\", "/").replace("//", "/");
         if (path.contains("/sand/"))        return Biome.SAND;
@@ -130,7 +167,12 @@ public enum Biome {
         return null;
     }
 
-    /* Get biome by file or blocks */
+    /**
+     * Get most appropriate biome by file and blocks
+     * @param file target file
+     * @param blocks array of blocks
+     * @return The biome
+     */
     static Biome valueOf(File file, short[] blocks) {
         Biome biome = valueOf(file);
         return biome != null ? biome : valueOf(blocks);

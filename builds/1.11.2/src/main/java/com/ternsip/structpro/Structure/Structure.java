@@ -24,36 +24,77 @@ import java.util.Random;
 
 import static com.ternsip.structpro.Universe.Blocks.Classifier.*;
 
-/* Holds schematic-extended information and can load/spawn/calibrate it */
+/**
+ * Holds schematic-extended information and can load, calibrate, project it
+ * @author Ternsip
+ * @since JDK 1.6
+ */
 public class Structure extends Blueprint {
 
-    /* Structure version */
+    /** Structure version */
     private static final int VERSION = 110;
 
-    /* Directory for dump files */
+    /** Directory for dump files */
     private static final File DUMP_DIR = new File("sprodump", "structures");
 
-    /* Melting distance measured in blocks */
+    /** Melting distance measured in blocks */
     public static final int MELT = 5;
 
+    /** Structure file */
     private File fileStructure;
+
+    /** Flag file */
     private File fileFlag;
+
+    /** Data file */
     private File fileData;
+
+    /** Structure file size in bytes */
     private long schemaLen;
+
+    /** Spawning method */
     private Method method;
+
+    /** Biome belonging */
     private Biome biome;
+
+    /**
+     * Structure foundation level
+     * Soil immersing level
+     */
     private int lift;
+
+    /**
+     * Skin mask over the volume
+     * Characterize structure interior
+     * 0 - deny to spawn cell, 1 - allow to spawn
+     */
     private BitSet skin;
+
+    /**
+     * Melting skin has an extended volume than structure
+     * 0 - do nothing, 1 - remove block
+     */
     private BitSet melt;
 
-    /* Construct structure based on structure file */
+    /**
+     * Construct structure based on structure file
+     * @param file Target file
+     * @throws IOException If structure failed to construct
+     */
     public Structure(File file) throws IOException {
         this(  file,
                 new File(DUMP_DIR.getPath(), file.getPath().hashCode() + ".dmp"),
                 new File(DUMP_DIR.getPath(), file.getPath().hashCode() + ".flg"));
     }
 
-    /* Construct structure based on blueprint file, data and flags */
+    /**
+     * Construct structure based on blueprint file, data and flags
+     * @param file Target file
+     * @param data Data file
+     * @param flags Flag file
+     * @throws IOException If structure failed to construct
+     */
     public Structure(File file, File data, File flags) throws IOException {
         fileStructure = file;
         fileData = data;
@@ -68,6 +109,11 @@ public class Structure extends Blueprint {
         }
     }
 
+    /**
+     * Load schematic from file
+     * @param file File to load
+     * @throws IOException If schematic failed to load
+     */
     @Override
     void loadSchematic(File file) throws IOException {
         super.loadSchematic(file);
@@ -82,7 +128,10 @@ public class Structure extends Blueprint {
         free();
     }
 
-    /* Load flags from flags-file */
+    /**
+     * Load flags from flags-file
+     * @throws IOException If flags failed to read
+     */
     private void loadFlags() throws IOException {
         NBTTagCompound tag = Utils.readTags(fileFlag);
         int version = tag.getInteger("Version");
@@ -101,7 +150,10 @@ public class Structure extends Blueprint {
         }
     }
 
-    /* Load data from data-file and schematic-file */
+    /**
+     * Load data from data-file and schematic-file
+     * @throws IOException If data failed to load
+     */
     private void loadData() throws IOException {
         super.loadSchematic(fileStructure);
         NBTTagCompound tag = Utils.readTags(fileData);
@@ -109,7 +161,10 @@ public class Structure extends Blueprint {
         melt = Utils.toBitSet(tag.getByteArray("Melt"));
     }
 
-    /* Save flags to file */
+    /**
+     * Save flags to file
+     * @throws IOException If flags failed to save
+     */
     private void saveFlags() throws IOException {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setInteger("Version", VERSION);
@@ -123,7 +178,10 @@ public class Structure extends Blueprint {
         Utils.writeTags(fileFlag, tag);
     }
 
-    /* Save file to file */
+    /**
+     * Save file to file
+     * @throws IOException If data failed to save
+     * */
     private void saveData() throws IOException {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setByteArray("Skin", Utils.toByteArray(skin));
@@ -131,7 +189,7 @@ public class Structure extends Blueprint {
         Utils.writeTags(fileData, tag);
     }
 
-    /* Free memory */
+    /** Free internal memory */
     private void free() {
         blocks = null;
         meta = null;
@@ -140,7 +198,10 @@ public class Structure extends Blueprint {
         tiles = null;
     }
 
-    /* Get structure ground level (lift) to dig it down */
+    /**
+     * Get structure ground level to dig it down
+     * @return Lift level
+     */
     private int calcLift() {
         int[][] level = new int[width][length];
         int[][] levelMax = new int[width][length];
@@ -165,7 +226,11 @@ public class Structure extends Blueprint {
         return  Math.max(borderLevel, wholeLevel);
     }
 
-    /* Generate schematic skin as BitSet of possible(0) and restricted(1) to spawn blocks */
+    /**
+     * Generate schematic skin as BitSet of possible(0) and restricted(1) to calibrate blocks
+     * @return Skin mask
+     */
+    @SuppressWarnings({"ConstantConditions"})
     private BitSet getSkin() {
 
         Classifier skips = (method == Method.AFLOAT || method == Method.UNDERWATER) ? SOP : GAS;
@@ -231,12 +296,15 @@ public class Structure extends Blueprint {
         return skin;
     }
 
-    /* Returns structure melts, requires calculated skin */
+    /**
+     * Returns structure melts, requires calculated ski
+     * @return Melt mask
+     */
     private BitSet getMelt() {
 
         /* Create melt using cardinal blocks */
         Volume meltVolume = extend(MELT, MELT, MELT);
-        BitSet melt = new BitSet(meltVolume.getVolume());
+        BitSet melt = new BitSet(meltVolume.getSize());
 
         /* Skip underwater melting*/
         if (method == Method.UNDERWATER || method == Method.AFLOAT) {
@@ -274,7 +342,10 @@ public class Structure extends Blueprint {
         return melt;
     }
 
-    /* Generate structure report */
+    /**
+     * Combine structure report
+     * @return Generated report
+     */
     public Report report() {
         return new Report()
                 .post("SCHEMATIC", getFile().getName())
@@ -284,7 +355,14 @@ public class Structure extends Blueprint {
                 .post(super.report());
     }
 
-    /* Project structure to the world */
+    /**
+     * Inject structure into specific position in the world
+     * It's not a transaction
+     * @param world World instance
+     * @param posture Transformation state
+     * @param seed Projection seed
+     * @throws IOException If blueprint failed to project
+     */
     @Override
     void project(World world, Posture posture, long seed) throws IOException {
 
@@ -295,7 +373,7 @@ public class Structure extends Blueprint {
         loadData();
 
         /* Iterate over volume and paste blocks */
-        for (int index = 0; index < posture.getVolume(); ++index) {
+        for (int index = 0; index < posture.getSize(); ++index) {
             if (!skin.get(index)) {
                 BlockPos worldPos = posture.getWorldPos(index);
                 Block block = Blocks.getBlockVanilla(blocks[index]);
@@ -303,21 +381,21 @@ public class Structure extends Blueprint {
                     continue;
                 }
                 int metaData = posture.getWorldMeta(block, meta[index]);
-                Universe.setBlockState(world, worldPos, Blocks.state(block, metaData));
+                Universe.setBlockState(world, worldPos, Blocks.getState(block, metaData));
                 Tiles.load(Universe.getTileEntity(world, worldPos), tiles[index], random.nextLong());
             }
         }
 
         /* Iterate over volume and melt area */
         Posture meltPosture = posture.extend(MELT, MELT, MELT);
-        for (int index = 0; index < meltPosture.getVolume(); ++index) {
+        for (int index = 0; index < meltPosture.getSize(); ++index) {
             if (!melt.get(index)) {
                 continue;
             }
             BlockPos worldPos = meltPosture.getWorldPos(index);
             IBlockState state = Universe.getBlockState(world, worldPos);
             if (Classifier.isBlock(SOIL, state) || Classifier.isBlock(OVERLOOK, state)) {
-                Universe.setBlockState(world, worldPos, Blocks.state(Blocks.AIR));
+                Universe.setBlockState(world, worldPos, Blocks.getState(Blocks.AIR));
             }
         }
 
@@ -354,12 +432,17 @@ public class Structure extends Blueprint {
 
         /* Check light for generated structure */
         Universe.grassFix(world, meltPosture);
-        Universe.checkLight(world, meltPosture);
+        Universe.updateLight(world, meltPosture);
         Universe.notifyPosture(world, meltPosture);
 
     }
 
-    /* Populate structure with entities */
+    /**
+     * Populate structure with entities
+     * @param world Target world
+     * @param posture Traformation posture
+     * @param seed population seed
+     */
     private void populate(World world, Posture posture, long seed) {
         boolean village = isHostile();
         ArrayList<Class<? extends Entity>> mobs = village ? Mobs.village.select() : Mobs.hostile.select(biome);
@@ -384,29 +467,38 @@ public class Structure extends Blueprint {
         }
     }
 
-    /* Match biome acceptability */
+    /**
+     * Match biome acceptability
+     * @param bio Minecraft native biome to match
+     * @throws IOException If biome not acceptable
+     */
     public void matchBiome(Biome bio) throws IOException {
         if (bio != Biome.SNOW && biome == Biome.SNOW) {
-            throw new IOException("Can't spawn Snow objects not in Snow biome");
+            throw new IOException("Can't calibrate Snow objects not in Snow biome");
         }
         if (bio != Biome.NETHER && biome == Biome.NETHER) {
-            throw new IOException("Can't spawn Nether objects not in Nether");
+            throw new IOException("Can't calibrate Nether objects not in Nether");
         }
         if (bio != Biome.END && biome == Biome.END) {
-            throw new IOException("Can't spawn The End objects not in The End");
+            throw new IOException("Can't calibrate The End objects not in The End");
         }
         if (bio == Biome.SNOW && biome == Biome.SAND) {
-            throw new IOException("Can't spawn Desert objects in Snow biome");
+            throw new IOException("Can't calibrate Desert objects in Snow biome");
         }
         if (bio == Biome.NETHER && biome == Biome.SAND) {
-            throw new IOException("Can't spawn Desert objects in Nether");
+            throw new IOException("Can't calibrate Desert objects in Nether");
         }
         if (bio == Biome.END && biome == Biome.SAND) {
-            throw new IOException("Can't spawn Desert objects in The End");
+            throw new IOException("Can't calibrate Desert objects in The End");
         }
     }
 
-    /* Match roughness acceptability */
+    /**
+     * Match roughness acceptability
+     * @param surface Region characterizes surface
+     * @param bottom Region characterizes bottom
+     * @throws IOException If regions are not acceptable
+     */
     public void matchAccuracy(Region surface, Region bottom) throws IOException {
         DecimalFormat decimal = new DecimalFormat("######0.00");
         double liquidHeight = surface.getAverage() - bottom.getAverage();
@@ -436,7 +528,13 @@ public class Structure extends Blueprint {
         }
     }
 
-    /* Calibrates posture in the world */
+    /**
+     * Returns best paste height in region
+     * @param surface Region characterizes surface
+     * @param bottom Region characterizes bottom
+     * @param seed Calibrating seed
+     * @return Best height
+     */
     public int getBestY(Region surface, Region bottom, long seed) {
         Random random = new Random(seed);
         int posY;
@@ -456,7 +554,10 @@ public class Structure extends Blueprint {
         return Math.max(4, Math.min(posY, 255));
     }
 
-    /* Check structure hostile for players */
+    /**
+     * Check structure hostile for players
+     * @return If structure is hostile for players
+     */
     private boolean isHostile() {
         return fileStructure.getPath().toLowerCase().contains("village");
     }
