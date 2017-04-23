@@ -73,12 +73,16 @@ public class Items extends net.minecraft.init.Items {
         if (!isValidItem(item)) {
             return false;
         }
-        ItemModelMesher models = Minecraft.getMinecraft().getRenderItem().getItemModelMesher();
-        TextureAtlasSprite sprite = models.getParticleIcon(item, meta);
-        return  sprite != null &&
-                sprite.getIconName() != null &&
-                !sprite.getIconName().equalsIgnoreCase("") &&
-                !sprite.getIconName().equalsIgnoreCase("missingno");
+        try {
+            ItemModelMesher models = Minecraft.getMinecraft().getRenderItem().getItemModelMesher();
+            TextureAtlasSprite sprite = models.getParticleIcon(item, meta);
+            return sprite != null &&
+                    sprite.getIconName() != null &&
+                    !sprite.getIconName().equalsIgnoreCase("") &&
+                    !sprite.getIconName().equalsIgnoreCase("missingno");
+        } catch (Throwable ignored) {
+            return false;
+        }
     }
 
     /**

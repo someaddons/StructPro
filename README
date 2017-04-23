@@ -3,7 +3,7 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 2.8
+Latest mod version: 2.9
 Recomened mod version: 2.3+
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
@@ -243,6 +243,9 @@ Version 2.8 (release) Item missingno fix
 Prevent inventories to contain bad items with missing texture
 Documented code
 Improve command shortcuts (for example now you can use /spro save w=5 h=10 l=20)
+Version 2.9 (release)
+Crash-protection when item extracting mesh texture
+Commands now can work on client and server both
  
 Known bugs
 ----------------------------------------------

@@ -41,7 +41,9 @@ public class Commands implements ICommand {
      */
     @Override
     public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
-        return (sender instanceof EntityPlayer) && ((EntityPlayer) sender).isCreative();
+        boolean isServer = (sender instanceof MinecraftServer);
+        boolean isAdmin = (sender instanceof EntityPlayer) && ((EntityPlayer) sender).isCreative();
+        return isServer || isAdmin;
     }
 
     @Override
@@ -103,7 +105,7 @@ public class Commands implements ICommand {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length <= 0) {
-            Evaluator.cmdHelp();
+            feedback(sender, Evaluator.cmdHelp());
             return;
         }
         String cmd = args[0];
@@ -122,6 +124,7 @@ public class Commands implements ICommand {
             boolean flipZ = vars.get(new String[]{"flipz", "fz"}, random.nextBoolean());
             boolean village = vars.get(new String[]{"village", "town", "city"}, false);
             feedback(sender, Evaluator.cmdPaste(sender.getEntityWorld(), name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, village));
+            return;
         }
         if (cmd.equalsIgnoreCase("save")) {
             String name = vars.get(new String[]{"name"}, "unnamed");
@@ -132,13 +135,17 @@ public class Commands implements ICommand {
             int height = vars.get(new String[]{"height", "h"}, 64);
             int length = vars.get(new String[]{"length", "l"}, 64);
             feedback(sender, Evaluator.cmdSave(sender.getEntityWorld(), name, posX, posY, posZ, width, height, length));
+            return;
         }
         if (cmd.equalsIgnoreCase("undo")) {
             feedback(sender, Evaluator.cmdUndo());
+            return;
         }
         if (cmd.equalsIgnoreCase("help")) {
             feedback(sender, Evaluator.cmdHelp());
+            return;
         }
+        feedback(sender, "Unknown command " + cmd + " for " + name);
     }
 
     /**
