@@ -5,7 +5,9 @@ import com.ternsip.structpro.Structure.Biome;
 import com.ternsip.structpro.Universe.Blocks.Blocks;
 import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Universe.Items.Items;
+import com.ternsip.structpro.Utils.BlockPos;
 import com.ternsip.structpro.Utils.Utils;
+import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -13,9 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.*;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.ArrayList;
@@ -58,10 +58,6 @@ public class Tiles {
         }
         if (tile instanceof IInventory) {
             load((IInventory)tile, tag, seed);
-            return;
-        }
-        if (tile instanceof TileEntityBanner) {
-            load((TileEntityBanner)tile, tag, seed);
             return;
         }
         if (tile instanceof TileEntityComparator) {
@@ -140,18 +136,18 @@ public class Tiles {
      */
     private static void load(TileEntityMobSpawner spawner, NBTTagCompound tag, long seed) {
         Random random = new Random(seed);
-        MobSpawnerBaseLogic logic = spawner.getSpawnerBaseLogic();
-        Biome biome = Biome.valueOf(Universe.getBiome(spawner.getWorld(), spawner.getPos()));
+        MobSpawnerBaseLogic logic = spawner.func_145881_a();
+        Biome biome = Biome.valueOf(Universe.getBiome(spawner.getWorldObj(), new BlockPos(spawner.xCoord, spawner.yCoord, spawner.zCoord)));
         Class<? extends Entity> mob = Utils.select(Mobs.hostile.select(biome), random.nextLong());
         if (mob != null) {
-            logic.setEntityId(Mobs.classToName(mob));
+            logic.setEntityName(Mobs.classToName(mob));
         }
         if (tag != null && tag.hasKey("EntityId")) {
             String mobName = Pattern.quote(tag.getString("EntityId"));
             Pattern mPattern = Pattern.compile(".*" + Pattern.quote(mobName) + ".*", Pattern.CASE_INSENSITIVE);
             mob = Utils.select(Configurator.MOB_SPAWNERS_EGGS_ONLY ? Mobs.eggs.select(mPattern) : Mobs.mobs.select(mPattern));
             if (mob != null) {
-                logic.setEntityId(Mobs.classToName(mob));
+                logic.setEntityName(Mobs.classToName(mob));
             }
         }
     }
@@ -168,10 +164,9 @@ public class Tiles {
         }
         Random random = new Random(seed);
         for (int i = 0; i < 4; ++i) {
-            try {
-                ITextComponent tc = ITextComponent.Serializer.fromJsonLenient(tag.getString("Text" + (i + 1)));
-                sign.signText[i] = new TextComponentString(tc.getUnformattedComponentText());
-            } catch (Throwable ignored) {
+            sign.signText[i] = tag.getString("Text" + (i + 1));
+            if ( sign.signText[i].length() > 15) {
+                sign.signText[i] = sign.signText[i].substring(0, 15);
             }
         }
     }
@@ -215,28 +210,8 @@ public class Tiles {
             return;
         }
         Random random = new Random(seed);
-        CommandBlockBaseLogic logic = commandBlock.getCommandBlockLogic();
-        logic.setCommand(tag.getString("Command"));
-        if (tag.hasKey("CustomName")) {
-            logic.setName(tag.getString("CustomName"));
-        }
-        if (tag.hasKey("TrackOutput")) {
-            logic.setTrackOutput(tag.getBoolean("TrackOutput"));
-        }
-        commandBlock.setPowered(tag.getBoolean("powered"));
-        commandBlock.setConditionMet(tag.getBoolean("conditionMet"));
-        commandBlock.setAuto(tag.getBoolean("auto"));
-    }
-
-    /**
-     * Load banner data from NBT tag
-     * @param banner Target banner
-     * @param tag tag to load
-     * @param seed Loading seed
-     */
-    private static void load(TileEntityBanner banner, NBTTagCompound tag, long seed) {
-        Random random = new Random(seed);
-        banner.setItemValues(new ItemStack(Blocks.WOOL, 1, random.nextInt(16)), false);
+        CommandBlockLogic logic = commandBlock.func_145993_a();
+        logic.func_145759_b(tag);
     }
 
     /**
@@ -270,7 +245,7 @@ public class Tiles {
             Pattern iPattern = Pattern.compile(Pattern.quote(itemName), Pattern.CASE_INSENSITIVE);
             Item item = Utils.select(Items.items.select(iPattern), random.nextLong());
             if (item != null) {
-                pot.setItemStack(new ItemStack(item, 1, tag.getInteger("Data")));
+                pot.func_145964_a(item, tag.getInteger("Data"));
             }
         }
     }
@@ -286,7 +261,7 @@ public class Tiles {
             return;
         }
         Random random = new Random(seed);
-        note.note = (byte) MathHelper.clamp(tag.getByte("note"), 0, 24);
+        note.note = (byte) MathHelper.clamp_int(tag.getByte("note"), 0, 24);
         note.previousRedstoneState = tag.getBoolean("powered");
     }
 

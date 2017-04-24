@@ -1,12 +1,12 @@
 package com.ternsip.structpro;
 
-import com.ternsip.structpro.Universe.Commands.Commands;
 import com.ternsip.structpro.Logic.Configurator;
+import com.ternsip.structpro.Universe.Commands.Commands;
 import com.ternsip.structpro.Universe.Generation.Decorator;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.registry.GameRegistry;
 
 import java.io.File;
 

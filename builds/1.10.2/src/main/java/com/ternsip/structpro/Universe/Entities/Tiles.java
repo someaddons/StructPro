@@ -223,6 +223,9 @@ public class Tiles {
         if (tag.hasKey("TrackOutput")) {
             logic.setTrackOutput(tag.getBoolean("TrackOutput"));
         }
+        commandBlock.setPowered(tag.getBoolean("powered"));
+        commandBlock.setConditionMet(tag.getBoolean("conditionMet"));
+        commandBlock.setAuto(tag.getBoolean("auto"));
     }
 
     /**

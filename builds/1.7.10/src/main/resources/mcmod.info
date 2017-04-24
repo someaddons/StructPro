@@ -1,0 +1,17 @@
+[
+{
+  "modid": "structpro",
+  "name": "StructPro",
+  "description": "World structure generation",
+  "version": "",
+  "mcversion": "${mcversion}",
+  "url": "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/wip-mods/2807018-structpro-mod-fast-schematic-spawning-system",
+  "updateUrl": "",
+  "authorList": ["Ternsip"],
+  "credits": "Ternsip",
+  "logoFile": "logo.png",
+  "screenshots": [],
+  "dependencies": []
+}
+]
+
