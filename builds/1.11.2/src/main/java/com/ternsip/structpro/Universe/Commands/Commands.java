@@ -152,6 +152,11 @@ public class Commands implements ICommand {
             feedback(sender, Evaluator.cmdUndo());
             return;
         }
+        if (cmd.equalsIgnoreCase("gen")) {
+            int size = vars.get(new String[]{"size", "s"}, 16);
+            feedback(sender, Evaluator.cmdGen(sender.getEntityWorld(), size));
+            return;
+        }
         if (cmd.equalsIgnoreCase("help")) {
             feedback(sender, Evaluator.cmdHelp());
             return;

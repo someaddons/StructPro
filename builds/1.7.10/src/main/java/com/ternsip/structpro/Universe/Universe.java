@@ -52,6 +52,7 @@ public class Universe {
         int i = y >> 4;
         if (storage[i] == null) {
             storage[i] = new ExtendedBlockStorage(i << 4, !chunk.worldObj.provider.hasNoSky);
+            chunk.generateSkylightMap();
         }
         return storage[i];
     }
@@ -264,11 +265,48 @@ public class Universe {
     }
 
     /**
+     * Recalculate height map and precipitations map for chunk
+     * @param chunk Chunk to process
+     */
+    public static void generateHeightMap(Chunk chunk) {
+        int i = chunk.getTopFilledSegment();
+        chunk.heightMapMinimum = Integer.MAX_VALUE;
+        for (int j = 0; j < 16; ++j) {
+            int k = 0;
+            while (k < 16) {
+                int l = i + 16 - 1;
+                while (true) {
+                    if (l > 0) {
+                        if (chunk.func_150808_b(j, l - 1, k) == 0) {
+                            --l;
+                            continue;
+                        }
+                        chunk.heightMap[k << 4 | j] = l;
+                        if (l < chunk.heightMapMinimum) {
+                            chunk.heightMapMinimum = l;
+                        }
+                    }
+                    ++k;
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
      * Updates queued data
      * @param world Target world
      * @param posture Posture area going to update
      */
     public static void notifyPosture(World world, Posture posture) {
+        int sx = posture.getPosX() >> 4, ex = posture.getEndX() >> 4;
+        int sz = posture.getPosZ() >> 4, ez = posture.getEndZ() >> 4;
+        for (int x = sx; x <= ex; ++x) {
+            for (int z = sz; z <= ez; ++z) {
+                generateHeightMap(world.getChunkFromChunkCoords(x, z));
+            }
+        }
+        updateLight(world, posture);
         if (Configurator.TICKER) {
             world.tickUpdates(true);
         }
@@ -282,8 +320,6 @@ public class Universe {
         if (Configurator.TICKER) {
             world.tickUpdates(true);
         }
-        int sx = posture.getPosX() >> 4, ex = posture.getEndX() >> 4;
-        int sz = posture.getPosZ() >> 4, ez = posture.getEndZ() >> 4;
         for (int x = sx; x <= ex; ++x) {
             for (int z = sz; z <= ez; ++z) {
                 notifyChunk(world, world.getChunkFromChunkCoords(x, z));

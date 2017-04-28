@@ -222,7 +222,6 @@ public class Blueprint extends Volume {
                 }
             }
         }
-        Universe.updateLight(world, posture);
         Universe.notifyPosture(world, posture);
     }
 }

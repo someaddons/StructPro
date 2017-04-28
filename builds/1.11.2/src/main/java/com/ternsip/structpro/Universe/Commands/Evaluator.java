@@ -1,9 +1,6 @@
 package com.ternsip.structpro.Universe.Commands;
 
-import com.ternsip.structpro.Logic.Configurator;
-import com.ternsip.structpro.Logic.Construction;
-import com.ternsip.structpro.Logic.Structures;
-import com.ternsip.structpro.Logic.Village;
+import com.ternsip.structpro.Logic.*;
 import com.ternsip.structpro.Structure.*;
 import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Utils.Report;
@@ -27,6 +24,11 @@ class Evaluator {
 
     /** Undo projections */
     private static final ArrayList<Projection> undo = new ArrayList<Projection>();
+
+    static String cmdGen(World world, int size) {
+        Pregen.activate(world, size);
+        return "Generation process started";
+    }
 
     /**
      * Paste schematic that has most similar name

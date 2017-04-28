@@ -432,7 +432,6 @@ public class Structure extends Blueprint {
 
         /* Check light for generated structure */
         Universe.grassFix(world, meltPosture);
-        Universe.updateLight(world, meltPosture);
         Universe.notifyPosture(world, meltPosture);
 
     }

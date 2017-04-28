@@ -3,7 +3,7 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 3.0
+Latest mod version: 3.1
 Recomened mod version: 2.3+
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
@@ -249,6 +249,8 @@ Commands now can work on client and server both
 Version 3.0 (release) 1.7.10 support
 Add support for 1.7.10
 Fix command block parameters parsing
+Version 3.1 (release) height map
+Fixed height-map bug (inside chunk) that caused light issues. No more skylight inside structures.
  
 Known bugs
 ----------------------------------------------
