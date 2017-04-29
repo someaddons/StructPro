@@ -25,11 +25,6 @@ class Evaluator {
     /** Undo projections */
     private static final ArrayList<Projection> undo = new ArrayList<Projection>();
 
-    static String cmdGen(World world, int size) {
-        Pregen.activate(world, size);
-        return "Generation process started";
-    }
-
     /**
      * Paste schematic that has most similar name
      * @param world Target world
@@ -141,7 +136,9 @@ class Evaluator {
                 "SAVE SCHEMATIC: /spro save " +
                 "name=<string> posX=<int> posY=<int> posZ=<int> width=<int> height=<int> length=<int>" +
                 "\n" +
-                "UNDO LAST ACTION: /spro undo";
+                "UNDO LAST ACTION: /spro undo" +
+                "\n" +
+                "GENERATE WORLD: /spro gen size=<int> sx=<int> sz=<int> stop=<bool>";
     }
 
     /**
@@ -159,6 +156,25 @@ class Evaluator {
         }
         undo.clear();
         return "Undo done";
+    }
+
+    /**
+     * Start pre-generation routine
+     * @param world Target world
+     * @param startX Starting chunk X coordinate
+     * @param startZ Starting chunk Z coordinate
+     * @param step Number of chunks to process per step
+     * @param size Number of chunks for x and z axis in each direction
+     * @return Command execution status
+     */
+    static String cmdGen(World world, int startX, int startZ,int step, int size, boolean stop) {
+        if (stop) {
+            Pregen.deactivate();
+            return "Generation process interrupted";
+        } else {
+            Pregen.activate(world, startX, startZ, step, size);
+            return "Generation process started";
+        }
     }
 
     /**

@@ -472,23 +472,20 @@ public class Structure extends Blueprint {
      * @throws IOException If biome not acceptable
      */
     public void matchBiome(Biome bio) throws IOException {
-        if (bio != Biome.SNOW && biome == Biome.SNOW) {
+        if (bio != Biome.SNOW && biome == Biome.SNOW && method != Method.UNDERGROUND) {
             throw new IOException("Can't calibrate Snow objects not in Snow biome");
         }
-        if (bio != Biome.NETHER && biome == Biome.NETHER) {
+        if (bio != Biome.NETHER && biome == Biome.NETHER && method != Method.SKY && method != Method.UNDERGROUND) {
             throw new IOException("Can't calibrate Nether objects not in Nether");
         }
-        if (bio != Biome.END && biome == Biome.END) {
-            throw new IOException("Can't calibrate The End objects not in The End");
+        if (bio == Biome.NETHER && biome != Biome.NETHER && method != Method.UNDERGROUND && method != Method.UNDERWATER) {
+            throw new IOException("Can't calibrate not Nether objects in Nether");
         }
-        if (bio == Biome.SNOW && biome == Biome.SAND) {
+        if (bio == Biome.SNOW && biome == Biome.SAND && method != Method.UNDERGROUND) {
             throw new IOException("Can't calibrate Desert objects in Snow biome");
         }
-        if (bio == Biome.NETHER && biome == Biome.SAND) {
-            throw new IOException("Can't calibrate Desert objects in Nether");
-        }
-        if (bio == Biome.END && biome == Biome.SAND) {
-            throw new IOException("Can't calibrate Desert objects in The End");
+        if (bio == Biome.END && biome != Biome.END && method != Method.SKY) {
+            throw new IOException("Can't calibrate not End objects in The End");
         }
     }
 

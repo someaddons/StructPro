@@ -3,8 +3,8 @@ Automatic structure generation based on schematics
 Author: Ternsip
 Mod: StructPro Mod
 Minecraft versions: [1.10.2], [1.11.2]
-Latest mod version: 3.1
-Recomened mod version: 2.3+
+Latest mod version: 3.2
+Recomened mod version: 3.1+
 Dependencies: Forge
 Tags: [World Generation], [Structure Spawn], [Schematic Control]
 Repository: https://github.com/ternsip/StructPro
@@ -151,6 +151,13 @@ width = Schematic width
 height = Schematic height
 length = Schematic length
 
+/structpro gen
+size = Generation radius measured in chunks
+startx = starting chunk x position
+startz = starting chunk z position
+step = Amount of chunks processed per tick, recommended = 16
+stop = Pick true to stop generation process
+
 Restore previous world data. Also works for village paste. Restores blocks for external mods. May be unsafe.
 /structpro undo
 
@@ -251,6 +258,9 @@ Add support for 1.7.10
 Fix command block parameters parsing
 Version 3.1 (release) height map
 Fixed height-map bug (inside chunk) that caused light issues. No more skylight inside structures.
+Version 3.2 (release) World pre-generation command
+Added world pre-generation command (chunk pre-populating) /spro gen size=64 step=16 sx=0 sz=0
+Improved some calibration conditions for nether, end etc
  
 Known bugs
 ----------------------------------------------

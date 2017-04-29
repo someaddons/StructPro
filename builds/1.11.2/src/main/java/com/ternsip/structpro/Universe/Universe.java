@@ -23,7 +23,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -60,17 +59,19 @@ public class Universe {
         return storage[i];
     }
 
-     /* Call generation manually at chunk position */
+     /**
+      * Call generation manually at chunk position
+      * @param world Target world
+      * @param chunkX Chunk X position
+      * @param chunkZ Chunk Z position
+      */
      public static void generate(World world, int chunkX, int chunkZ) {
         if (world.getChunkProvider() instanceof ChunkProviderServer) {
             ChunkProviderServer cps = (ChunkProviderServer) world.getChunkProvider();
-            Chunk chunk = cps.provideChunk(chunkX, chunkZ);
-            if (!chunk.isTerrainPopulated()) {
-                chunk.checkLight();
-                cps.chunkGenerator.populate(chunkX, chunkZ);
-                GameRegistry.generateWorld(chunkX, chunkZ, world, cps.chunkGenerator, world.getChunkProvider());
-                chunk.setChunkModified();
-            }
+            world.getChunkFromChunkCoords(chunkX + 1, chunkZ);
+            world.getChunkFromChunkCoords(chunkX + 1, chunkZ + 1);
+            world.getChunkFromChunkCoords(chunkX, chunkZ + 1);
+            world.getChunkFromChunkCoords(chunkX, chunkZ).populateChunk(cps, cps.chunkGenerator);
         }
      }
 
@@ -78,7 +79,7 @@ public class Universe {
      * Get block biome in the world
      * @param world Target world
      * @param pos Block position
-     * @return Mineraft native biome
+     * @return Minecraft native biome
      */
     public static Biome getBiome(World world, BlockPos pos) {
         return world.getBiome(pos);

@@ -29,7 +29,7 @@ public class Commands implements ICommand {
     private static final String name = "structpro";
 
     /** Main hint for usage */
-    private static final String usage = "/structpro <help|paste|save|undo>";
+    private static final String usage = "/structpro <help|paste|save|undo|gen>";
 
     /** Command can be invoked using any of this aliases */
     private static final ArrayList<String> aliases = new ArrayList<String>(){{add("structpro");add("spro");}};
@@ -152,6 +152,15 @@ public class Commands implements ICommand {
         }
         if (cmd.equalsIgnoreCase("undo")) {
             feedback(sender, Evaluator.cmdUndo());
+            return;
+        }
+        if (cmd.equalsIgnoreCase("gen")) {
+            int size = vars.get(new String[]{"size", "s", "length", "radius", "r"}, 16);
+            int startX = vars.get(new String[]{"startx", "sx"}, 0);
+            int startZ = vars.get(new String[]{"startz", "sz"}, 0);
+            boolean stop = vars.get(new String[]{"stop", "end", "finish"}, false);
+            int step = Math.min(Math.max(1, vars.get(new String[]{"step", "delta"}, 16)), 4096);
+            feedback(sender, Evaluator.cmdGen(sender.getEntityWorld(), startX, startZ, step, size, stop));
             return;
         }
         if (cmd.equalsIgnoreCase("help")) {

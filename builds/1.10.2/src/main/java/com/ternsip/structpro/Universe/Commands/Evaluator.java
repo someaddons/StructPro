@@ -1,9 +1,6 @@
 package com.ternsip.structpro.Universe.Commands;
 
-import com.ternsip.structpro.Logic.Configurator;
-import com.ternsip.structpro.Logic.Construction;
-import com.ternsip.structpro.Logic.Structures;
-import com.ternsip.structpro.Logic.Village;
+import com.ternsip.structpro.Logic.*;
 import com.ternsip.structpro.Structure.*;
 import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Utils.Report;
@@ -139,7 +136,9 @@ class Evaluator {
                 "SAVE SCHEMATIC: /spro save " +
                 "name=<string> posX=<int> posY=<int> posZ=<int> width=<int> height=<int> length=<int>" +
                 "\n" +
-                "UNDO LAST ACTION: /spro undo";
+                "UNDO LAST ACTION: /spro undo" +
+                "\n" +
+                "GENERATE WORLD: /spro gen size=<int> sx=<int> sz=<int> stop=<bool>";
     }
 
     /**
@@ -157,6 +156,25 @@ class Evaluator {
         }
         undo.clear();
         return "Undo done";
+    }
+
+    /**
+     * Start pre-generation routine
+     * @param world Target world
+     * @param startX Starting chunk X coordinate
+     * @param startZ Starting chunk Z coordinate
+     * @param step Number of chunks to process per step
+     * @param size Number of chunks for x and z axis in each direction
+     * @return Command execution status
+     */
+    static String cmdGen(World world, int startX, int startZ,int step, int size, boolean stop) {
+        if (stop) {
+            Pregen.deactivate();
+            return "Generation process interrupted";
+        } else {
+            Pregen.activate(world, startX, startZ, step, size);
+            return "Generation process started";
+        }
     }
 
     /**

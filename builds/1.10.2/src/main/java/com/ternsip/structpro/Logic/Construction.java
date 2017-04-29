@@ -29,14 +29,17 @@ public class Construction {
         add(Structures.structures.select(new Method[]{Method.BASIC}));
         add(Structures.structures.select(new Method[]{Method.BASIC}));
         add(Structures.structures.select(new Method[]{Method.BASIC}));
+        add(Structures.structures.select(new Biome[]{Biome.NETHER}));
+        add(Structures.structures.select(new Biome[]{Biome.SNOW}));
+        add(Structures.structures.select(new Biome[]{Biome.SAND}));
+        add(Structures.structures.select(new Biome[]{Biome.END}));
         add(Structures.structures.select(new Method[]{Method.UNDERWATER}));
         add(Structures.structures.select(new Method[]{Method.AFLOAT}));
         add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
         add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
         add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
-        add(Structures.structures.select(new Biome[]{Biome.NETHER}));
-        add(Structures.structures.select(new Biome[]{Biome.SNOW}));
-        add(Structures.structures.select(new Biome[]{Biome.END}));
+        add(Structures.structures.select(new Method[]{Method.SKY}));
+        add(Structures.structures.select(new Method[]{Method.UNDERGROUND}));
     }};
 
     /**
