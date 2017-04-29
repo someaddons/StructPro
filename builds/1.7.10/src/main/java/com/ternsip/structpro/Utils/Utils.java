@@ -124,7 +124,7 @@ public class Utils {
      * @return Set of objects
      */
     public static <T> HashSet<T> toHashSet(final List<T> array) {
-       return new HashSet<T>(){{addAll(array);}};
+       return new HashSet<T>(array);
     }
 
     /**

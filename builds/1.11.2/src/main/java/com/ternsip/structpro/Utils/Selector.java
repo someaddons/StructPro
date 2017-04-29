@@ -105,6 +105,23 @@ public class Selector<T> {
     }
 
     /**
+     * Select structures that matches any biome or any method, O(n * log(n))
+     * @param methods Array of methods to select
+     * @param biomes Array of biomes to select
+     * @return Objects that matches any biome or any method
+     */
+    public ArrayList<T> select(final Biome[] biomes, final Method[] methods) {
+        return new ArrayList<T>(new HashSet<T>(){{
+            for (Biome biome : biomes) {
+                addAll(select(biome));
+            }
+            for (Method method : methods) {
+                addAll(select(method));
+            }
+        }});
+    }
+
+    /**
      * Add object without bias just by reference
      * @param target Object instance
      */

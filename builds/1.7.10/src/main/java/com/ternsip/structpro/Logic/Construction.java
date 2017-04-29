@@ -9,6 +9,7 @@ import net.minecraft.world.World;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -24,22 +25,35 @@ import static com.ternsip.structpro.Universe.Blocks.Classifier.OVERLOOK;
 public class Construction {
 
     /** Structures calibrate sets in attempting order */
-    private static final ArrayList<ArrayList<Structure>> spawnOrder = new ArrayList<ArrayList<Structure>>(){{
+    private static final ArrayList<ArrayList<Structure>> spawnOrder = new ArrayList<ArrayList<Structure>>() {{
         add(Structures.structures.select());
         add(Structures.structures.select(new Method[]{Method.BASIC}));
         add(Structures.structures.select(new Method[]{Method.BASIC}));
         add(Structures.structures.select(new Method[]{Method.BASIC}));
-        add(Structures.structures.select(new Biome[]{Biome.NETHER}));
-        add(Structures.structures.select(new Biome[]{Biome.SNOW}));
-        add(Structures.structures.select(new Biome[]{Biome.SAND}));
-        add(Structures.structures.select(new Biome[]{Biome.END}));
         add(Structures.structures.select(new Method[]{Method.UNDERWATER}));
         add(Structures.structures.select(new Method[]{Method.AFLOAT}));
         add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
         add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
         add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
-        add(Structures.structures.select(new Method[]{Method.SKY}));
-        add(Structures.structures.select(new Method[]{Method.UNDERGROUND}));
+    }};
+
+    /** Structures calibrate sets in attempting order for each biome */
+    private static final HashMap<Biome, ArrayList<ArrayList<Structure>>> bioOrder = new HashMap<Biome, ArrayList<ArrayList<Structure>>>() {{
+        for (Biome biome : Biome.values()) {
+            ArrayList<ArrayList<Structure>> order = new ArrayList<ArrayList<Structure>>();
+            for (ArrayList<Structure> entire : spawnOrder) {
+                ArrayList<Structure> acceptable = new ArrayList<Structure>();
+                for (Structure structure : entire) {
+                    try {
+                        structure.matchBiome(biome);
+                        acceptable.add(structure);
+                    } catch (IOException ignored) {
+                    }
+                }
+                order.add(acceptable);
+            }
+            put(biome, order);
+        }
     }};
 
     /**
@@ -54,7 +68,8 @@ public class Construction {
             for (int drop = drops(world, chunkX, chunkZ); drop > 0; --drop) {
                 Random random = getRandom(world, chunkX, chunkZ);
                 boolean spawned = false;
-                for (ArrayList<Structure> structures : spawnOrder) {
+                Biome biome = Biome.valueOf(Universe.getBiome(world, new BlockPos(chunkX * 16, 64, chunkZ * 16)));
+                for (ArrayList<Structure> structures : bioOrder.get(biome)) {
                     int cx = chunkX * 16 + Math.abs(random.nextInt()) % 16;
                     int cz = chunkZ * 16 + Math.abs(random.nextInt()) % 16;
                     Structure structure = Utils.select(structures, random.nextLong());
