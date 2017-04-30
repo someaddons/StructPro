@@ -147,8 +147,7 @@ public class Tiles {
             logic.setEntityId(Mobs.classToName(mob));
         }
         if (tag != null && tag.hasKey("EntityId")) {
-            String mobName = Pattern.quote(tag.getString("EntityId"));
-            Pattern mPattern = Pattern.compile(".*" + Pattern.quote(mobName) + ".*", Pattern.CASE_INSENSITIVE);
+            Pattern mPattern = Pattern.compile(".*" + Pattern.quote(tag.getString("EntityId")) + ".*", Pattern.CASE_INSENSITIVE);
             mob = Utils.select(Configurator.MOB_SPAWNERS_EGGS_ONLY ? Mobs.eggs.select(mPattern) : Mobs.mobs.select(mPattern));
             if (mob != null) {
                 logic.setEntityId(Mobs.classToName(mob));

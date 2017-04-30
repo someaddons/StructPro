@@ -1,7 +1,4 @@
 /builds/*/*
-/builds/*/build.gradle
 
 !/builds/*/bin
 !/builds/*/src
-
-

@@ -1,0 +1,28 @@
+body {
+    background-image: url("background.png");
+    background-color: rgb(255, 255, 255);
+    font-family: "Century Gothic", CenturyGothic, Geneva, AppleGothic, sans-serif;
+    padding-top: 0px;
+	padding-right: 5%;
+	padding-bottom: 0%;
+	padding-left: 5%;
+}
+
+table, th, td {
+	border: 1px solid black;
+    font-weight: normal;
+    border-spacing: 0.25em;
+    text-align: left;
+}
+
+ul {
+	list-style-type: square; 
+}
+
+.thumb img  {
+	border: 2px solid #55c5e9;
+	padding: 5px;
+	background: #666;
+    width: 40%;
+    height: 40%;
+}
