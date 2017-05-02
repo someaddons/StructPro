@@ -157,7 +157,7 @@ public class Commands implements ICommand {
             int startX = vars.get(new String[]{"startx", "sx"}, 0);
             int startZ = vars.get(new String[]{"startz", "sz"}, 0);
             boolean stop = vars.get(new String[]{"stop", "end", "finish"}, false);
-            int step = Math.min(Math.max(1, vars.get(new String[]{"step", "delta"}, 16)), 4096);
+            int step = Math.min(Math.max(1, vars.get(new String[]{"step", "delta"}, 32)), 4096);
             feedback(sender, Evaluator.cmdGen(sender.getEntityWorld(), startX, startZ, step, size, stop));
             return;
         }

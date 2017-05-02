@@ -57,7 +57,7 @@ public class Items extends net.minecraft.init.Items {
      * @return Is item valid
      */
     public static boolean isValidItem(Item item) {
-        return item != null;
+        return item != null && (item.delegate.name().contains("minecraft:") || !Configurator.ONLY_VANILLA_LOOT);
     }
 
     /**

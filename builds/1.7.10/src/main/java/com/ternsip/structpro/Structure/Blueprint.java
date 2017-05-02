@@ -166,9 +166,10 @@ public class Blueprint extends Volume {
         tag.setByteArray("AddBlocks", new byte[0]);
         byte[] blocksID = new byte[blocks.length];
         for (int i = 0; i < blocks.length; ++i) {
-            blocksID[i] = Blocks.isVanilla(blocksID[i]) ? (byte) blocks[i] : 0;
+            blocksID[i] = (byte) blocks[i];
         }
         tag.setByteArray("Blocks", blocksID);
+        tag.setByteArray("AddBlocks", getAddBlocks(blocks));
         tag.setByteArray("Data", meta);
         NBTTagList tileEntities = new NBTTagList();
         for (NBTTagCompound tile : tiles) {
@@ -200,6 +201,22 @@ public class Blueprint extends Volume {
             }
         }
         return blocks;
+    }
+
+    /**
+     * Decompose to 8b-addBlocks from 16b-block id
+     * @param blocksID Blocks id array
+     * @return Decomposed array to AddBlocks
+     */
+    private static byte[] getAddBlocks(short[] blocksID) {
+        byte[] addBlocks = new byte[(blocksID.length >> 1) + 1];
+        for (int index = 0; index < blocksID.length; ++index) {
+            short block = blocksID[index];
+            if (block > 255) {
+                addBlocks[index >> 1] = (byte) (((index & 1) == 0) ? addBlocks[index >> 1] & 0xF0 | (block >> 8) & 0xF : addBlocks[index >> 1] & 0xF | ((block >> 8) & 0xF) << 4);
+            }
+        }
+        return addBlocks;
     }
 
     /**

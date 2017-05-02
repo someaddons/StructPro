@@ -40,8 +40,10 @@
 		During the world exploration you can discover neatly pasted schematics that looks harmonically with environment.
 		Any user can add arbitrary schematic to make it possible automatically appear in the world.
 		Collected more than 2900+ great schematics and include them to standard mod releases.
-		Mod config provides the ability to adjust spawn rates.
-		There is possibility to generate villages constructed from schematic sets.<br>
+		Mod config provides the ability to adjust spawn conditions and rates.
+		One of the most important features of this mod is that structure spawning going much-much faster than similar mods do.
+		The mod includes schematic control features and world pre-generation ability.
+		There is possibility to automatically generate villages constructed from schematic sets and easily insert it into the world.<br>
 		<br>
 		<!--#### #### #### ####-->
 		<hr>
@@ -68,10 +70,12 @@
 			<li>Random mobs spawn-control
 			<li>Automatic mob-population inside generated structures
 			<li>Flexible configuration of entire generation processes
-			<li>In-game creative commands to paste schematics or even villages
+			<li>In-game creative commands to paste schematics or even villages and undo actions
 			<li>Any players can combine their own schematic sets
 			<li>Built-in schematic rotation and flipping algorithms
 			<li>Lots of best schematics collected and it number over 2900
+			<li>Possibility to save world fragments to schematics
+			<li>World pre-generation command
 			<li>Compatible with most mods
 			<li>No dependencies
 		</ul>
@@ -181,6 +185,8 @@
 		<h4>Commands</h4>
 		Aliases: /structpro or /spro<br>
 		Pasting schematic in the world. Each field may not be specified. Available only for creative users.<br>
+		If you want to paste village use /spro paste name="village folder name" village=true.<br>
+		You can use any sub-word of schematic path and name.<br>
 		/structpro paste<br>
 		<ul>
 			<li>name = Select random schematic which path contains this name (default = "")
@@ -208,7 +214,8 @@
 			<li>length = Schematic length
 		</ul>
 		<br>
-		Pre-generate world<br>
+		Pre-generate world. Very important! Go to server.properties and set max-tick-time=-1.<br>
+		To stop generation use /spro gen stop=true.<br>
 		/structpro gen<br>
 		<ul>
 			<li>size = Generation radius measured in chunks
@@ -231,10 +238,28 @@
 		- .minecraft/schematics/ by default, but you can configure it<br>
 		<br>
 		- For using own schematics, do we also need something?<br>
-		- Nope, you need to put your schematics in the folder. Nothing more.<br>
+		- Nope, you need to put your schematics in the folder. Nothing more<br>
 		<br>
 		- How to make structures more rare?<br>
 		- Go to config and open structpro.cfg file then put density, for instance 10 times less than before (0.005 -> 0.0005)<br>
+		<br>
+		- I've got a java.lang.Error when pre-generating world<br>
+		- Go to server.properties and set max-tick-time = -1<br>
+		<br>
+		- Game crashing when opening chest<br>
+		- That's because some other mods incorrectly implements items. All you can do with this mod - go to mod config and set ONLY_VANILLA_LOOT=true. This will prevent third-party items to appear in chests. Destroy bad chests using editor or generate a new world<br>
+		<br>
+		- I don't want to spawn chests with items because it's unbalance<br>
+		- Set LOOT_CHANCE=0 in mod config, it gives you zero-probability of loot<br>
+		<br>
+		- I want calculate density where 1 structure drops per 400x400 blocks area<br>
+		- Dinsity is a probability to spawn per each chunk, but it can be even more then one. Basic forula for area DENSITY= 256.0 / S, where S is area mesured in blocks, in case you pick area 400x400 density will be 0.0016 <br>
+		<br>
+		- I have some problems with ticking<br>
+		- Set TICKER=false in mod config file. This flag will stop additional ticking before/after pasting structure.<br>
+		<br>
+		- Can I paste schematic with modded items<br>
+		- No, this function is disabled because modded items ids varies hard from one mod-pack to another. To not spoil the world with non-existent blocks. But, you can save it to schematics.<br>
 		<br>
 		<!--#### #### #### ####-->
 		<hr>
@@ -483,6 +508,14 @@
 						Fixed mob-spawner transfering from schematic nbt tile data (Random mob in spawner bug)<br>
 					</th>
 				</tr>
+				<tr>
+					<th>3.5 save modded blocks</th>
+					<th>
+						New ability to save schematics with modded items or blocks (not paste)<br>
+						New logo, new web-reference<br>
+						Fixed 1.7.10 bug when ONLY_VANILLA_LOOT not works<br>
+					</th>
+				</tr>
 			</table>
 		</details>
 		<br>
@@ -492,7 +525,6 @@
 		Sometimes spawned structures break nether-portals<br>
 		Sometimes creative command "paste" may produce structures with temporary-invisible mobs<br>
 		Falled-down sand/gravel can not be undone with /spro undo<br>
-        1.7.10 ONLY_VANILLA_LOOT not works and spawns all items<br>
         <br>
 		<!--#### #### #### ####-->
 		<hr>
@@ -527,7 +559,7 @@
 				<th>Planned in future</th>
 			</tr>
             <tr>
-				<th>Save schematics with modded items or blocks also and limit max-save-dimensions</th>
+				<th>Limit max schematic dimensions for save command</th>
 				<th>Planned in future</th>
 			</tr>
 		</table>
@@ -536,7 +568,10 @@
 		<hr>
 		<h4>Installation and downloads</h4>
 		<ul>
-            <li>Download jar for your version <a href="../builds/1.7.10/bin/structpro-last-1.7.10.jar">1.7.10</a>, <a href="../builds/1.10.2/bin/structpro-last-1.10.2.jar">1.10.2</a><a href="../builds/1.11.2/bin/structpro-last-1.11.2.jar">1.11.2</a>
+            <li>Download jar for your version 
+            	<a href="../builds/1.7.10/bin/structpro-3.5-1.7.10.jar">1.7.10</a>, 
+            	<a href="../builds/1.10.2/bin/structpro-3.5-1.10.2.jar">1.10.2</a>, 
+            	<a href="../builds/1.11.2/bin/structpro-3.5-1.11.2.jar">1.11.2</a>
             <li>Put the jar to your minecraft mods folder
             <li>Download <a href="../schematics/schematics.zip">schematics</a> archive or pick your own
             <li>Unzip schematics to .minecraft/schematics (or schematics folder you specified in config)
@@ -551,8 +586,8 @@
 			<li><a href="http://cubical.xyz/">[Online Schematic Viewer Cubical-XYZ]</a>
 			<li><a href="http://www.mcedit-unified.net/">[MC-EDIT V-1.0]</a>
 			<li><a href="https://minecraft.curseforge.com/projects/worldedit">[Minecraft ForgeMod World-Edit]</a>
-		Don't forget to save original name and prefix schematic author or publisher in square brackets.
 		</ul>
+		Don't forget to save original name and prefix schematic author or publisher in square brackets - [author]name.schematic. <br>
 		<br>
 		<!--#### #### #### ####-->
 		<hr>
