@@ -80,7 +80,7 @@ public class Village extends Construction {
      * @param chunkZ Chunk Z coordinate
      * @return Amount of villages spawned in chunk
      */
-    private static int drops(World world, int chunkX, int chunkZ) {
+    public static int drops(World world, int chunkX, int chunkZ) {
         if (outsideBorder(chunkX, chunkZ)) {
             return 0;
         }

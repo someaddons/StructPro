@@ -117,7 +117,7 @@ public class Construction {
      * @param chunkZ Chunk Z coordinate
      * @return Number of structures
      */
-    private static int drops(World world, int chunkX, int chunkZ) {
+    public static int drops(World world, int chunkX, int chunkZ) {
         if (outsideBorder(chunkX, chunkZ)) {
             return 0;
         }

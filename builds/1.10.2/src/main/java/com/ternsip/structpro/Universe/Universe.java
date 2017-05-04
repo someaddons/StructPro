@@ -61,12 +61,12 @@ public class Universe {
     }
 
     /**
-     * Call generation manually at chunk position
+     * Call decoration manually at chunk position
      * @param world Target world
      * @param chunkX Chunk X position
      * @param chunkZ Chunk Z position
      */
-    public static void generate(World world, int chunkX, int chunkZ) {
+    public static void decorate(World world, int chunkX, int chunkZ) {
         if (world.getChunkProvider() instanceof ChunkProviderServer) {
             ChunkProviderServer cps = (ChunkProviderServer) world.getChunkProvider();
             world.getChunkFromChunkCoords(chunkX + 1, chunkZ);
@@ -74,6 +74,17 @@ public class Universe {
             world.getChunkFromChunkCoords(chunkX, chunkZ + 1);
             world.getChunkFromChunkCoords(chunkX, chunkZ).populateChunk(cps, cps.chunkGenerator);
         }
+    }
+
+    /**
+     * Check if the chunk was already decorated
+     * @param world Target world
+     * @param chunkX Chunk X position
+     * @param chunkZ Chunk Z position
+     * @return Is chunk decorated
+     */
+    public static boolean isDecorated(World world, int chunkX, int chunkZ) {
+        return world.getChunkFromChunkCoords(chunkX, chunkZ).isTerrainPopulated();
     }
 
     /**

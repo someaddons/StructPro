@@ -29,6 +29,9 @@ public class Pregen {
     /** Activated or not */
     private static boolean active = false;
 
+    /** Skip chunks without structures */
+    private static boolean skip = false;
+
     /** Tick generation step progress */
     public static void tick() {
         if (!active) {
@@ -36,7 +39,15 @@ public class Pregen {
         }
         int rSize = 2 * size + 1;
         for (int cnt = 0; cnt < step && progress < rSize * rSize; ++progress, ++cnt) {
-            Universe.generate(world, startX - size + progress / rSize, startZ - size + progress % rSize);
+            int chunkX = startX - size + progress / rSize;
+            int chunkZ = startZ - size + progress % rSize;
+            if (Universe.isDecorated(world, chunkX, chunkZ)) {
+                continue;
+            }
+            if (skip && Construction.drops(world, chunkX, chunkZ) <= 0 && Village.drops(world, chunkX, chunkZ) <= 0) {
+                continue;
+            }
+            Universe.decorate(world, chunkX, chunkZ);
         }
         new Report().post("WORLD GEN", progress + "/" + rSize * rSize).print();
         if (progress >= rSize * rSize) {
@@ -51,18 +62,21 @@ public class Pregen {
      * @param startX Starting chunk X coordinate
      * @param startZ Starting chunk Z coordinate
      * @param step Number of chunks to process per step
+     * @param skip Chunks with no structures
+     * @param progress Start generation progress from given number
      * @param size Number of chunks for x and z axis in each direction
      */
-    public static void activate(World world, int startX, int startZ, int step, int size) {
+    public static void activate(World world, int startX, int startZ, int step, int size, boolean skip, int progress) {
         if (active) {
             new Report().post("WORLD GEN", "INTERRUPT").print();
         }
         Pregen.world = world;
-        Pregen.step = step;
-        Pregen.size = size;
+        Pregen.skip = skip;
+        Pregen.step = Math.max(1, step);
+        Pregen.size = Math.max(0, size);
         Pregen.startX = startX;
         Pregen.startZ = startZ;
-        Pregen.progress = 0;
+        Pregen.progress = Math.max(0, progress);
         Pregen.active = true;
         new Report().post("WORLD GEN", "START").print();
     }

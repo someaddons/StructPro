@@ -138,7 +138,7 @@ class Evaluator {
                 "\n" +
                 "UNDO LAST ACTION: /spro undo" +
                 "\n" +
-                "GENERATE WORLD: /spro gen size=<int> sx=<int> sz=<int> stop=<bool>";
+                "GENERATE WORLD: /spro gen size=<int> step=<int> sx=<int> sz=<int> stop=<bool> skip=<bool> progress=<int>";
     }
 
     /**
@@ -165,14 +165,17 @@ class Evaluator {
      * @param startZ Starting chunk Z coordinate
      * @param step Number of chunks to process per step
      * @param size Number of chunks for x and z axis in each direction
+     * @param stop Deactivate generation
+     * @param skip Skip chunks with no structures
+     * @param progress Start generation progress from given number
      * @return Command execution status
      */
-    static String cmdGen(World world, int startX, int startZ,int step, int size, boolean stop) {
+    static String cmdGen(World world, int startX, int startZ,int step, int size, boolean stop, boolean skip, int progress) {
         if (stop) {
             Pregen.deactivate();
             return "Generation process interrupted";
         } else {
-            Pregen.activate(world, startX, startZ, step, size);
+            Pregen.activate(world, startX, startZ, step, size, skip, progress);
             return "Generation process started";
         }
     }

@@ -19,7 +19,7 @@
 			<li>Author: <a href=https://github.com/ternsip>Ternsip</a>
 			<li>Mod: StructPro
 			<li>Minecraft versions: [1.7.10], [1.10.2], [1.11.2]    
-			<li>Latest mod version: 3.6
+			<li>Latest mod version: 3.7
 			<li>Recomened mod version: 3.6+
 			<li>Dependencies: <a href=http://files.minecraftforge.net/>Forge</a>
 			<li>Tags: [World Generation], [Custom structures], [Schematic Control]
@@ -226,6 +226,8 @@
 			<li>startz = starting chunk z position
 			<li>step = Amount of chunks processed per tick, recommended = 16
 			<li>stop = Pick true to stop generation process
+			<li>skip = Skip chunks that doesn't contains mod structures
+			<li>progress = Start generation progress from this value (you can continue old interrupted process using this)
 			<li>world = Dimension name or id
 		</ul>
 		<br>
@@ -247,7 +249,7 @@
 		- How to make structures more rare?<br>
 		- Go to config and open structpro.cfg file then put density, for instance 10 times less than before (0.005 -> 0.0005)<br>
 		<br>
-		- I've got a java.lang.Error when pre-generating world<br>
+		- I've got a crash with java.lang.Error<br>
 		- Go to server.properties and set max-tick-time = -1<br>
 		<br>
 		- Game crashing when opening chest<br>
@@ -264,7 +266,6 @@
 		<br>
 		- Can I paste schematic with modded items<br>
 		- No, this function is disabled because modded items ids varies hard from one mod-pack to another. To not spoil the world with non-existent blocks. But, you can save it to schematics.<br>
-		<br>
 		<!--#### #### #### ####-->
 		<hr>
 		<h4>Screenshots</h4>
@@ -320,6 +321,17 @@
 					<img class="thumb_image" src="../screenshots/46.png">
 					<img class="thumb_image" src="../screenshots/47.png">
 					<img class="thumb_image" src="../screenshots/48.png">
+					<img class="thumb_image" src="../screenshots/50.png">
+                    <img class="thumb_image" src="../screenshots/51.png">
+                    <img class="thumb_image" src="../screenshots/52.png">
+                    <img class="thumb_image" src="../screenshots/53.png">
+                    <img class="thumb_image" src="../screenshots/54.png">
+                    <img class="thumb_image" src="../screenshots/55.png">
+                    <img class="thumb_image" src="../screenshots/56.png">
+                    <img class="thumb_image" src="../screenshots/57.png">
+                    <img class="thumb_image" src="../screenshots/58.png">
+                    <img class="thumb_image" src="../screenshots/59.png">
+                    <img class="thumb_image" src="../screenshots/60.png">
 				</p>
 			</details>
 		<br>
@@ -528,6 +540,14 @@
 						Now you can generate/save/paste/undo in any dimension even if you are not in the server<br>
 					</th>
 				</tr>
+				<tr>
+					<th>3.7 World control</th>
+					<th>
+						Now when you use /spro gen you can skip chunks that doesn't contains spro structures /spro gen skip=true<br>
+						You can continue /spro gen generation using progess /spro gen process=number<br>
+						Already decorated chunks skips to improve performance<br>
+					</th>
+				</tr>
 			</table>
 		</details>
 		<br>
@@ -581,9 +601,9 @@
 		<h4>Installation and downloads</h4>
 		<ul>
             <li>Download jar for your version 
-            	<a href="../builds/1.7.10/bin/structpro-3.6-1.7.10.jar">1.7.10</a>, 
-            	<a href="../builds/1.10.2/bin/structpro-3.6-1.10.2.jar">1.10.2</a>, 
-            	<a href="../builds/1.11.2/bin/structpro-3.6-1.11.2.jar">1.11.2</a>
+            	<a href="../builds/1.7.10/bin/structpro-3.7-1.7.10.jar">1.7.10</a>, 
+            	<a href="../builds/1.10.2/bin/structpro-3.7-1.10.2.jar">1.10.2</a>, 
+            	<a href="../builds/1.11.2/bin/structpro-3.7-1.11.2.jar">1.11.2</a>
             <li>Put the jar to your minecraft mods folder
             <li>Download <a href="../schematics/schematics.zip">schematics</a> archive or pick your own
             <li>Unzip schematics to .minecraft/schematics (or schematics folder you specified in config)

@@ -173,6 +173,8 @@ public class Commands implements ICommand {
             int startX = vars.get(new String[]{"startx", "sx"}, 0);
             int startZ = vars.get(new String[]{"startz", "sz"}, 0);
             boolean stop = vars.get(new String[]{"stop", "end", "finish"}, false);
+            boolean skip = vars.get(new String[]{"skip"}, false);
+            int progress = vars.get(new String[]{"progress"}, 0);
             int step = Math.min(Math.max(1, vars.get(new String[]{"step", "delta"}, 32)), 4096);
             String worldName = vars.get(new String[]{"world"});
             World world = worldName == null ? sender.getEntityWorld() : Universe.getWorld(worldName);
@@ -180,7 +182,7 @@ public class Commands implements ICommand {
                 feedback(sender, "No matching world");
                 return;
             }
-            feedback(sender, Evaluator.cmdGen(world, startX, startZ, step, size, stop));
+            feedback(sender, Evaluator.cmdGen(world, startX, startZ, step, size, stop, skip, progress));
             return;
         }
         if (cmd.equalsIgnoreCase("help")) {
