@@ -21,6 +21,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraftforge.common.DimensionManager;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -345,6 +346,33 @@ public class Universe {
         if (Configurator.TICKER) {
             world.tickUpdates(true);
         }
+    }
+
+    /**
+     * Save all data for world
+     * @param world The world instance
+     */
+    public static void saveWorlds(World world) {
+        world.getChunkProvider().unloadQueuedChunks();
+    }
+
+    /**
+     * Get world instance by dimension name or id, case insensitive
+     * @param dimension Dimension name or id
+     * @return World instance
+     */
+    public static World getWorld(String dimension) {
+        for (int dim : DimensionManager.getStaticDimensionIDs()) {
+            if (DimensionManager.getWorld(dim) == null) {
+                DimensionManager.initDimension(dim);
+            }
+        }
+        for (World world : DimensionManager.getWorlds()) {
+            if (getDimensionName(world).equalsIgnoreCase(dimension) || String.valueOf(getDimensionID(world)).equalsIgnoreCase(dimension)) {
+                return world;
+            }
+        }
+        return null;
     }
 
     /**

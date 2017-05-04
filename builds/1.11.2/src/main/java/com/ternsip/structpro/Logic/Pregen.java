@@ -42,6 +42,7 @@ public class Pregen {
         if (progress >= rSize * rSize) {
             deactivate();
         }
+        Universe.saveWorlds(world);
     }
 
     /**

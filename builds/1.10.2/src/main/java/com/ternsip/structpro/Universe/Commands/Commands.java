@@ -1,5 +1,6 @@
 package com.ternsip.structpro.Universe.Commands;
 
+import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Utils.Utils;
 import com.ternsip.structpro.Utils.Variables;
 import net.minecraft.command.CommandException;
@@ -9,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +125,13 @@ public class Commands implements ICommand {
             boolean flipY = vars.get(new String[]{"flipy", "fy"}, false);
             boolean flipZ = vars.get(new String[]{"flipz", "fz"}, random.nextBoolean());
             boolean village = vars.get(new String[]{"village", "town", "city"}, false);
-            feedback(sender, Evaluator.cmdPaste(sender.getEntityWorld(), name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, village));
+            String worldName = vars.get(new String[]{"world"});
+            World world = worldName == null ? sender.getEntityWorld() : Universe.getWorld(worldName);
+            if (world == null) {
+                feedback(sender, "No matching world");
+                return;
+            }
+            feedback(sender, Evaluator.cmdPaste(world, name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, village));
             return;
         }
         if (cmd.equalsIgnoreCase("save")) {
@@ -134,7 +142,13 @@ public class Commands implements ICommand {
             int width = vars.get(new String[]{"width", "w"}, 64);
             int height = vars.get(new String[]{"height", "h"}, 64);
             int length = vars.get(new String[]{"length", "l"}, 64);
-            feedback(sender, Evaluator.cmdSave(sender.getEntityWorld(), name, posX, posY, posZ, width, height, length));
+            String worldName = vars.get(new String[]{"world"});
+            World world = worldName == null ? sender.getEntityWorld() : Universe.getWorld(worldName);
+            if (world == null) {
+                feedback(sender, "No matching world");
+                return;
+            }
+            feedback(sender, Evaluator.cmdSave(world, name, posX, posY, posZ, width, height, length));
             return;
         }
         if (cmd.equalsIgnoreCase("undo")) {
@@ -147,7 +161,13 @@ public class Commands implements ICommand {
             int startZ = vars.get(new String[]{"startz", "sz"}, 0);
             boolean stop = vars.get(new String[]{"stop", "end", "finish"}, false);
             int step = Math.min(Math.max(1, vars.get(new String[]{"step", "delta"}, 32)), 4096);
-            feedback(sender, Evaluator.cmdGen(sender.getEntityWorld(), startX, startZ, step, size, stop));
+            String worldName = vars.get(new String[]{"world"});
+            World world = worldName == null ? sender.getEntityWorld() : Universe.getWorld(worldName);
+            if (world == null) {
+                feedback(sender, "No matching world");
+                return;
+            }
+            feedback(sender, Evaluator.cmdGen(world, startX, startZ, step, size, stop));
             return;
         }
         if (cmd.equalsIgnoreCase("help")) {

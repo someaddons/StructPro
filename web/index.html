@@ -19,8 +19,8 @@
 			<li>Author: <a href=https://github.com/ternsip>Ternsip</a>
 			<li>Mod: StructPro
 			<li>Minecraft versions: [1.7.10], [1.10.2], [1.11.2]    
-			<li>Latest mod version: 3.4
-			<li>Recomened mod version: 3.4+
+			<li>Latest mod version: 3.6
+			<li>Recomened mod version: 3.6+
 			<li>Dependencies: <a href=http://files.minecraftforge.net/>Forge</a>
 			<li>Tags: [World Generation], [Custom structures], [Schematic Control]
 			<li>Repository: <a href=https://github.com/ternsip/StructPro>github.com/ternsip/structpro<a/>
@@ -200,9 +200,11 @@
 			<li>flipY = Flip Y axis (default = random false) [You want flip your building upside down?]
 			<li>flipZ = Flip Z axis (default = random true..false)
 			<li>village = Spawn entire village (default = false)
+			<li>world = Dimension name or id
 		</ul>
 		<br>
 		Schematic saving to schematics/Saves folder from world fragment. Fragment will be copied in increasing X,Y,Z direction.<br>
+		Works only while server ticks. If you play integrated server you have to be in game to process ticks.
 		/structpro save<br>
 		<ul>
 			<li>name = Schematic name
@@ -212,6 +214,7 @@
 			<li>width = Schematic width
 			<li>height = Schematic height
 			<li>length = Schematic length
+			<li>world = Dimension name or id
 		</ul>
 		<br>
 		Pre-generate world. Very important! Go to server.properties and set max-tick-time=-1.<br>
@@ -223,6 +226,7 @@
 			<li>startz = starting chunk z position
 			<li>step = Amount of chunks processed per tick, recommended = 16
 			<li>stop = Pick true to stop generation process
+			<li>world = Dimension name or id
 		</ul>
 		<br>
 		Restore previous world data. Also works for village paste. Restores blocks for external mods. May be unsafe.<br>
@@ -516,6 +520,14 @@
 						Fixed 1.7.10 bug when ONLY_VANILLA_LOOT not works<br>
 					</th>
 				</tr>
+				<tr>
+					<th>3.6 World control</th>
+					<th>
+						Allow dimension selecting for commands using world=dimension<br>
+						Unload chunks during /spro gen command proccess that prevents memory overflows<br>
+						Now you can generate/save/paste/undo in any dimension even if you are not in the server<br>
+					</th>
+				</tr>
 			</table>
 		</details>
 		<br>
@@ -569,9 +581,9 @@
 		<h4>Installation and downloads</h4>
 		<ul>
             <li>Download jar for your version 
-            	<a href="../builds/1.7.10/bin/structpro-3.5-1.7.10.jar">1.7.10</a>, 
-            	<a href="../builds/1.10.2/bin/structpro-3.5-1.10.2.jar">1.10.2</a>, 
-            	<a href="../builds/1.11.2/bin/structpro-3.5-1.11.2.jar">1.11.2</a>
+            	<a href="../builds/1.7.10/bin/structpro-3.6-1.7.10.jar">1.7.10</a>, 
+            	<a href="../builds/1.10.2/bin/structpro-3.6-1.10.2.jar">1.10.2</a>, 
+            	<a href="../builds/1.11.2/bin/structpro-3.6-1.11.2.jar">1.11.2</a>
             <li>Put the jar to your minecraft mods folder
             <li>Download <a href="../schematics/schematics.zip">schematics</a> archive or pick your own
             <li>Unzip schematics to .minecraft/schematics (or schematics folder you specified in config)

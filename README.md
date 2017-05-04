@@ -22,7 +22,7 @@ Features
 + No dependencies
 
 Installation
-+ Download jar for your version [1.7.10](builds/1.7.10/bin/structpro-last-1.7.10.jar), [1.10.2](builds/1.10.2/bin/structpro-last-1.10.2.jar), [1.11.2](builds/1.11.2/bin/structpro-last-1.11.2.jar)
++ Download jar for your version [1.7.10](builds/1.7.10/bin/structpro-3.6-1.7.10.jar?raw=true), [1.10.2](builds/1.10.2/bin/structpro-3.6-1.10.2.jar?raw=true), [1.11.2](builds/1.11.2/bin/structpro-3.6-1.11.2.jar?raw=true)
 + Put the jar to your minecraft mods folder
 + Download [schematics](schematics/schematics.zip) archive or pick your own
 + Unzip schematics to .minecraft/schematics (or schematics folder you specified in config)
