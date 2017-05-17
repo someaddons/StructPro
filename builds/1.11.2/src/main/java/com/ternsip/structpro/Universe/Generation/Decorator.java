@@ -31,10 +31,10 @@ public class Decorator implements IWorldGenerator {
     @Override
     public void generate(Random random, final int chunkX, final int chunkZ, final World world, IChunkGenerator generator, IChunkProvider provider) {
         for (Projection projection : Construction.obtain(world, chunkX, chunkZ)) {
-            projection.project().print();
+            projection.project(false).print();
         }
         for (Projection projection : Village.obtain(world, chunkX, chunkZ)) {
-            projection.project().print();
+            projection.project(false).print();
         }
     }
 

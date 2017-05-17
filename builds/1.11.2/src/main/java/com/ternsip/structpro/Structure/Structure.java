@@ -5,10 +5,8 @@ import com.ternsip.structpro.Universe.Blocks.Blocks;
 import com.ternsip.structpro.Universe.Blocks.Classifier;
 import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Universe.Entities.Mobs;
-import com.ternsip.structpro.Universe.Entities.Tiles;
 import com.ternsip.structpro.Utils.Report;
 import com.ternsip.structpro.Utils.Utils;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -361,10 +359,11 @@ public class Structure extends Blueprint {
      * @param world World instance
      * @param posture Transformation state
      * @param seed Projection seed
+     * @param isInsecure Projection will be insecure
      * @throws IOException If blueprint failed to project
      */
     @Override
-    void project(World world, Posture posture, long seed) throws IOException {
+    void project(World world, Posture posture, long seed, boolean isInsecure) throws IOException {
 
         /* Prepare tiles */
         Random random = new Random(seed);
@@ -375,14 +374,7 @@ public class Structure extends Blueprint {
         /* Iterate over volume and paste blocks */
         for (int index = 0; index < posture.getSize(); ++index) {
             if (!skin.get(index)) {
-                BlockPos worldPos = posture.getWorldPos(index);
-                Block block = Blocks.getBlockVanilla(blocks[index]);
-                if (block == null) {
-                    continue;
-                }
-                int metaData = posture.getWorldMeta(block, meta[index]);
-                Universe.setBlockState(world, worldPos, Blocks.getState(block, metaData));
-                Tiles.load(Universe.getTileEntity(world, worldPos), tiles[index], random.nextLong());
+                project(world, posture, index, isInsecure, random);
             }
         }
 

@@ -2,9 +2,8 @@ package com.ternsip.structpro.Universe.Entities;
 
 import com.ternsip.structpro.Logic.Configurator;
 import com.ternsip.structpro.Structure.Biome;
-import com.ternsip.structpro.Universe.Blocks.Blocks;
-import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Universe.Items.Items;
+import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Utils.BlockPos;
 import com.ternsip.structpro.Utils.Utils;
 import net.minecraft.command.server.CommandBlockLogic;

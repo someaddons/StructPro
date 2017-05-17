@@ -12,9 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * The Commands class implements default command.
@@ -34,6 +32,9 @@ public class Commands implements ICommand {
 
     /** Command can be invoked using any of this aliases */
     private static final ArrayList<String> aliases = new ArrayList<String>(){{add("structpro");add("spro");}};
+
+    /** Wand cuboid block selections for each player */
+    private static final HashMap<EntityPlayer, AbstractMap.SimpleEntry<BlockPos, BlockPos>> wand = new HashMap<EntityPlayer, AbstractMap.SimpleEntry<BlockPos, BlockPos>>();
 
     /**
      * Check if the given ICommandSender has permission to execute this command
@@ -107,12 +108,16 @@ public class Commands implements ICommand {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length <= 0) {
-            feedback(sender, Evaluator.cmdHelp());
+            feedback(sender, Evaluator.cmdHelp(""));
             return;
         }
         String cmd = args[0];
         Variables vars = new Variables(Utils.join(args, " "));
         Random random = new Random();
+        if (vars.get(new String[]{"help"}, false)) {
+            feedback(sender, Evaluator.cmdHelp(cmd));
+            return;
+        }
         if (cmd.equalsIgnoreCase("paste")) {
             String name = vars.get(new String[]{"name"}, "");
             int posX = vars.get(new String[]{"posx", "px", "x"}, sender.getPosition().getX());
@@ -124,14 +129,20 @@ public class Commands implements ICommand {
             boolean flipX = vars.get(new String[]{"flipx", "fx"},  random.nextBoolean());
             boolean flipY = vars.get(new String[]{"flipy", "fy"}, false);
             boolean flipZ = vars.get(new String[]{"flipz", "fz"}, random.nextBoolean());
-            boolean village = vars.get(new String[]{"village", "town", "city"}, false);
+            boolean isVillage = vars.get(new String[]{"village", "town", "city"}, false);
+            boolean isInsecure = vars.get(new String[]{"insecure"}, false);
+            posY = vars.get(new String[]{"auto"}, false) ? 0 : posY;
+            if (vars.get(new String[]{"wand"}, false) && sender instanceof EntityPlayer && wand.containsKey(sender)) {
+                BlockPos pos = wand.get(sender).getValue();
+                posX = pos.getX(); posY = pos.getY(); posZ = pos.getZ();
+            }
             String worldName = vars.get(new String[]{"world"});
             World world = worldName == null ? sender.getEntityWorld() : Universe.getWorld(worldName);
             if (world == null) {
                 feedback(sender, "No matching world");
                 return;
             }
-            feedback(sender, Evaluator.cmdPaste(world, name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, village));
+            feedback(sender, Evaluator.cmdPaste(world, name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, isVillage, isInsecure));
             return;
         }
         if (cmd.equalsIgnoreCase("save")) {
@@ -142,10 +153,20 @@ public class Commands implements ICommand {
             int width = vars.get(new String[]{"width", "w"}, 64);
             int height = vars.get(new String[]{"height", "h"}, 64);
             int length = vars.get(new String[]{"length", "l"}, 64);
+            if (vars.get(new String[]{"wand"}, false) && sender instanceof EntityPlayer && wand.containsKey(sender)) {
+                BlockPos posK = wand.get(sender).getKey();
+                BlockPos posV = wand.get(sender).getValue();
+                posX = Math.min(posK.getX(), posV.getX());
+                posY = Math.min(posK.getY(), posV.getY());
+                posZ = Math.min(posK.getZ(), posV.getZ());
+                width = Math.max(posK.getX(), posV.getX()) - posX + 1;
+                height = Math.max(posK.getY(), posV.getY()) - posY + 1;
+                length = Math.max(posK.getZ(), posV.getZ()) - posZ + 1;
+            }
             String worldName = vars.get(new String[]{"world"});
             World world = worldName == null ? sender.getEntityWorld() : Universe.getWorld(worldName);
             if (world == null) {
-                feedback(sender, "No matching world");
+                feedback(sender, "§4No matching world");
                 return;
             }
             feedback(sender, Evaluator.cmdSave(world, name, posX, posY, posZ, width, height, length));
@@ -166,17 +187,13 @@ public class Commands implements ICommand {
             String worldName = vars.get(new String[]{"world"});
             World world = worldName == null ? sender.getEntityWorld() : Universe.getWorld(worldName);
             if (world == null) {
-                feedback(sender, "No matching world");
+                feedback(sender, "§4No matching world");
                 return;
             }
             feedback(sender, Evaluator.cmdGen(world, startX, startZ, step, size, stop, skip, progress));
             return;
         }
-        if (cmd.equalsIgnoreCase("help")) {
-            feedback(sender, Evaluator.cmdHelp());
-            return;
-        }
-        feedback(sender, "Unknown command " + cmd + " for " + name);
+        feedback(sender, "§4Unknown command§2 " + cmd + "§4 for §b" + name);
     }
 
     /**
@@ -186,6 +203,16 @@ public class Commands implements ICommand {
      */
     private static void feedback(ICommandSender sender, String message) {
         sender.addChatMessage(new TextComponentString(message));
+    }
+
+    /**
+     * Called when player touches block with wand
+     * @param player Player entity instance that touches block
+     * @param pos Touched block position
+     */
+    public static void touch(EntityPlayer player, BlockPos pos) {
+        feedback(player, "§ablock §d" + pos.getX() + " " + pos.getY() + " " + pos.getZ() + "§a selected");
+        wand.put(player, new AbstractMap.SimpleEntry<BlockPos, BlockPos>(wand.containsKey(player) ? wand.get(player).getValue() : pos, pos));
     }
 
 }

@@ -1,0 +1,16 @@
+[
+{
+  "modid": "structpro",
+  "name": "StructPro",
+  "description": "World structure generation",
+  "version": "",
+  "mcversion": "${mcversion}",
+  "url": "http://htmlpreview.github.io/?https://raw.githubusercontent.com/ternsip/StructPro/master/web/index.html",
+  "updateUrl": "",
+  "authorList": ["Ternsip"],
+  "credits": "Ternsip",
+  "logoFile": "logo.png",
+  "screenshots": [],
+  "dependencies": []
+}
+]

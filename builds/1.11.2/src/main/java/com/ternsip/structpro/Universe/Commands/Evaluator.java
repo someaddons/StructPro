@@ -38,7 +38,8 @@ class Evaluator {
      * @param flipX X axis flip
      * @param flipY Y axis flip
      * @param flipZ Z axis flip
-     * @param village Paste entire village
+     * @param isVillage Paste entire village
+     * @param isInsecure Projection will be insecure
      * @return Execution status
      */
     static String cmdPaste(World world,
@@ -46,23 +47,23 @@ class Evaluator {
                            int posX, int posY, int posZ,
                            int rotateX, int rotateY, int rotateZ,
                            boolean flipX, boolean flipY, boolean flipZ,
-                           boolean village) {
+                           boolean isVillage, boolean isInsecure) {
         final Pattern nPattern = Pattern.compile(".*" + Pattern.quote(name) + ".*", Pattern.CASE_INSENSITIVE);
         undo.clear();
-        if (village) {
+        if (isVillage) {
             ArrayList<Structure> town = Utils.select(Structures.villages.select(nPattern));
             if (town == null) {
-                return "No matching villages";
+                return "§4No matching villages";
             }
             ArrayList<Projection> projections = Village.combine(world, town, posX >> 4, posZ >> 4, System.currentTimeMillis());
             for (Projection projection : projections) {
                 saveUndo(projection);
             }
             for (Projection projection : projections) {
-                Report report = projection.project();
+                Report report = projection.project(isInsecure);
                 report.print();
             }
-            return "Total spawned: " + projections.size();
+            return "§2Total spawned:§1 " + projections.size();
         } else {
             ArrayList<Structure> candidates = new ArrayList<Structure>(){{
                 addAll(Structures.structures.select(nPattern));
@@ -70,7 +71,7 @@ class Evaluator {
             }};
             Structure structure = Utils.select(candidates);
             if (structure == null) {
-                return "No matching structures";
+                return "§4No matching structures";
             }
             Posture posture = structure.getPosture(posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ);
             Projection projection = new Projection(world, structure, posture, System.currentTimeMillis());
@@ -84,7 +85,7 @@ class Evaluator {
                 }
             }
             saveUndo(projection);
-            Report report = projection.project();
+            Report report = projection.project(isInsecure);
             report.print();
             Universe.sound(world, new BlockPos(posX, posY, posZ), SoundEvents.BLOCK_GLASS_PLACE, SoundCategory.BLOCKS, 1.0f);
             return report.toString();
@@ -126,36 +127,52 @@ class Evaluator {
      * Print command help information
      * @return Command execution status
      */
-    static String cmdHelp() {
-        return "You can pass arguments by name" +
-                "\n" +
-                "PASTE SCHEMATIC: /spro paste " +
-                "name=<string> posX=<int> posY=<int> posZ=<int> rotateX=<int> " +
-                "rotateY=<int> rotateZ=<int> flipX=<bool> flipY=<bool> flipZ=<bool> village=<bool>" +
-                "\n" +
-                "SAVE SCHEMATIC: /spro save " +
-                "name=<string> posX=<int> posY=<int> posZ=<int> width=<int> height=<int> length=<int>" +
-                "\n" +
-                "UNDO LAST ACTION: /spro undo" +
-                "\n" +
-                "GENERATE WORLD: /spro gen size=<int> step=<int> sx=<int> sz=<int> stop=<bool> skip=<bool> progress=<int>";
+    static String cmdHelp(String chapter) {
+        if (chapter.equalsIgnoreCase("paste")) {
+            return "§a/spro paste §d\n" +
+                    "wand=<bool> auto=<bool> insecure=<bool> name=<string> village=<bool> " +
+                    "posX=<int> posY=<int> posZ=<int> " +
+                    "rotateX=<int> rotateY=<int> rotateZ=<int> " +
+                    "flipX=<bool> flipY=<bool> flipZ=<bool>";
+        }
+        if (chapter.equalsIgnoreCase("save")) {
+            return "§a/spro save §d\n" +
+                    "name=<string> " +
+                    "posX=<int> posY=<int> posZ=<int> " +
+                    "width=<int> height=<int> length=<int>";
+        }
+        if (chapter.equalsIgnoreCase("undo")) {
+            return "§a/spro undo";
+        }
+        if (chapter.equalsIgnoreCase("gen")) {
+            return "§a/spro gen §d\n" +
+                    "size=<int> step=<int> skip=<bool> progress=<int> " +
+                    "sx=<int> sz=<int> " +
+                    "stop=<bool>";
+        }
+        return  "§2You can pass arguments by name \n" +
+                "§9PASTE SCHEMATIC:§a /spro paste \n" +
+                "§9SAVE SCHEMATIC:§a /spro save \n" +
+                "§9UNDO LAST ACTION:§a /spro undo \n" +
+                "§9GENERATE WORLD:§a /spro gen";
     }
 
     /**
      * Undo all session history
+     * All projections applied insecure to restore data 1:1
      * @return Command execution status
      */
     static String cmdUndo() {
         if (undo.isEmpty()) {
-            return "No undo data";
+            return "§4No undo data";
         }
         for (Projection projection : undo) {
-            projection.project().print();
+            projection.project(true).print();
             Posture pst = projection.getPosture();
             Universe.sound(projection.getWorld(), new BlockPos(pst.getPosX(), pst.getPosY(), pst.getPosZ()), SoundEvents.ENTITY_ENDERMEN_TELEPORT, SoundCategory.HOSTILE, 1.0f);
         }
         undo.clear();
-        return "Undo done";
+        return "§2Undo done";
     }
 
     /**
@@ -173,10 +190,10 @@ class Evaluator {
     static String cmdGen(World world, int startX, int startZ,int step, int size, boolean stop, boolean skip, int progress) {
         if (stop) {
             Pregen.deactivate();
-            return "Generation process interrupted";
+            return "§4Generation process interrupted";
         } else {
             Pregen.activate(world, startX, startZ, step, size, skip, progress);
-            return "Generation process started";
+            return "§2Generation process started";
         }
     }
 

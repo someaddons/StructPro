@@ -47,13 +47,14 @@ public class Projection {
 
     /**
      * Project blueprint into the world according it posture and flags
+     * @param isInsecure Projection will be insecure
      * @return Result report
      */
-    public Report project() {
+    public Report project(boolean isInsecure) {
         Report result = report();
         long startTime = System.currentTimeMillis();
         try {
-            blueprint.project(world, posture, seed);
+            blueprint.project(world, posture, seed, isInsecure);
             result.pref("PASTED", "SUCCESS");
         } catch (IOException ioe) {
             result.pref("NOT PASTED", ioe.getMessage());

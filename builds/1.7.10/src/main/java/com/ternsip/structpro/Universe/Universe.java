@@ -6,6 +6,7 @@ import com.ternsip.structpro.Structure.Volume;
 import com.ternsip.structpro.Universe.Blocks.Blocks;
 import com.ternsip.structpro.Universe.Blocks.Classifier;
 import com.ternsip.structpro.Universe.Entities.Mobs;
+import com.ternsip.structpro.Universe.Entities.Tiles;
 import com.ternsip.structpro.Utils.BlockPos;
 import com.ternsip.structpro.Utils.IBlockState;
 import net.minecraft.block.Block;
@@ -57,22 +58,6 @@ public class Universe {
             chunk.generateSkylightMap();
         }
         return storage[i];
-    }
-
-    /**
-     * Call generation manually at chunk position
-     * @param world Target world
-     * @param chunkX Chunk X position
-     * @param chunkZ Chunk Z position
-     */
-    public static void generate(World world, int chunkX, int chunkZ) {
-        if (world.getChunkProvider() instanceof ChunkProviderServer) {
-            ChunkProviderServer cps = (ChunkProviderServer) world.getChunkProvider();
-            world.getChunkFromChunkCoords(chunkX + 1, chunkZ);
-            world.getChunkFromChunkCoords(chunkX + 1, chunkZ + 1);
-            world.getChunkFromChunkCoords(chunkX, chunkZ + 1);
-            world.getChunkFromChunkCoords(chunkX, chunkZ).populateChunk(cps, cps.currentChunkProvider, chunkX, chunkZ);
-        }
     }
     
     /**
@@ -162,6 +147,7 @@ public class Universe {
      * @param pos Block position over tile entity
      * @param tile Tile entity NBT tag
      */
+    @SuppressWarnings({"deprecation"})
     public static void setTileTag(World world, BlockPos pos, NBTTagCompound tile) {
         if (tile == null) {
             return;
@@ -171,8 +157,13 @@ public class Universe {
         tag.setInteger("x", pos.getX());
         tag.setInteger("y", pos.getY());
         tag.setInteger("z", pos.getZ());
-        TileEntity entity = TileEntity.createAndLoadEntity(tag);
-        Universe.setTileEntity(world, pos, entity);
+        try {
+            TileEntity entity = TileEntity.createAndLoadEntity(tag);
+            Universe.setTileEntity(world, pos, entity);
+        } catch (Throwable throwable) {
+            Tiles.load(Universe.getTileEntity(world, pos), tile, 0);
+        }
+
     }
 
     /**

@@ -1,8 +1,10 @@
 package com.ternsip.structpro.Structure;
 
 import com.ternsip.structpro.Universe.Blocks.Blocks;
+import com.ternsip.structpro.Universe.Entities.Tiles;
 import com.ternsip.structpro.Universe.Universe;
 import com.ternsip.structpro.Utils.Utils;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -12,6 +14,7 @@ import net.minecraftforge.common.util.Constants;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 /**
  * Schematic - Classical Minecraft schematic storage
@@ -226,19 +229,41 @@ public class Blueprint extends Volume {
      * @param world World instance
      * @param posture Transformation state
      * @param seed Projection seed
+     * @param isInsecure Projection will be insecure
      * @throws IOException If blueprint failed to project
      */
-    void project(World world, Posture posture, long seed) throws IOException {
+    void project(World world, Posture posture, long seed, boolean isInsecure) throws IOException {
+        Random random = new Random(0);
         for (int ix = 0; ix < width; ++ix) {
             for (int iy = 0; iy < height; ++iy) {
                 for (int iz = 0; iz < length; ++iz) {
-                    int index = getIndex(ix, iy, iz);
-                    BlockPos worldPos = posture.getWorldPos(ix, iy, iz);
-                    Universe.setBlockState(world, worldPos, Blocks.getState(Blocks.getBlock(blocks[index]), meta[index]));
-                    Universe.setTileTag(world, worldPos, tiles[index]);
+                    project(world, posture, getIndex(ix, iy, iz), isInsecure, random);
                 }
             }
         }
         Universe.notifyPosture(world, posture);
     }
+
+    /**
+     * Projects block to the world according posture
+     * @param world The world to project
+     * @param posture Projection posture
+     * @param index Blueprint index to paste
+     * @param isInsecure Projection will be insecure
+     * @param random Random object
+     */
+    void project(World world, Posture posture, int index, boolean isInsecure, Random random) {
+        Block block = isInsecure ? Blocks.getBlock(blocks[index]) : Blocks.getBlockVanilla(blocks[index]);
+        if (block == null) {
+            return;
+        }
+        BlockPos pos = posture.getWorldPos(index);
+        Universe.setBlockState(world, pos, Blocks.getState(block, posture.getWorldMeta(block, meta[index])));
+        if (isInsecure) {
+            Universe.setTileTag(world, pos, tiles[index]);
+        } else {
+            Tiles.load(Universe.getTileEntity(world, pos), tiles[index], random.nextLong());
+        }
+    }
+
 }

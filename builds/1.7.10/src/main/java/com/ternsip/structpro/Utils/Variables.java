@@ -26,6 +26,11 @@ public class Variables {
             String[] tokens = m.group().split("[ =]+");
             values.put(tokens[0].toLowerCase(), tokens[1]);
         }
+        for (String token : string.replaceAll("[\\S]+[\\s]*=[\\s]*[\\S]+", "").split(" ")) {
+            if (token.length() > 0 && !values.containsKey(token)) {
+                values.put(token, "true");
+            }
+        }
     }
 
     /**

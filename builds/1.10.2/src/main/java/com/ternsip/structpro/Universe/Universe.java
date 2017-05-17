@@ -6,6 +6,7 @@ import com.ternsip.structpro.Structure.Volume;
 import com.ternsip.structpro.Universe.Blocks.Blocks;
 import com.ternsip.structpro.Universe.Blocks.Classifier;
 import com.ternsip.structpro.Universe.Entities.Mobs;
+import com.ternsip.structpro.Universe.Entities.Tiles;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -15,6 +16,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketChunkData;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -147,6 +149,7 @@ public class Universe {
      * @param pos Block position over tile entity
      * @param tile Tile entity NBT tag
      */
+    @SuppressWarnings({"deprecation"})
     public static void setTileTag(World world, BlockPos pos, NBTTagCompound tile) {
         if (tile == null) {
             return;
@@ -156,8 +159,12 @@ public class Universe {
         tag.setInteger("x", pos.getX());
         tag.setInteger("y", pos.getY());
         tag.setInteger("z", pos.getZ());
-        TileEntity entity = TileEntity.create(world, tag);
-        Universe.setTileEntity(world, pos, entity);
+        try {
+            TileEntity entity = TileEntity.create(world, tag);
+            Universe.setTileEntity(world, pos, entity);
+        } catch (Throwable throwable) {
+            Tiles.load(Universe.getTileEntity(world, pos), tile, 0);
+        }
     }
 
     /**

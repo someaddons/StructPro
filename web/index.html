@@ -18,9 +18,8 @@
 		<ul>
 			<li>Author: <a href=https://github.com/ternsip>Ternsip</a>
 			<li>Mod: StructPro
-			<li>Minecraft versions: [1.7.10], [1.10.2], [1.11.2]    
-			<li>Latest mod version: 3.7
-			<li>Recomened mod version: 3.6+
+			<li>Minecraft versions: [1.7.10], [1.10.2], [1.11.2], [1.12.1]
+			<li>Latest mod version: 3.8
 			<li>Dependencies: <a href=http://files.minecraftforge.net/>Forge</a>
 			<li>Tags: [World Generation], [Custom structures], [Schematic Control]
 			<li>Repository: <a href=https://github.com/ternsip/StructPro>github.com/ternsip/structpro<a/>
@@ -37,7 +36,7 @@
 		It automatically spawns various structures based on schematics during world generation on the server side.
 		It works both with server and client-integrated server.
 		Strutures can reach gigantic proportions and generates as quickly as possible.
-		During the world exploration you can discover neatly pasted schematics that looks harmonically with environment.
+		During the world exploration you can discover neatly placed schematics that looks harmonically with environment.
 		Any user can add arbitrary schematic to make it possible automatically appear in the world.
 		Collected more than 2900+ great schematics and include them to standard mod releases.
 		Mod config provides the ability to adjust spawn conditions and rates.
@@ -201,6 +200,9 @@
 			<li>flipZ = Flip Z axis (default = random true..false)
 			<li>village = Spawn entire village (default = false)
 			<li>world = Dimension name or id
+			<li>auto = Auto detect best height
+			<li>wand = To Use wand
+			<li>insecure = To paste schematic insecured style, that makes it 1:1 for modded blocks, items, etc.
 		</ul>
 		<br>
 		Schematic saving to schematics/Saves folder from world fragment. Fragment will be copied in increasing X,Y,Z direction.<br>
@@ -215,6 +217,7 @@
 			<li>height = Schematic height
 			<li>length = Schematic length
 			<li>world = Dimension name or id
+			<li>wand = To use wand
 		</ul>
 		<br>
 		Pre-generate world. Very important! Go to server.properties and set max-tick-time=-1.<br>
@@ -548,6 +551,21 @@
 						Already decorated chunks skips to improve performance<br>
 					</th>
 				</tr>
+				<tr>
+					<th>3.8 Insecure projection and commands</th>
+					<th>
+						Now all command arguments with type boolean and value true can be passed as tokens - /spro paste village, /spro gen stop<br>
+						Added wand - wooden axe as select tool, to appy append wand token to command - /spro save wand <br>
+						Projection can be insecure. That means you can paste schematic 1:1 without loosing anything - /spro paste name=banner insecure<br>
+					</th>
+				</tr>
+				<tr>
+					<th>3.8 for 1.12</th>
+					<th>
+						Adapted for 1.12 minecraft<br>
+						Wand now are wooden hoe<br>
+					</th>
+				</tr>
 			</table>
 		</details>
 		<br>
@@ -601,9 +619,10 @@
 		<h4>Installation and downloads</h4>
 		<ul>
             <li>Download jar for your version 
-            	<a href="../builds/1.7.10/bin/structpro-3.7-1.7.10.jar">1.7.10</a>, 
-            	<a href="../builds/1.10.2/bin/structpro-3.7-1.10.2.jar">1.10.2</a>, 
-            	<a href="../builds/1.11.2/bin/structpro-3.7-1.11.2.jar">1.11.2</a>
+            	<a href="../builds/1.7.10/bin/structpro-3.8-1.7.10.jar">1.7.10</a>, 
+            	<a href="../builds/1.10.2/bin/structpro-3.8-1.10.2.jar">1.10.2</a>, 
+            	<a href="../builds/1.11.2/bin/structpro-3.8-1.11.2.jar">1.11.2</a>,
+            	<a href="../builds/1.12.1/bin/structpro-3.8-1.12.1.jar">1.12.1</a>
             <li>Put the jar to your minecraft mods folder
             <li>Download <a href="../schematics/schematics.zip">schematics</a> archive or pick your own
             <li>Unzip schematics to .minecraft/schematics (or schematics folder you specified in config)

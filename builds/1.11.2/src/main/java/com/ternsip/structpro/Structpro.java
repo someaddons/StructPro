@@ -4,7 +4,9 @@ import com.ternsip.structpro.Logic.Pregen;
 import com.ternsip.structpro.Universe.Commands.Commands;
 import com.ternsip.structpro.Logic.Configurator;
 import com.ternsip.structpro.Universe.Generation.Decorator;
+import com.ternsip.structpro.Universe.Items.Items;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
@@ -28,7 +30,7 @@ public class Structpro {
 
     public static final String MODID = "structpro";
     public static final String MODNAME = "StructPro";
-    public static final String VERSION = "3.7";
+    public static final String VERSION = "3.8";
     public static final String AUTHOR = "Ternsip";
 
     @Mod.EventHandler
@@ -46,6 +48,17 @@ public class Structpro {
     @SubscribeEvent
     public void serverTick(TickEvent.ServerTickEvent event) {
         Pregen.tick();
+    }
+
+    @SubscribeEvent
+    @SuppressWarnings({"ConstantConditions"})
+    public void onBlockBreak(BlockEvent.BreakEvent event) {
+        if (    event.getPlayer().getHeldItemMainhand() != null &&
+                event.getPlayer().getHeldItemMainhand().getItem() == Items.WOODEN_AXE &&
+                event.getPlayer().isCreative()) {
+            event.setCanceled(true);
+            Commands.touch(event.getPlayer(), event.getPos());
+        }
     }
 
 }
