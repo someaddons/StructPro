@@ -19,7 +19,7 @@
 			<li>Author: <a href=https://github.com/ternsip>Ternsip</a>
 			<li>Mod: StructPro
 			<li>Minecraft versions: [1.7.10], [1.10.2], [1.11.2], [1.12.1]
-			<li>Latest mod version: 3.8
+			<li>Latest mod version: 3.9
 			<li>Dependencies: <a href=http://files.minecraftforge.net/>Forge</a>
 			<li>Tags: [World Generation], [Custom structures], [Schematic Control]
 			<li>Repository: <a href=https://github.com/ternsip/StructPro>github.com/ternsip/structpro<a/>
@@ -106,7 +106,7 @@
 			<li>Schematic proportions W <= 1024, H <= 256, L <= 1024
 			<li>Schematic volume <= 256^3
 			<li>Schematic file size <= 16 MB
-			<li>Java: 1.6+
+			<li>Java: 1.8+
 		</ul>
 		<br>
 		<!--#### #### #### ####-->
@@ -164,9 +164,11 @@
 			<li>TICKER {Boolean}[[Recommended true] Additional World ticks for spawning process
 			<li>WORLD_CHUNK_BORDER {Integer} [0..+INF, Measured in chunks, Recomended 4096] Generation border
 			<li>SCHEMATICS_FOLDER {File} [Relative path, Use "/", Recomended schematics] Schematics goes this folder
+			<li>STRUCTURE_SPAWN_QUOTA {Integer} [Recommended 1024] Maximal spawn quantity for each structure
 			<li>SPAWN_DIMENSIONS {Set} [Case sensitive, Recomended -1, 0, 1] Allow spawning structures only in this dimensions
 			<li>VILLAGE_DIMENSIONS {Set} [Case sensitive, Recomended 0] Allow spawning villages only in specified dimensions
 			<li>REPLACE_BLOCKS {Map} [BlockSrc -> BlockDst, Comma separated, Case non-sensitive] Replaces blocks to another
+			<li>PROTECT_BLOCKS {Set} [Block names, Comma separated, Case non-sensitive] Protect blocks from pasting structures over it 
 			<li>EXCLUDE_ITEMS {Set} [Item names, Comma separated, Case non-sensitive] Exclude items from possible loot
 		</ul>
 		Recommendations<br>
@@ -566,6 +568,15 @@
 						Wand now are wooden hoe<br>
 					</th>
 				</tr>
+				<tr>
+					<th>3.9 Structure quota</th>
+					<th>
+						Integrated Forge API-pillow helps to transfer code between versions and apis. Isolated minecraft logic from mod logic<br>
+						New config option - STRUCTURE_SPAWN_QUOTA. It says how much times each schematic can be spawned per world<br>
+						New config option - PROTECT_BLOCKS. This is a set of blocks protected from replacing by structure during world generation<br>
+						Java 1.8+ required<br>
+					</th>
+				</tr>
 			</table>
 		</details>
 		<br>
@@ -585,10 +596,6 @@
 				<th>Response</th>
 			</tr>
 			<tr>
-				<th>Forge logo screen showing loading progress</th>
-				<th>Probably, when forge will provide ability to do it</th>
-			</tr>
-			<tr>
 				<th>Support recurrent schematics</th>
 				<th>Available only vanilla schematics</th>
 			</tr>
@@ -601,7 +608,7 @@
 				<th>Inconveniences in jar-file flow system not allows to do it</th>
 			</tr>
 			<tr>
-				<th>Auto spawning mob-spawners inside already generated structures</th>
+				<th>Auto adding mob-spawners inside already generated structures</th>
 				<th>It's badly correlated with mod logic, put spawners you need in your schematics</th>
 			</tr>
             <tr>
@@ -609,7 +616,7 @@
 				<th>Planned in future</th>
 			</tr>
             <tr>
-				<th>Limit max schematic dimensions for save command</th>
+				<th>Add max schematic size for save command</th>
 				<th>Planned in future</th>
 			</tr>
 		</table>
@@ -619,10 +626,10 @@
 		<h4>Installation and downloads</h4>
 		<ul>
             <li>Download jar for your version 
-            	<a href="../builds/1.7.10/bin/structpro-3.8-1.7.10.jar">1.7.10</a>, 
-            	<a href="../builds/1.10.2/bin/structpro-3.8-1.10.2.jar">1.10.2</a>, 
-            	<a href="../builds/1.11.2/bin/structpro-3.8-1.11.2.jar">1.11.2</a>,
-            	<a href="../builds/1.12.1/bin/structpro-3.8-1.12.1.jar">1.12.1</a>
+            	<a href="../builds/1.7.10/bin/structpro-3.9-1.7.10.jar">1.7.10</a>, 
+            	<a href="../builds/1.10.2/bin/structpro-3.9-1.10.2.jar">1.10.2</a>, 
+            	<a href="../builds/1.11.2/bin/structpro-3.9-1.11.2.jar">1.11.2</a>,
+            	<a href="../builds/1.12.1/bin/structpro-3.9-1.12.1.jar">1.12.1</a>
             <li>Put the jar to your minecraft mods folder
             <li>Download <a href="../schematics/schematics.zip">schematics</a> archive or pick your own
             <li>Unzip schematics to .minecraft/schematics (or schematics folder you specified in config)

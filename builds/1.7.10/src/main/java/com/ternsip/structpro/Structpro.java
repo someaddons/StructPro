@@ -1,12 +1,12 @@
 package com.ternsip.structpro;
 
-import com.ternsip.structpro.Logic.Configurator;
-import com.ternsip.structpro.Logic.Pregen;
-import com.ternsip.structpro.Universe.Commands.Commands;
-import com.ternsip.structpro.Universe.Generation.Decorator;
-import com.ternsip.structpro.Universe.Items.Items;
-import com.ternsip.structpro.Utils.BlockPos;
-import cpw.mods.fml.common.FMLCommonHandler;
+import com.ternsip.structpro.logic.Configurator;
+import com.ternsip.structpro.logic.generation.Pregen;
+import com.ternsip.structpro.universe.blocks.UBlockPos;
+import com.ternsip.structpro.universe.commands.Commands;
+import com.ternsip.structpro.universe.generation.Decorator;
+import com.ternsip.structpro.universe.items.UItem;
+import com.ternsip.structpro.universe.items.UItems;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
@@ -21,25 +21,24 @@ import java.io.File;
 /**
  * Main mod class. Forge will handle all registered events
  * @author Ternsip
- * @since JDK 1.6
  */
 @Mod(   modid = Structpro.MODID,
         name = Structpro.MODNAME,
         version = Structpro.VERSION,
+        acceptedMinecraftVersions = "*",
         acceptableRemoteVersions = "*")
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class Structpro {
 
     public static final String MODID = "structpro";
     public static final String MODNAME = "StructPro";
-    public static final String VERSION = "3.8";
+    public static final String VERSION = "3.9";
     public static final String AUTHOR = "Ternsip";
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        Configurator.configure(new File("config/structpro.cfg"));
+        Configurator.configure(new File("config/" + MODID + ".cfg"));
         GameRegistry.registerWorldGenerator(new Decorator(), 4096);
-        FMLCommonHandler.instance().bus().register(this);
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -57,10 +56,10 @@ public class Structpro {
     @SuppressWarnings({"ConstantConditions"})
     public void onBlockBreak(BlockEvent.BreakEvent event) {
         if (    event.getPlayer().getHeldItem() != null &&
-                event.getPlayer().getHeldItem().getItem() == Items.wooden_axe &&
+                new UItem(event.getPlayer().getHeldItem().getItem()).getId() == UItems.WOODEN_HOE.getId() &&
                 event.getPlayer().capabilities.isCreativeMode) {
             event.setCanceled(true);
-            Commands.touch(event.getPlayer(), new BlockPos(event.x, event.y, event.z));
+            Commands.touch(event.getPlayer(), new UBlockPos(event.x, event.y, event.z));
         }
     }
 
