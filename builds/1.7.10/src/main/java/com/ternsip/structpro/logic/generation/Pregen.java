@@ -1,7 +1,7 @@
 package com.ternsip.structpro.logic.generation;
 
-import com.ternsip.structpro.universe.world.UWorld;
 import com.ternsip.structpro.universe.utils.Report;
+import com.ternsip.structpro.universe.world.UWorld;
 
 /**
  * World pre-generation helper
@@ -13,7 +13,7 @@ public class Pregen {
     private static int step = 16;
 
     /** Target world to generate */
-    private static UWorld uWorld;
+    private static UWorld world;
 
     /** How much chunks already processed */
     private static int progress = 0;
@@ -39,24 +39,24 @@ public class Pregen {
         for (int cnt = 0; cnt < step && progress < rSize * rSize; ++progress, ++cnt) {
             int chunkX = startX - size + progress / rSize;
             int chunkZ = startZ - size + progress % rSize;
-            if (uWorld.isDecorated(chunkX, chunkZ)) {
+            if (world.isDecorated(chunkX, chunkZ)) {
                 continue;
             }
-            if (skip && Construction.drops(uWorld, chunkX, chunkZ) <= 0 && Village.drops(uWorld, chunkX, chunkZ) <= 0) {
+            if (skip && Construction.drops(world, chunkX, chunkZ) <= 0 && Village.drops(world, chunkX, chunkZ) <= 0) {
                 continue;
             }
-            uWorld.decorate(chunkX, chunkZ);
+            world.decorate(chunkX, chunkZ);
         }
         new Report().post("WORLD GEN", progress + "/" + rSize * rSize).print();
         if (progress >= rSize * rSize) {
             deactivate();
         }
-        uWorld.saveWorlds();
+        world.saveWorlds();
     }
 
     /**
      * Activate generation process
-     * @param uWorld Target world
+     * @param world Target world
      * @param startX Starting chunk X coordinate
      * @param startZ Starting chunk Z coordinate
      * @param step Number of chunks to process per step
@@ -64,11 +64,11 @@ public class Pregen {
      * @param progress Start generation progress from given number
      * @param size Number of chunks for x and z axis in each direction
      */
-    public static void activate(UWorld uWorld, int startX, int startZ, int step, int size, boolean skip, int progress) {
+    public static void activate(UWorld world, int startX, int startZ, int step, int size, boolean skip, int progress) {
         if (active) {
             new Report().post("WORLD GEN", "INTERRUPT").print();
         }
-        Pregen.uWorld = uWorld;
+        Pregen.world = world;
         Pregen.skip = skip;
         Pregen.step = Math.max(1, step);
         Pregen.size = Math.max(0, size);

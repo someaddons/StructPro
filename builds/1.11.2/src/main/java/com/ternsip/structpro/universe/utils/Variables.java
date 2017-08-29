@@ -80,4 +80,12 @@ public class Variables {
         return null;
     }
 
+    /** Manually add key variable with value
+     * @param key Variable name
+     * @param value Variable value
+     */
+    public void put(String key, String value) {
+        values.put(key, value);
+    }
+
 }

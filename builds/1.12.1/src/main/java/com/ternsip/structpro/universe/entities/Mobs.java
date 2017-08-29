@@ -1,7 +1,7 @@
 package com.ternsip.structpro.universe.entities;
 
-import com.ternsip.structpro.universe.biomes.Biomus;
 import com.ternsip.structpro.structure.Method;
+import com.ternsip.structpro.universe.biomes.Biomus;
 import com.ternsip.structpro.universe.utils.Selector;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.monster.*;

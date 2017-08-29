@@ -4,7 +4,7 @@ import com.ternsip.structpro.universe.blocks.Classifier;
 import com.ternsip.structpro.universe.world.UWorld;
 
 /**
- * Region statistics calculator
+ * 2D Region statistics calculator
  * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -24,14 +24,14 @@ public class Region {
 
     /**
      * Construct region calculated over area according classifier
-     * @param uWorld Target world
+     * @param world Target world
      * @param startX Starting X position
      * @param startZ Starting Z position
      * @param sizeX Size on X axis
      * @param sizeZ Size on Z axis
      * @param classifier passing block classifier
      */
-    public Region(UWorld uWorld, int startX, int startZ, int sizeX, int sizeZ, Classifier classifier) {
+    public Region(UWorld world, int startX, int startZ, int sizeX, int sizeZ, Classifier classifier) {
         variance = 0;
         average = 0;
         major = 0;
@@ -40,7 +40,7 @@ public class Region {
         double squareSum = 0;
         for (int x = 0, wx = startX; x < sizeX; ++x, ++wx) {
             for (int z = 0, wz = startZ; z < sizeZ; ++z, ++wz) {
-                int level = uWorld.getHeight(classifier, wx, wz);
+                int level = world.getHeight(classifier, wx, wz);
                 major = Math.max(major, level);
                 minor = Math.min(minor, level);
                 total += level;
@@ -71,4 +71,5 @@ public class Region {
     public double getRoughness() {
         return Math.sqrt(variance);
     }
+
 }

@@ -122,7 +122,6 @@ public class UWorld {
      * @param pos Block position over tile entity
      * @param tile Tile entity NBT tag
      */
-    @SuppressWarnings({"deprecation"})
     public void setTileTag(UBlockPos pos, NBTTagCompound tile) {
         if (tile == null) {
             return;
@@ -182,7 +181,6 @@ public class UWorld {
      * @param light Block light value
      * @param sky Set for sky
      */
-    @SuppressWarnings({"ConstantConditions"})
     public void setLight(UBlockPos pos, int light, boolean sky) {
         ExtendedBlockStorage storage = getStorage(world.getChunkFromBlockCoords(pos.getBlockPos()), pos.getY());
         if (storage != null) {

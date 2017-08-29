@@ -91,8 +91,8 @@ public class Structures {
                                         .post("LOAD", file.getPath())
                                         .post("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]")
                                         .post("LIFT", String.valueOf(structure.getLift()))
-                                        .post("METHOD", structure.getMethod().name)
-                                        .post("BIOME", structure.getBiomus().name)
+                                        .post("METHOD", structure.getMethod().getName())
+                                        .post("BIOME", structure.getBiomus().getName())
                                         .print();
                             }
                             loads.add(structure);
@@ -137,10 +137,10 @@ public class Structures {
         long loadTime = (System.currentTimeMillis() - startTime);
         Report report = new Report();
         for (Method method : Method.values()) {
-            report.post("METHOD " + method.name.toUpperCase(), String.valueOf(Structures.structures.select(method).size()));
+            report.post("METHOD " + method.getName().toUpperCase(), String.valueOf(Structures.structures.select(method).size()));
         }
         for (Biomus biomus : Biomus.values()) {
-            report.post("BIOME " + biomus.name.toUpperCase(), String.valueOf(Structures.structures.select(biomus).size()));
+            report.post("BIOME " + biomus.getName().toUpperCase(), String.valueOf(Structures.structures.select(biomus).size()));
         }
         report.post("TOTAL STRUCTURES LOADED", String.valueOf(Structures.structures.select().size()));
         report.post("TOTAL VILLAGES LOADED", String.valueOf(Structures.villages.select().size()));

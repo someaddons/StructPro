@@ -231,29 +231,29 @@ public class UItems {
 
     /**
      * Get item possible states
-     * @param uItem Target item
+     * @param item Target item
      * @return Possible item metadata array
      */
-    public static ArrayList<Integer> getPossibleMeta(UItem uItem) {
-        if (!possibleMeta.containsKey(uItem)) {
+    public static ArrayList<Integer> getPossibleMeta(UItem item) {
+        if (!possibleMeta.containsKey(item)) {
             ArrayList<Integer> states = new ArrayList<>();
-            for (int meta = 0; meta <= uItem.getMaxDamage(); ++meta) {
-                if (uItem.isValidItemState(meta)) {
+            for (int meta = 0; meta <= item.getMaxDamage(); ++meta) {
+                if (item.isValidItemState(meta)) {
                     states.add(meta);
                 }
             }
-            possibleMeta.put(uItem, states);
+            possibleMeta.put(item, states);
         }
-        return possibleMeta.get(uItem);
+        return possibleMeta.get(item);
     }
 
     static {
 
         /* Construct acceptable item list */
         final Selector<UItem> names = new Selector<>();
-        for (UItem uItem : UItem.getItems()) {
-            if (uItem.isValid() && !getPossibleMeta(uItem).isEmpty()) {
-                names.add(uItem.getPath(), uItem);
+        for (UItem item : UItem.getItems()) {
+            if (item.isValid() && !getPossibleMeta(item).isEmpty()) {
+                names.add(item.getPath(), item);
             }
         }
         ArrayList<UItem> acceptable = new ArrayList<>();
@@ -268,9 +268,9 @@ public class UItems {
         }
 
         /* Add acceptable items */
-        for (UItem uItem: acceptable) {
-            items.add(uItem.getPath(), uItem);
-            items.add(String.valueOf(uItem.getId()), uItem);
+        for (UItem item: acceptable) {
+            items.add(item.getPath(), item);
+            items.add(String.valueOf(item.getId()), item);
         }
 
     }

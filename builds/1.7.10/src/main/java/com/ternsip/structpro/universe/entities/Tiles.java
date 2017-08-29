@@ -89,11 +89,11 @@ public class Tiles {
                 String itemName = stackTag.getString("id").replaceAll(".*:", "");
                 itemName = itemName.isEmpty() ? String.valueOf(stackTag.getShort("id")) : itemName;
                 Pattern iPattern = Pattern.compile(Pattern.quote(itemName), Pattern.CASE_INSENSITIVE);
-                UItem uItem = Utils.select(UItems.items.select(iPattern), random.nextLong());
+                UItem item = Utils.select(UItems.items.select(iPattern), random.nextLong());
                 byte cnt = items.getCompoundTagAt(i).getByte("Count");
                 int dmg = items.getCompoundTagAt(i).getShort("Damage");
-                if (uItem != null && cnt > 0 && cnt <= uItem.getMaxStack() && UItems.getPossibleMeta(uItem).contains(dmg)) {
-                    forceItems.add(new UItemStack(uItem, cnt, dmg));
+                if (item != null && cnt > 0 && cnt <= item.getMaxStack() && UItems.getPossibleMeta(item).contains(dmg)) {
+                    forceItems.add(new UItemStack(item, cnt, dmg));
                 }
             }
         }
@@ -107,21 +107,21 @@ public class Tiles {
         Collections.shuffle(forceItems, random);
         Collections.shuffle(permutation, random);
         for (int idx = 0; idx < itemsCount; ++idx) {
-            UItem uItem = Utils.select(UItems.items.select(), random.nextLong());
-            if (uItem == null) {
+            UItem item = Utils.select(UItems.items.select(), random.nextLong());
+            if (item == null) {
                 continue;
             }
-            Integer stackMeta = Utils.select(UItems.getPossibleMeta(uItem), random.nextLong());
+            Integer stackMeta = Utils.select(UItems.getPossibleMeta(item), random.nextLong());
             if (stackMeta == null) {
                 continue;
             }
             if (idx < forceItems.size()) {
-                uItem = forceItems.get(idx).getItem();
+                item = forceItems.get(idx).getItem();
                 stackMeta = forceItems.get(idx).getItemDamage();
             }
-            int maxStackSize = Math.max(1, Math.min(Configurator.MAX_CHEST_STACK_SIZE, uItem.getMaxStack()));
+            int maxStackSize = Math.max(1, Math.min(Configurator.MAX_CHEST_STACK_SIZE, item.getMaxStack()));
             int stackSize = 1 + random.nextInt(maxStackSize);
-            chest.setInventorySlotContents(permutation.get(idx), new UItemStack(uItem, stackSize, stackMeta).getItemStack());
+            chest.setInventorySlotContents(permutation.get(idx), new UItemStack(item, stackSize, stackMeta).getItemStack());
         }
     }
 
@@ -135,8 +135,8 @@ public class Tiles {
         Random random = new Random(seed);
         MobSpawnerBaseLogic logic = spawner.func_145881_a();
         UBlockPos spawnerPos = new UBlockPos(spawner.xCoord, spawner.yCoord, spawner.zCoord);
-        UWorld uWorld = new UWorld(spawner.getWorldObj());
-        Biomus biomus = Biomus.valueOf(uWorld.getBiome(spawnerPos));
+        UWorld world = new UWorld(spawner.getWorldObj());
+        Biomus biomus = Biomus.valueOf(world.getBiome(spawnerPos));
         UEntityClass mob = Utils.select(Mobs.hostile.select(biomus), random.nextLong());
         if (mob != null) {
             logic.setEntityName(mob.getName());
@@ -241,9 +241,9 @@ public class Tiles {
             String itemName = tag.getString("Item").replaceAll(".*:", "");
             itemName = itemName.isEmpty() ? String.valueOf(tag.getInteger("Item")) : itemName;
             Pattern iPattern = Pattern.compile(Pattern.quote(itemName), Pattern.CASE_INSENSITIVE);
-            UItem uItem = Utils.select(UItems.items.select(iPattern), random.nextLong());
-            if (uItem != null) {
-                pot.func_145964_a(uItem.getItem(), tag.getInteger("Data"));
+            UItem item = Utils.select(UItems.items.select(iPattern), random.nextLong());
+            if (item != null) {
+                pot.func_145964_a(item.getItem(), tag.getInteger("Data"));
             }
         }
     }

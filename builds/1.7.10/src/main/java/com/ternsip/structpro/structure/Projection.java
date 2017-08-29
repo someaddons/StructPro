@@ -1,7 +1,7 @@
 package com.ternsip.structpro.structure;
 
-import com.ternsip.structpro.universe.world.UWorld;
 import com.ternsip.structpro.universe.utils.Report;
+import com.ternsip.structpro.universe.world.UWorld;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -10,13 +10,13 @@ import java.text.DecimalFormat;
  * Construct projection that determines blueprint state in the world
  * @author Ternsip
  */
-public class Projection {
+public class Projection implements Reportable {
 
     /** Target world */
-    private final UWorld uWorld;
+    private final UWorld world;
 
     /** Target blueprint */
-    private final Blueprint blueprint;
+    private final Schema schema;
 
     /** Posture transformation */
     private final Posture posture;
@@ -25,9 +25,9 @@ public class Projection {
     private final long seed;
 
     /** Default constructor */
-    public Projection(UWorld uWorld, Blueprint blueprint, Posture posture, long seed) {
-        this.uWorld = uWorld;
-        this.blueprint = blueprint;
+    public Projection(UWorld world, Schema schema, Posture posture, long seed) {
+        this.world = world;
+        this.schema = schema;
         this.posture = posture;
         this.seed = seed;
     }
@@ -36,11 +36,12 @@ public class Projection {
      * Combine projection report
      * @return Generated report
      */
+    @Override
     public Report report() {
-        return blueprint.report()
-                .post(posture.report())
-                .post("WORLD", uWorld.getWorldName())
-                .post("DIMENSION", String.valueOf(uWorld.getDimensionID()));
+        return getSchema().report()
+                .post(getPosture().report())
+                .post("WORLD", getWorld().getWorldName())
+                .post("DIMENSION", String.valueOf(getWorld().getDimensionID()));
     }
 
     /**
@@ -52,7 +53,7 @@ public class Projection {
         Report result = report();
         long startTime = System.currentTimeMillis();
         try {
-            blueprint.project(uWorld, posture, seed, isInsecure);
+            getSchema().project(getWorld(), getPosture(), getSeed(), isInsecure);
             result.pref("PASTED", "SUCCESS");
         } catch (IOException ioe) {
             result.pref("NOT PASTED", ioe.getMessage());
@@ -61,8 +62,8 @@ public class Projection {
         return result.post("SPENT TIME", new DecimalFormat("###0.00").format(spentTime / 1000.0) + "s");
     }
 
-    public Blueprint getBlueprint() {
-        return blueprint;
+    public Schema getSchema() {
+        return schema;
     }
 
     public Posture getPosture() {
@@ -70,6 +71,11 @@ public class Projection {
     }
 
     public UWorld getWorld() {
-        return uWorld;
+        return world;
     }
+
+    private long getSeed() {
+        return seed;
+    }
+
 }

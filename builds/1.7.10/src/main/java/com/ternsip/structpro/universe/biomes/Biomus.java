@@ -1,7 +1,7 @@
 package com.ternsip.structpro.universe.biomes;
 
-import com.ternsip.structpro.universe.blocks.UBlocks;
 import com.ternsip.structpro.universe.blocks.UBlock;
+import com.ternsip.structpro.universe.blocks.UBlocks;
 
 import java.io.File;
 import java.util.HashMap;
@@ -22,8 +22,8 @@ public enum Biomus {
     END (0x07, "END"),
     WATER (0x08, "WATER");
 
-    public final int value;
-    public final String name;
+    private final int value;
+    private final String name;
 
     /**
      * Default biomus constructor
@@ -130,14 +130,14 @@ public enum Biomus {
 
     /**
      * Determine Biomus by given Biome
-     * @param uBiome Minecraft native biome
+     * @param biome Minecraft native biome
      * @return The biome
      */
-    public static Biomus valueOf(UBiome uBiome) {
-        if (!uBiome.isValid()) {
+    public static Biomus valueOf(UBiome biome) {
+        if (!biome.isValid()) {
             return Biomus.COMMON;
         }
-        String biomeName = uBiome.getPath().toLowerCase().replace(" ", "");
+        String biomeName = biome.getPath().toLowerCase().replace(" ", "");
         for (HashMap.Entry<Biomus, String[]> entry : bioNames.entrySet()) {
             for (int i = 0; i < entry.getValue().length; ++i) {
                 if (biomeName.contains(entry.getValue()[i].toLowerCase())) {
@@ -180,4 +180,11 @@ public enum Biomus {
         return biomus != null ? biomus : valueOf(blocks);
     }
 
+    public int getValue() {
+        return value;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

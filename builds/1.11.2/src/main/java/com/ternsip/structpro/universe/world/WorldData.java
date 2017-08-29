@@ -4,7 +4,7 @@ import com.ternsip.structpro.Structpro;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.WorldSavedData;
 
-@SuppressWarnings({"NullableProblems"})
+@SuppressWarnings({"WeakerAccess", "NullableProblems"})
 public class WorldData extends WorldSavedData {
 
     public static final String DATA_NAME = Structpro.MODID;

@@ -320,9 +320,9 @@ public enum Classifier {
         for (String exclusion : Configurator.PROTECT_BLOCKS) {
             try {
                 Pattern ePattern = Pattern.compile(exclusion, Pattern.CASE_INSENSITIVE);
-                for (UBlock uBlock : UBlocks.selector.select(ePattern)) {
-                    if (uBlock != null && uBlock.isValid()) {
-                        setBlock(PROTECTED, uBlock);
+                for (UBlock block : UBlocks.selector.select(ePattern)) {
+                    if (block != null && block.isValid()) {
+                        setBlock(PROTECTED, block);
                     }
                 }
             } catch (PatternSyntaxException pse) {

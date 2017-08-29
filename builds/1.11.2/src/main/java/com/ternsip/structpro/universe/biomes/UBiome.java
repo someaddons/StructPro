@@ -24,7 +24,7 @@ public class UBiome {
 
     /** Returns biome path */
     public String getPath() {
-        return biome.getRegistryName().getResourcePath();
+        return biome.getRegistryName() == null ? "" : biome.getRegistryName().getResourcePath();
     }
 
 }

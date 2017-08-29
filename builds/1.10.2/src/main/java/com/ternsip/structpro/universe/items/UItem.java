@@ -72,7 +72,7 @@ public class UItem {
      * @return Item resource path
      * */
     public String getPath() {
-        return item.getRegistryName().getResourcePath();
+        return item.getRegistryName() == null ? "" : item.getRegistryName().getResourcePath();
     }
 
     /**

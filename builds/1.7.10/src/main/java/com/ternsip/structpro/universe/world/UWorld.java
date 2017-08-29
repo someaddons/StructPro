@@ -1,6 +1,5 @@
 package com.ternsip.structpro.universe.world;
 
-import com.ternsip.structpro.logic.Configurator;
 import com.ternsip.structpro.structure.Posture;
 import com.ternsip.structpro.structure.Volume;
 import com.ternsip.structpro.universe.biomes.UBiome;
@@ -176,9 +175,9 @@ public class UWorld {
     public UBlockState getBlockState(UBlockPos pos) {
         ExtendedBlockStorage storage = getStorage(world.getChunkFromBlockCoords(pos.getX(), pos.getZ()), pos.getY());
         if (storage != null) {
-            UBlock uBlock = new UBlock(storage.getBlockByExtId(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15));
+            UBlock block = new UBlock(storage.getBlockByExtId(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15));
             int meta = storage.getExtBlockMetadata(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15);
-            return new UBlockState(uBlock, meta);
+            return new UBlockState(block, meta);
         }
         return UBlocks.AIR.getState();
     }

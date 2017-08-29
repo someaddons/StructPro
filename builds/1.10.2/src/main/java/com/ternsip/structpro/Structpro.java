@@ -4,6 +4,7 @@ import com.ternsip.structpro.logic.Configurator;
 import com.ternsip.structpro.logic.generation.Pregen;
 import com.ternsip.structpro.universe.blocks.UBlockPos;
 import com.ternsip.structpro.universe.commands.Commands;
+import com.ternsip.structpro.universe.commands.Evaluator;
 import com.ternsip.structpro.universe.generation.Decorator;
 import com.ternsip.structpro.universe.items.UItem;
 import com.ternsip.structpro.universe.items.UItems;
@@ -32,7 +33,7 @@ public class Structpro {
 
     public static final String MODID = "structpro";
     public static final String MODNAME = "StructPro";
-    public static final String VERSION = "3.9";
+    public static final String VERSION = "4.0";
     public static final String AUTHOR = "Ternsip";
 
     @Mod.EventHandler
@@ -59,7 +60,7 @@ public class Structpro {
                 new UItem(event.getPlayer().getHeldItemMainhand().getItem()).getId() == UItems.WOODEN_HOE.getId() &&
                 event.getPlayer().isCreative()) {
             event.setCanceled(true);
-            Commands.touch(event.getPlayer(), new UBlockPos(event.getPos()));
+            Evaluator.touchBlock(event.getPlayer(), new UBlockPos(event.getPos()));
         }
     }
 

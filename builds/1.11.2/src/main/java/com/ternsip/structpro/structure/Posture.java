@@ -88,10 +88,10 @@ public class Posture extends Volume {
      * @return World block position
      */
     UBlockPos getWorldPos(int x, int y, int z) {
-        int wx = flipX ? width - x - 1 : x;
-        int wy = flipY ? height - y - 1 : y;
-        int wz = flipZ ? length - z - 1 : z;
-        int w = width, h = height, l = length;
+        int w = getWidth(), h = getHeight(), l = getLength();
+        int wx = flipX ? w - x - 1 : x;
+        int wy = flipY ? h - y - 1 : y;
+        int wz = flipZ ? l - z - 1 : z;
         /* ADD X rotations */
         /* ADD Z rotations */
         for (int i = 0; i < rotateY; ++i) {
@@ -111,7 +111,7 @@ public class Posture extends Volume {
         int x = wx - posX;
         int y = wy - posY;
         int z = wz - posZ;
-        int w = width, h = height, l = length;
+        int w = getWidth(), h = getHeight(), l = getLength();
         if (rotateY % 2 > 0) {
             int tmp = w; w = l; l = tmp;
         }
@@ -128,12 +128,12 @@ public class Posture extends Volume {
 
     /**
      * Get world metadata of block state
-     * @param uBlock Target block
+     * @param block Target block
      * @param meta Block metadata
      * @return transformed metadata
      */
-    int getWorldMeta(UBlock uBlock, byte meta) {
-        Directions.BlockType blockType = Directions.getBlockType(uBlock, meta);
+    int getWorldMeta(UBlock block, byte meta) {
+        Directions.BlockType blockType = Directions.getBlockType(block, meta);
         int mask = Directions.getMask(blockType);
         int overlap = (meta & mask) ^ meta;
         int direction = Directions.getDirection(meta & mask, blockType);
@@ -180,6 +180,7 @@ public class Posture extends Volume {
      * @param z Z-axis extension delta
      * @return New extended posture
      */
+    @Override
     public Posture extend(int x, int y, int z) {
         return super.extend(x, y, z).getPosture(posX - x, posY - y, posZ - z, rotateX, rotateY, rotateZ, flipX, flipY, flipZ);
     }
@@ -188,6 +189,7 @@ public class Posture extends Volume {
      * Combine posture report
      * @return Generated report
      */
+    @Override
     public Report report() {
         return new Report()
                 .post("POS", "[X=" + posX + ";Y=" + posY + ";Z=" + posZ + "]")
@@ -230,4 +232,5 @@ public class Posture extends Volume {
     public int getSizeZ() {
         return sizeZ;
     }
+
 }

@@ -1,12 +1,12 @@
 package com.ternsip.structpro.structure;
 
-import com.ternsip.structpro.universe.blocks.UBlocks;
 import com.ternsip.structpro.universe.blocks.UBlock;
 import com.ternsip.structpro.universe.blocks.UBlockPos;
 import com.ternsip.structpro.universe.blocks.UBlockState;
+import com.ternsip.structpro.universe.blocks.UBlocks;
 import com.ternsip.structpro.universe.entities.Tiles;
-import com.ternsip.structpro.universe.world.UWorld;
 import com.ternsip.structpro.universe.utils.Utils;
+import com.ternsip.structpro.universe.world.UWorld;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;
@@ -20,64 +20,51 @@ import java.util.Random;
  * Provide controls for schematic
  * @author  Ternsip
  */
-public class Blueprint extends Volume {
+@SuppressWarnings({"WeakerAccess"})
+public class Blueprint extends Volume implements Schema {
 
     /** Tag file size limit in bytes */
     private static final long TAG_FILE_SIZE_LIMIT = 1024 * 1024 * 16;
 
-    /** Volume width limitation */
-    private static final int WIDTH_LIMIT = 1024;
-
-    /** Volume height limitation */
-    private static final int HEIGHT_LIMIT = 256;
-
-    /** Volume length limitation */
-    private static final int LENGTH_LIMIT = 1024;
-
-    /** Volume size limitation */
-    private static final long VOLUME_LIMIT = 256 * 256 * 256;
-
     /** Block ID array */
-    short[] blocks;
+    private short[] blocks;
 
     /** Block metadata array */
-    byte[] meta;
+    private byte[] metas;
 
     /** Tag array */
-    NBTTagCompound[] tiles;
+    private NBTTagCompound[] tiles;
 
     /** Empty constructor */
     Blueprint() {}
 
     /**
      * Construct from extracted world part
-     * @param uWorld World instance
+     * @param world World instance
      * @param start Starting position
      * @param volume Volume dimensions
      */
-    public Blueprint(UWorld uWorld, UBlockPos start, Volume volume) {
-        this.width = volume.getWidth();
-        this.height = volume.getHeight();
-        this.length = volume.getLength();
+    public Blueprint(UWorld world, UBlockPos start, Volume volume) {
+        super(volume);
         int size = getSize();
-        blocks = new short[size];
-        meta = new byte[size];
-        tiles = new NBTTagCompound[size];
+        setBlocks(new short[size]);
+        setMetas(new byte[size]);
+        setTiles(new NBTTagCompound[size]);
         Posture posture = getPosture(start.getX(), start.getY(), start.getZ(), 0, 0, 0, false, false, false);
-        for (int ix = 0; ix < width; ++ix) {
-            for (int iy = 0; iy < height; ++iy) {
-                for (int iz = 0; iz < length; ++iz) {
+        for (int ix = 0; ix < getWidth(); ++ix) {
+            for (int iy = 0; iy < getHeight(); ++iy) {
+                for (int iz = 0; iz < getLength(); ++iz) {
                     UBlockPos pos = posture.getWorldPos(ix, iy, iz);
-                    UBlockState state = uWorld.getBlockState(pos);
+                    UBlockState state = world.getBlockState(pos);
                     int blockID = state.getID();
                     int index = getIndex(ix, iy, iz);
-                    blocks[index] = (short) blockID;
-                    meta[index] = (byte) state.getMeta();
-                    tiles[index] = uWorld.getTileTag(pos);
-                    if (tiles[index] != null) {
-                        tiles[index].setInteger("x", ix);
-                        tiles[index].setInteger("y", iy);
-                        tiles[index].setInteger("z", iz);
+                    setBlock((short) blockID, index);
+                    setMeta((byte) state.getMeta(), index);
+                    setTile(world.getTileTag(pos), index);
+                    if (getTile(index) != null) {
+                        getTile(index).setInteger("x", ix);
+                        getTile(index).setInteger("y", iy);
+                        getTile(index).setInteger("z", iz);
                     }
                 }
             }
@@ -89,7 +76,7 @@ public class Blueprint extends Volume {
      * @param file File to load
      * @throws IOException If schematic can not be loaded
      */
-    void loadSchematic(File file) throws IOException {
+    public void loadSchematic(File file) throws IOException {
         if (file.length() > TAG_FILE_SIZE_LIMIT) {
             throw new IOException("File is too large: " + file.length());
         }
@@ -115,32 +102,32 @@ public class Blueprint extends Volume {
         if (!materials.equals("Alpha")) {
             throw new IOException("Materials of schematic is not an alpha: [" + materials + "]");
         }
-        width = tag.getShort("Width");
-        height = tag.getShort("Height");
-        length = tag.getShort("Length");
-        String dimensions = "[W=" + width + ";H=" + height + ";L=" + length + "]";
+        setWidth(tag.getShort("Width"));
+        setHeight(tag.getShort("Height"));
+        setLength(tag.getShort("Length"));
+        String dimensions = "[W=" + getWidth() + ";H=" + getHeight() + ";L=" + getLength() + "]";
         String dimLimit = "[W=" + WIDTH_LIMIT + ";H=" + HEIGHT_LIMIT + ";L=" + LENGTH_LIMIT + "]";
-        if (width <= 0 || height <= 0 || length <= 0) {
+        if (getWidth() <= 0 || getHeight() <= 0 || getLength() <= 0) {
             throw new IOException("Schematic has non-positive dimensions: " + dimensions);
         }
-        if (width > WIDTH_LIMIT || height > HEIGHT_LIMIT || length > LENGTH_LIMIT) {
+        if (getWidth() > WIDTH_LIMIT || getHeight() > HEIGHT_LIMIT || getLength() > LENGTH_LIMIT) {
             throw new IOException("Schematic dimensions are too large: " + dimensions + "/" + dimLimit);
         }
-        int volume = getSize();
-        if (volume > VOLUME_LIMIT) {
-            throw new IOException("Schematic is too big: " + volume + "/" + VOLUME_LIMIT);
+        int size = getSize();
+        if (size > VOLUME_LIMIT) {
+            throw new IOException("Schematic is too big: " + size + "/" + VOLUME_LIMIT);
         }
         byte[] addBlocks = tag.getByteArray("AddBlocks");
         byte[] blocksID = tag.getByteArray("Blocks");
-        if (volume != blocksID.length) {
-            throw new IOException("Wrong schematic blocks length: " + blocksID.length + "/" + volume);
+        if (size != blocksID.length) {
+            throw new IOException("Wrong schematic blocks length: " + blocksID.length + "/" + size);
         }
-        blocks = compose(blocksID, addBlocks);
-        meta = tag.getByteArray("Data");
-        if (volume != meta.length) {
-            throw new IOException("Wrong schematic metadata length: " + blocksID.length + "/" + volume);
+        setBlocks(compose(blocksID, addBlocks));
+        setMetas(tag.getByteArray("Data"));
+        if (size != getMetas().length) {
+            throw new IOException("Wrong schematic metadata length: " + blocksID.length + "/" + size);
         }
-        tiles = new NBTTagCompound[width * height * length];
+        setTiles(new NBTTagCompound[size]);
         NBTTagList tileEntities = tag.getTagList("TileEntities", Constants.NBT.TAG_COMPOUND);
         for(int i = 0; i < tileEntities.tagCount(); i++) {
             NBTTagCompound tile = tileEntities.getCompoundTagAt(i);
@@ -148,8 +135,8 @@ public class Blueprint extends Volume {
             int y = tile.getInteger("y");
             int z = tile.getInteger("z");
             int idx = getIndex(x, y, z);
-            if (idx >= 0 && idx < width * height * length) {
-                tiles[idx] = tile;
+            if (idx >= 0 && idx < size) {
+                setTile(tile, idx);
             }
         }
     }
@@ -161,19 +148,19 @@ public class Blueprint extends Volume {
     private NBTTagCompound getSchematic() {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setString("Materials", "Alpha");
-        tag.setShort("Width", (short) width);
-        tag.setShort("Height", (short) height);
-        tag.setShort("Length", (short) length);
+        tag.setShort("Width", (short) getWidth());
+        tag.setShort("Height", (short) getHeight());
+        tag.setShort("Length", (short) getLength());
         tag.setByteArray("AddBlocks", new byte[0]);
-        byte[] blocksID = new byte[blocks.length];
-        for (int i = 0; i < blocks.length; ++i) {
-            blocksID[i] = (byte) blocks[i];
+        byte[] blocksID = new byte[getBlocks().length];
+        for (int i = 0; i < getBlocks().length; ++i) {
+            blocksID[i] = (byte) getBlock(i);
         }
         tag.setByteArray("Blocks", blocksID);
-        tag.setByteArray("AddBlocks", getAddBlocks(blocks));
-        tag.setByteArray("Data", meta);
+        tag.setByteArray("AddBlocks", getAddBlocks(getBlocks()));
+        tag.setByteArray("Data", getMetas());
         NBTTagList tileEntities = new NBTTagList();
-        for (NBTTagCompound tile : tiles) {
+        for (NBTTagCompound tile : getTiles()) {
             if (tile != null) {
                 tileEntities.appendTag(tile);
             }
@@ -220,48 +207,80 @@ public class Blueprint extends Volume {
         return addBlocks;
     }
 
-    /**
-     * Inject blueprint into specific position in the world
-     * Unsafe for cross-versioned data
-     * It's not a transaction
-     * @param uWorld World instance
-     * @param posture Transformation state
-     * @param seed Projection seed
-     * @param isInsecure Projection will be insecure
-     * @throws IOException If blueprint failed to project
-     */
-    void project(UWorld uWorld, Posture posture, long seed, boolean isInsecure) throws IOException {
+    @Override
+    public void project(UWorld world, Posture posture, long seed, boolean isInsecure) throws IOException {
         Random random = new Random(0);
-        for (int ix = 0; ix < width; ++ix) {
-            for (int iy = 0; iy < height; ++iy) {
-                for (int iz = 0; iz < length; ++iz) {
-                    project(uWorld, posture, getIndex(ix, iy, iz), isInsecure, random);
+        for (int ix = 0; ix < getWidth(); ++ix) {
+            for (int iy = 0; iy < getHeight(); ++iy) {
+                for (int iz = 0; iz < getLength(); ++iz) {
+                    project(world, posture, getIndex(ix, iy, iz), isInsecure, random);
                 }
             }
         }
-        uWorld.notifyPosture(posture);
+        world.notifyPosture(posture);
     }
 
-    /**
-     * Projects block to the world according posture
-     * @param uWorld The world to project
-     * @param posture Projection posture
-     * @param index Blueprint index to paste
-     * @param isInsecure Projection will be insecure
-     * @param random Random object
-     */
-    void project(UWorld uWorld, Posture posture, int index, boolean isInsecure, Random random) {
-        UBlock block = isInsecure ? UBlock.getById(blocks[index]) : UBlocks.getBlockVanilla(blocks[index]);
+    @Override
+    public void project(UWorld world, Posture posture, int index, boolean isInsecure, Random random) {
+        UBlock block = isInsecure ? UBlock.getById(getBlock(index)) : UBlocks.getBlockVanilla(getBlock(index));
         if (block == null) {
             return;
         }
         UBlockPos pos = posture.getWorldPos(index);
-        uWorld.setBlockState(pos, block.getState(posture.getWorldMeta(block, meta[index])));
+        world.setBlockState(pos, block.getState(posture.getWorldMeta(block, getMeta(index))));
         if (isInsecure) {
-            uWorld.setTileTag(pos, tiles[index]);
+            world.setTileTag(pos, getTile(index));
         } else {
-            Tiles.load(uWorld.getTileEntity(pos), tiles[index], random.nextLong());
+            Tiles.load(world.getTileEntity(pos), getTile(index), random.nextLong());
         }
+    }
+
+    protected short[] getBlocks() {
+        return blocks;
+    }
+
+    protected byte[] getMetas() {
+        return metas;
+    }
+
+    protected NBTTagCompound[] getTiles() {
+        return tiles;
+    }
+
+    protected short getBlock(int index) {
+        return this.blocks[index];
+    }
+
+    protected byte getMeta(int index) {
+        return this.metas[index];
+    }
+
+    protected NBTTagCompound getTile(int index) {
+        return this.tiles[index];
+    }
+
+    protected void setBlocks(short[] blocks) {
+        this.blocks = blocks;
+    }
+
+    protected void setMetas(byte[] meta) {
+        this.metas = meta;
+    }
+
+    protected void setTiles(NBTTagCompound[] tiles) {
+        this.tiles = tiles;
+    }
+
+    protected void setBlock(short block, int index) {
+        this.blocks[index] = block;
+    }
+
+    protected void setMeta(byte meta, int index) {
+        this.metas[index] = meta;
+    }
+
+    protected void setTile(NBTTagCompound tile, int index) {
+        this.tiles[index] = tile;
     }
 
 }

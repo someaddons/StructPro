@@ -1,7 +1,7 @@
 package com.ternsip.structpro.universe.utils;
 
-import com.ternsip.structpro.universe.biomes.Biomus;
 import com.ternsip.structpro.structure.Method;
+import com.ternsip.structpro.universe.biomes.Biomus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
  * Object selection relative parameters
  * @author Ternsip
  */
-@SuppressWarnings({"unused"})
 public class Selector<T> {
 
     /** Used objects */

@@ -4,9 +4,9 @@ import com.ternsip.structpro.logic.Configurator;
 import com.ternsip.structpro.logic.Structures;
 import com.ternsip.structpro.structure.Projection;
 import com.ternsip.structpro.structure.Structure;
-import com.ternsip.structpro.universe.world.UWorld;
 import com.ternsip.structpro.universe.utils.Report;
 import com.ternsip.structpro.universe.utils.Utils;
+import com.ternsip.structpro.universe.world.UWorld;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -15,22 +15,23 @@ import java.util.Random;
  * Village constructor
  * @author  Ternsip
  */
+@SuppressWarnings({"WeakerAccess"})
 public class Village extends Constructor {
 
     /**
      * Obtain array of village projections calibrated inside chunk
-     * @param uWorld Target world object
+     * @param world Target world object
      * @param chunkX Chunk X coordinate
      * @param chunkZ Chunk Z coordinate
      * @return Array of spawned projections
      */
-    public static ArrayList<Projection> obtain(final UWorld uWorld, final int chunkX, final int chunkZ) {
+    public static ArrayList<Projection> obtain(final UWorld world, final int chunkX, final int chunkZ) {
         ArrayList<Projection> projections = new ArrayList<>();
-        for (int drop = drops(uWorld, chunkX, chunkZ); drop > 0; --drop) {
-            Random random = getRandom(uWorld, chunkX, chunkZ);
+        for (int drop = drops(world, chunkX, chunkZ); drop > 0; --drop) {
+            Random random = getRandom(world, chunkX, chunkZ);
             ArrayList<Structure> village = Utils.select(Structures.villages.select(), random.nextLong());
             if (village != null) {
-                projections.addAll(combine(uWorld, village, chunkX, chunkZ, random.nextLong()));
+                projections.addAll(combine(world, village, chunkX, chunkZ, random.nextLong()));
             }
         }
         return projections;
@@ -38,14 +39,14 @@ public class Village extends Constructor {
 
     /**
      * Generate projection set combined from village that spawned in specific position
-     * @param uWorld Target world object
+     * @param world Target world object
      * @param village Village structures
      * @param chunkX Chunk X coordinate
      * @param chunkZ Chunk Z coordinate
      * @param seed Combination seed
      * @return Array of spawned projections
      */
-    public static ArrayList<Projection> combine(final UWorld uWorld, final ArrayList<Structure> village, final int chunkX, final int chunkZ, final long seed) {
+    public static ArrayList<Projection> combine(final UWorld world, final ArrayList<Structure> village, final int chunkX, final int chunkZ, final long seed) {
         ArrayList<Projection> projections = new ArrayList<>();
         Random random = new Random(seed);
         String villageName = village.get(0).getFile().getParent();
@@ -63,11 +64,11 @@ public class Village extends Constructor {
             int curSize = Math.max(structure.getWidth(), structure.getLength());
             maxSize = Math.max(maxSize, curSize);
             offsetX += maxSize;
-            if (!Limiter.isStructureLimitExceeded(uWorld, structure)) {
-                Projection projection = construct(uWorld, realX, realZ, random.nextLong(), structure);
+            if (!Limiter.isStructureLimitExceeded(world, structure)) {
+                Projection projection = construct(world, realX, realZ, random.nextLong(), structure);
                 if (projection != null) {
                     projections.add(projection);
-                    Limiter.useStructure(uWorld, structure);
+                    Limiter.useStructure(world, structure);
                 }
             }
         }
@@ -77,29 +78,29 @@ public class Village extends Constructor {
 
     /**
      * Get drops in certain chunk in the world
-     * @param uWorld Target world object
+     * @param world Target world object
      * @param chunkX Chunk X coordinate
      * @param chunkZ Chunk Z coordinate
      * @return Amount of villages spawned in chunk
      */
-    public static int drops(UWorld uWorld, int chunkX, int chunkZ) {
-        if (Limiter.isChunkOutsideBorder(chunkX, chunkZ) || !Limiter.isPossibleDimensionVillage(uWorld)) {
+    public static int drops(UWorld world, int chunkX, int chunkZ) {
+        if (Limiter.isChunkOutsideBorder(chunkX, chunkZ) || !Limiter.isPossibleDimensionVillage(world)) {
             return 0;
         }
-        Random random = getRandom(uWorld, chunkX, chunkZ);
+        Random random = getRandom(world, chunkX, chunkZ);
         double density = Configurator.DENSITY_VILLAGE;
         return (int) density + (random.nextDouble() <= (density - (int) density) ? 1 : 0);
     }
 
     /**
      * Get random for world chunk
-     * @param uWorld Target world object
+     * @param world Target world object
      * @param chunkX Chunk X coordinate
      * @param chunkZ Chunk Z coordinate
      * @return Random generator
      */
-    private static Random getRandom(UWorld uWorld, int chunkX, int chunkZ) {
-        long seed = uWorld.getSeed();
+    private static Random getRandom(UWorld world, int chunkX, int chunkZ) {
+        long seed = world.getSeed();
         long chunkIndex = (long)chunkX << 32 | chunkZ & 0xFFFFFFFFL;
         Random random = new Random(chunkIndex);
         random.setSeed(random.nextLong());

@@ -1,18 +1,15 @@
 package com.ternsip.structpro.universe.commands;
 
-import com.ternsip.structpro.universe.blocks.UBlockPos;
-import com.ternsip.structpro.universe.world.UWorld;
 import com.ternsip.structpro.universe.utils.Utils;
 import com.ternsip.structpro.universe.utils.Variables;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Commands class implements default command.
@@ -31,9 +28,6 @@ public class Commands implements ICommand {
 
     /** Command can be invoked using any of this aliases */
     private static final ArrayList<String> aliases = new ArrayList<String>(){{add("structpro");add("spro");}};
-
-    /** Wand cuboid block selections for each player */
-    private static final HashMap<EntityPlayer, AbstractMap.SimpleEntry<UBlockPos, UBlockPos>> wand = new HashMap<>();
 
     /**
      * Check if the given ICommandSender has permission to execute this command
@@ -113,117 +107,34 @@ public class Commands implements ICommand {
      */
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        if (args.length <= 0) {
-            feedback(sender, Evaluator.cmdHelp(""));
-            return;
-        }
-        UBlockPos where = new UBlockPos(0, 0, 0);
-        if (sender instanceof EntityPlayerMP) {
-            EntityPlayerMP player = (EntityPlayerMP) sender;
-            where = new UBlockPos((int)player.posX, (int)player.posY, (int)player.posZ);
-        }
-        String cmd = args[0];
         Variables vars = new Variables(Utils.join(args, " "));
-        Random random = new Random();
+        if (args.length <= 0) {
+            Evaluator.execHelp(vars, sender);
+            return;
+        }
+        String command = args[0];
+        vars.put("command", command);
         if (vars.get(new String[]{"help"}, false)) {
-            feedback(sender, Evaluator.cmdHelp(cmd));
+            Evaluator.execHelp(vars, sender);
             return;
         }
-        if (cmd.equalsIgnoreCase("paste")) {
-            String name = vars.get(new String[]{"name"}, "");
-            int posX = vars.get(new String[]{"posx", "px", "x"}, where.getX());
-            int posY = vars.get(new String[]{"posy", "py", "y"}, where.getY());
-            int posZ = vars.get(new String[]{"posz", "pz", "z"}, where.getZ());
-            int rotateX = vars.get(new String[]{"rotatex", "rotx", "rx"}, 0);
-            int rotateY = vars.get(new String[]{"rotatey", "roty", "ry"}, random.nextInt() % 4);
-            int rotateZ = vars.get(new String[]{"rotatez", "rotz", "rz"}, 0);
-            boolean flipX = vars.get(new String[]{"flipx", "fx"},  random.nextBoolean());
-            boolean flipY = vars.get(new String[]{"flipy", "fy"}, false);
-            boolean flipZ = vars.get(new String[]{"flipz", "fz"}, random.nextBoolean());
-            boolean isVillage = vars.get(new String[]{"village", "town", "city"}, false);
-            boolean isInsecure = vars.get(new String[]{"insecure"}, false);
-            posY = vars.get(new String[]{"auto"}, false) ? 0 : posY;
-            if (vars.get(new String[]{"wand"}, false) && sender instanceof EntityPlayer && wand.containsKey(sender)) {
-                UBlockPos pos = wand.get(sender).getValue();
-                posX = pos.getX(); posY = pos.getY(); posZ = pos.getZ();
-            }
-            String worldName = vars.get(new String[]{"world"});
-            UWorld uWorld = worldName == null ? new UWorld(sender.getEntityWorld()) : UWorld.getWorld(worldName);
-            if (uWorld == null) {
-                feedback(sender, "No matching world");
-                return;
-            }
-            feedback(sender, Evaluator.cmdPaste(uWorld, name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, isVillage, isInsecure));
+        if (command.equalsIgnoreCase("paste")) {
+            Evaluator.execPaste(vars, sender);
             return;
         }
-        if (cmd.equalsIgnoreCase("save")) {
-            String name = vars.get(new String[]{"name"}, "unnamed");
-            int posX = vars.get(new String[]{"posx", "px", "x"}, where.getX());
-            int posY = vars.get(new String[]{"posy", "py", "y"}, where.getY());
-            int posZ = vars.get(new String[]{"posz", "pz", "z"}, where.getZ());
-            int width = vars.get(new String[]{"width", "w"}, 64);
-            int height = vars.get(new String[]{"height", "h"}, 64);
-            int length = vars.get(new String[]{"length", "l"}, 64);
-            if (vars.get(new String[]{"wand"}, false) && sender instanceof EntityPlayer && wand.containsKey(sender)) {
-                UBlockPos posK = wand.get(sender).getKey();
-                UBlockPos posV = wand.get(sender).getValue();
-                posX = Math.min(posK.getX(), posV.getX());
-                posY = Math.min(posK.getY(), posV.getY());
-                posZ = Math.min(posK.getZ(), posV.getZ());
-                width = Math.max(posK.getX(), posV.getX()) - posX + 1;
-                height = Math.max(posK.getY(), posV.getY()) - posY + 1;
-                length = Math.max(posK.getZ(), posV.getZ()) - posZ + 1;
-            }
-            String worldName = vars.get(new String[]{"world"});
-            UWorld uWorld = worldName == null ? new UWorld(sender.getEntityWorld()) : UWorld.getWorld(worldName);
-            if (uWorld == null) {
-                feedback(sender, "§4No matching world");
-                return;
-            }
-            feedback(sender, Evaluator.cmdSave(uWorld, name, posX, posY, posZ, width, height, length));
+        if (command.equalsIgnoreCase("save")) {
+            Evaluator.execSave(vars, sender);
             return;
         }
-        if (cmd.equalsIgnoreCase("undo")) {
-            feedback(sender, Evaluator.cmdUndo());
+        if (command.equalsIgnoreCase("undo")) {
+            Evaluator.execUndo(vars, sender);
             return;
         }
-        if (cmd.equalsIgnoreCase("gen")) {
-            int size = vars.get(new String[]{"size", "s", "length", "radius", "r"}, 16);
-            int startX = vars.get(new String[]{"startx", "sx"}, 0);
-            int startZ = vars.get(new String[]{"startz", "sz"}, 0);
-            boolean stop = vars.get(new String[]{"stop", "end", "finish"}, false);
-            boolean skip = vars.get(new String[]{"skip"}, false);
-            int progress = vars.get(new String[]{"progress"}, 0);
-            int step = Math.min(Math.max(1, vars.get(new String[]{"step", "delta"}, 32)), 4096);
-            String worldName = vars.get(new String[]{"world"});
-            UWorld uWorld = worldName == null ? new UWorld(sender.getEntityWorld()) : UWorld.getWorld(worldName);
-            if (uWorld == null) {
-                feedback(sender, "§4No matching world");
-                return;
-            }
-            feedback(sender, Evaluator.cmdGen(uWorld, startX, startZ, step, size, stop, skip, progress));
+        if (command.equalsIgnoreCase("gen")) {
+            Evaluator.execGen(vars, sender);
             return;
         }
-        feedback(sender, "§4Unknown command§2 " + cmd + "§4 for §b" + name);
-    }
-
-    /**
-     * Send chat feedback to sender
-     * @param sender The sender that will receive feedback
-     * @param message Text constituent of feedback
-     */
-    private static void feedback(ICommandSender sender, String message) {
-        sender.addChatMessage(new ChatComponentText(message));
-    }
-
-    /**
-     * Called when player touches block with wand
-     * @param player Player entity instance that touches block
-     * @param pos Touched block position
-     */
-    public static void touch(EntityPlayer player, UBlockPos pos) {
-        feedback(player, "§ablock §d" + pos.getX() + " " + pos.getY() + " " + pos.getZ() + "§a selected");
-        wand.put(player, new AbstractMap.SimpleEntry<>(wand.containsKey(player) ? wand.get(player).getValue() : pos, pos));
+        Evaluator.execUnknown(vars, sender);
     }
 
 }

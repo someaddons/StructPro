@@ -21,8 +21,8 @@ public enum Method {
     SKY (0x04, "SKY"),
     HILL (0x05, "HILL");
 
-    public final int value;
-    public final String name;
+    private final int value;
+    private final String name;
 
     /**
      * Default method constructor
@@ -64,6 +64,14 @@ public enum Method {
         if (path.contains("/hill/"))            return Method.HILL;
         if (path.contains("/mountain/"))        return Method.HILL;
         return Method.BASIC;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

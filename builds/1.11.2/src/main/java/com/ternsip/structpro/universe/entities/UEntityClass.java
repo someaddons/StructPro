@@ -25,7 +25,8 @@ public class UEntityClass {
      * @return Name
      */
     public String getPath() {
-        return EntityList.getKey(entityClass).getResourcePath();
+        ResourceLocation res = EntityList.getKey(entityClass);
+        return res == null ? "" : res.getResourcePath();
     }
 
     /**
@@ -38,11 +39,11 @@ public class UEntityClass {
 
     /**
      * Construct entity by class in the world
-     * @param uWorld Target world
+     * @param world Target world
      * @return Spawned entity
      * */
-    public Entity construct(UWorld uWorld) {
-        return EntityList.newEntity(entityClass, uWorld.getWorld());
+    public Entity construct(UWorld world) {
+        return EntityList.newEntity(entityClass, world.getWorld());
     }
 
     /** Return minecraft native entity class */

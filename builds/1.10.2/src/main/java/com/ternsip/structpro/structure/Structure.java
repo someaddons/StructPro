@@ -2,12 +2,15 @@ package com.ternsip.structpro.structure;
 
 import com.ternsip.structpro.logic.Configurator;
 import com.ternsip.structpro.universe.biomes.Biomus;
-import com.ternsip.structpro.universe.blocks.*;
+import com.ternsip.structpro.universe.blocks.Classifier;
+import com.ternsip.structpro.universe.blocks.UBlockPos;
+import com.ternsip.structpro.universe.blocks.UBlockState;
+import com.ternsip.structpro.universe.blocks.UBlocks;
 import com.ternsip.structpro.universe.entities.Mobs;
 import com.ternsip.structpro.universe.entities.UEntityClass;
-import com.ternsip.structpro.universe.world.UWorld;
 import com.ternsip.structpro.universe.utils.Report;
 import com.ternsip.structpro.universe.utils.Utils;
+import com.ternsip.structpro.universe.world.UWorld;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.File;
@@ -23,6 +26,7 @@ import static com.ternsip.structpro.universe.blocks.Classifier.*;
  * Holds schematic-extended information and can load, calibrate, project it
  * @author Ternsip
  */
+@SuppressWarnings({"WeakerAccess"})
 public class Structure extends Blueprint {
 
     /** Structure version */
@@ -67,6 +71,8 @@ public class Structure extends Blueprint {
 
     /**
      * Melting skin has an extended volume than Structure
+     * Determines what have to be replaced/erased or not around structure
+     * Also useful for light near structure
      * 0 - do nothing, 1 - remove block
      */
     private BitSet melt;
@@ -90,36 +96,26 @@ public class Structure extends Blueprint {
      * @throws IOException If Structure failed to construct
      */
     public Structure(File file, File data, File flags) throws IOException {
-        fileStructure = file;
-        fileData = data;
-        fileFlag = flags;
+        setFileStructure(file);
+        setFileData(data);
+        setFileFlag(flags);
         try {
-            if (!fileData.exists() || !fileFlag.exists()) {
+            if (!getFileData().exists() || !getFileFlag().exists()) {
                 throw new IOException("Dump files not exists");
             }
             loadFlags();
         } catch (IOException ioe) {
-            loadSchematic(fileStructure);
+            loadSchematic(getFileStructure());
+            setSchemaLen(getFileStructure().length());
+            setMethod(Method.valueOf(getFileStructure()));
+            setBiomus(Biomus.valueOf(getFileStructure(), getBlocks()));
+            setLift(calcLift());
+            setSkin(calcSkin());
+            setMelt(calcMelt());
+            saveFlags();
+            saveData();
+            free();
         }
-    }
-
-    /**
-     * Load schematic from file
-     * @param file File to load
-     * @throws IOException If schematic failed to load
-     */
-    @Override
-    void loadSchematic(File file) throws IOException {
-        super.loadSchematic(file);
-        schemaLen = fileStructure.length();
-        method = Method.valueOf(fileStructure);
-        biomus = Biomus.valueOf(fileStructure, blocks);
-        lift = calcLift();
-        skin = getSkin();
-        melt = getMelt();
-        saveFlags();
-        saveData();
-        free();
     }
 
     /**
@@ -127,20 +123,20 @@ public class Structure extends Blueprint {
      * @throws IOException If flags failed to read
      */
     private void loadFlags() throws IOException {
-        NBTTagCompound tag = Utils.readTags(fileFlag);
+        NBTTagCompound tag = Utils.readTags(getFileFlag());
         int version = tag.getInteger("Version");
         if (version != VERSION) {
             throw new IOException("Incomplete version: " + version + " requires " + VERSION);
         }
-        width = tag.getShort("Width");
-        height = tag.getShort("Height");
-        length = tag.getShort("Length");
-        schemaLen = tag.getLong("SchemaLen");
-        lift = tag.getInteger("Lift");
-        method = Method.valueOf(tag.getInteger("Method"));
-        biomus = Biomus.valueOf(tag.getInteger("Biome"));
-        if (schemaLen != fileStructure.length()) {
-            throw new IOException("Mismatched schematic length: " + fileStructure.length() + "/" + schemaLen);
+        setWidth(tag.getShort("Width"));
+        setHeight(tag.getShort("Height"));
+        setLength(tag.getShort("Length"));
+        setSchemaLen(tag.getLong("SchemaLen"));
+        setLift(tag.getInteger("Lift"));
+        setMethod(Method.valueOf(tag.getInteger("Method")));
+        setBiomus(Biomus.valueOf(tag.getInteger("Biome")));
+        if (getSchemaLen() != getFileStructure().length()) {
+            throw new IOException("Mismatched schematic length: " + getFileStructure().length() + "/" + getSchemaLen());
         }
     }
 
@@ -149,10 +145,10 @@ public class Structure extends Blueprint {
      * @throws IOException If data failed to load
      */
     private void loadData() throws IOException {
-        super.loadSchematic(fileStructure);
-        NBTTagCompound tag = Utils.readTags(fileData);
-        skin = Utils.toBitSet(tag.getByteArray("Skin"));
-        melt = Utils.toBitSet(tag.getByteArray("Melt"));
+        super.loadSchematic(getFileStructure());
+        NBTTagCompound tag = Utils.readTags(getFileData());
+        setSkin(Utils.toBitSet(tag.getByteArray("Skin")));
+        setMelt(Utils.toBitSet(tag.getByteArray("Melt")));
     }
 
     /**
@@ -162,14 +158,14 @@ public class Structure extends Blueprint {
     private void saveFlags() throws IOException {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setInteger("Version", VERSION);
-        tag.setShort("Width", (short)width);
-        tag.setShort("Height", (short)height);
-        tag.setShort("Length", (short)length);
-        tag.setLong("SchemaLen", schemaLen);
-        tag.setInteger("Lift", lift);
-        tag.setInteger("Method", method.value);
-        tag.setInteger("Biome", biomus.value);
-        Utils.writeTags(fileFlag, tag);
+        tag.setShort("Width", (short)getWidth());
+        tag.setShort("Height", (short)getHeight());
+        tag.setShort("Length", (short)getLength());
+        tag.setLong("SchemaLen", getSchemaLen());
+        tag.setInteger("Lift", getLift());
+        tag.setInteger("Method", getMethod().getValue());
+        tag.setInteger("Biome", getBiomus().getValue());
+        Utils.writeTags(getFileFlag(), tag);
     }
 
     /**
@@ -178,18 +174,18 @@ public class Structure extends Blueprint {
      * */
     private void saveData() throws IOException {
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setByteArray("Skin", Utils.toByteArray(skin));
-        tag.setByteArray("Melt", Utils.toByteArray(melt));
-        Utils.writeTags(fileData, tag);
+        tag.setByteArray("Skin", Utils.toByteArray(getSkin()));
+        tag.setByteArray("Melt", Utils.toByteArray(getMelt()));
+        Utils.writeTags(getFileData(), tag);
     }
 
     /** Free internal memory */
     private void free() {
-        blocks = null;
-        meta = null;
-        skin = null;
-        melt = null;
-        tiles = null;
+        setBlocks(null);
+        setMetas(null);
+        setTiles(null);
+        setSkin(null);
+        setMelt(null);
     }
 
     /**
@@ -197,26 +193,26 @@ public class Structure extends Blueprint {
      * @return Lift level
      */
     private int calcLift() {
-        int[][] level = new int[width][length];
-        int[][] levelMax = new int[width][length];
-        boolean dry = method != Method.UNDERWATER;
-        for (int index = 0; index < blocks.length; ++index) {
-            if (Classifier.isBlock(SOIL, blocks[index]) || (dry && Classifier.isBlock(LIQUID, blocks[index]))) {
+        int[][] level = new int[getWidth()][getLength()];
+        int[][] levelMax = new int[getWidth()][getLength()];
+        boolean dry = getMethod() != Method.UNDERWATER;
+        for (int index = 0; index < getBlocks().length; ++index) {
+            if (Classifier.isBlock(SOIL, getBlock(index)) || (dry && Classifier.isBlock(LIQUID, getBlock(index)))) {
                 level[getX(index)][getZ(index)] += 1;
                 levelMax[getX(index)][getZ(index)] = getY(index) + 1;
             }
         }
         long borders = 0, totals = 0;
-        for (int x = 0; x < width; ++x) {
-            for (int z = 0; z < length; ++z) {
+        for (int x = 0; x < getWidth(); ++x) {
+            for (int z = 0; z < getLength(); ++z) {
                 totals += level[x][z];
-                if (x == 0 || z == 0 || x == width - 1 || z == length - 1) {
+                if (x == 0 || z == 0 || x == getWidth() - 1 || z == getLength() - 1) {
                     borders += levelMax[x][z];
                 }
             }
         }
-        int borderLevel = (int) Math.round(borders / ((width + length) * 2.0));
-        int wholeLevel = Math.round(totals / (width * length));
+        int borderLevel = (int) Math.round(borders / ((getWidth() + getLength()) * 2.0));
+        int wholeLevel = Math.round(totals / (getWidth() * getLength()));
         return  Math.max(borderLevel, wholeLevel);
     }
 
@@ -224,21 +220,20 @@ public class Structure extends Blueprint {
      * Generate schematic skin as BitSet of possible(0) and restricted(1) to calibrate blocks
      * @return Skin mask
      */
-    @SuppressWarnings({"ConstantConditions"})
-    private BitSet getSkin() {
+    private BitSet calcSkin() {
 
-        Classifier skips = (method == Method.AFLOAT || method == Method.UNDERWATER) ? SOP : GAS;
+        Classifier skips = (getMethod() == Method.AFLOAT || getMethod() == Method.UNDERWATER) ? SOP : GAS;
 
         /* Height Map [SIDE][DIR][SIZE_A][SIZE_B], SIDE = YX, YZ, XZ, DIR = MAX, MIN */
         int[][][][] heightMap = {
-                {new int[height][width], new int[height][width]},
-                {new int[height][length], new int[height][length]},
-                {new int[width][length], new int[width][length]},
+                {new int[getHeight()][getWidth()], new int[getHeight()][getWidth()]},
+                {new int[getHeight()][getLength()], new int[getHeight()][getLength()]},
+                {new int[getWidth()][getLength()], new int[getWidth()][getLength()]},
         };
-        int iMax[] = {height, height, width};
-        int jMax[] = {width, length, length};
-        int kStart[][] = {{length - 1, 0}, {width - 1, 0}, {height - 1, 0}};
-        int kEnd[][] = {{-1, length}, {-1, width}, {-1, height}};
+        int iMax[] = {getHeight(), getHeight(), getWidth()};
+        int jMax[] = {getWidth(), getLength(), getLength()};
+        int kStart[][] = {{getLength() - 1, 0}, {getWidth() - 1, 0}, {getHeight() - 1, 0}};
+        int kEnd[][] = {{-1, getLength()}, {-1, getWidth()}, {-1, getHeight()}};
         int dk[] = {-1, 1};
         for (int side = 0; side < 3; ++side) {
             for (int dir = 0; dir < 2; ++dir) {
@@ -247,7 +242,7 @@ public class Structure extends Blueprint {
                         int k = kStart[side][dir];
                         for (; k != kEnd[side][dir]; k += dk[dir]) {
                             int index = side == 0 ? getIndex(j, i, k) : (side == 1 ? getIndex(k, i, j) : getIndex(i, k, j));
-                            if (!Classifier.isBlock(skips, blocks[index])) {
+                            if (!Classifier.isBlock(skips, getBlock(index))) {
                                 break;
                             }
                         }
@@ -258,10 +253,10 @@ public class Structure extends Blueprint {
         }
 
         /* Create skin using height-maps */
-        BitSet skin = new BitSet(width * height * length);
-        for (int x = 0; x < width; ++x) {
-            for (int y = 0; y < height; ++y) {
-                for (int z = 0; z < length; ++z) {
+        BitSet skin = new BitSet(getWidth() * getHeight() * getLength());
+        for (int x = 0; x < getWidth(); ++x) {
+            for (int y = 0; y < getHeight(); ++y) {
+                for (int z = 0; z < getLength(); ++z) {
                     boolean reachable = heightMap[0][0][y][x] <= z ||
                             heightMap[0][1][y][x] >= z ||
                             heightMap[1][0][y][z] <= x ||
@@ -273,12 +268,12 @@ public class Structure extends Blueprint {
         }
 
         /* Shed under skin positions */
-        for (int index = 0; index < width * height * length; ++index) {
+        for (int index = 0; index < getWidth() * getHeight() * getLength(); ++index) {
             if (skin.get(index)) {
                 int x = getX(index), y = getY(index), z = getZ(index);
                 while (y-- > 0) {
                     int next = getIndex(x, y, z);
-                    if (!skin.get(next) && Classifier.isBlock(skips, blocks[next])) {
+                    if (!skin.get(next) && Classifier.isBlock(skips, getBlock(next))) {
                         skin.set(next);
                     } else {
                         break;
@@ -291,25 +286,26 @@ public class Structure extends Blueprint {
     }
 
     /**
-     * Returns Structure melts, requires calculated ski
+     * Returns Structure melts
+     * Requires calculated sky
      * @return Melt mask
      */
-    private BitSet getMelt() {
+    private BitSet calcMelt() {
 
         /* Create melt using cardinal blocks */
         Volume meltVolume = extend(MELT, MELT, MELT);
         BitSet melt = new BitSet(meltVolume.getSize());
 
         /* Skip underwater melting*/
-        if (method == Method.UNDERWATER || method == Method.AFLOAT) {
+        if (getMethod() == Method.UNDERWATER || getMethod() == Method.AFLOAT) {
             return melt;
         }
 
-        for (int x = 0; x < width; ++x) {
-            for (int y = lift; y < height; ++y) {
-                for (int z = 0; z < length; ++z) {
+        for (int x = 0; x < getWidth(); ++x) {
+            for (int y = lift; y < getHeight(); ++y) {
+                for (int z = 0; z < getLength(); ++z) {
                     int idx = getIndex(x, y, z);
-                    if (!Classifier.isBlock(CARDINAL, blocks[idx])) {
+                    if (!Classifier.isBlock(CARDINAL, getBlock(idx))) {
                         continue;
                     }
                     double radius = 3;
@@ -322,7 +318,7 @@ public class Structure extends Blueprint {
                                     if (!meltVolume.isInside(nx, ny, nz)) {
                                         continue;
                                     }
-                                    if (!isInside(nx, ny, nz) || skin.get(getIndex(nx, ny, nz))) {
+                                    if (!isInside(nx, ny, nz) || getSkin().get(getIndex(nx, ny, nz))) {
                                         melt.set(meltVolume.getIndex(nx + MELT, ny + MELT, nz + MELT), true);
                                     }
                                 }
@@ -340,26 +336,18 @@ public class Structure extends Blueprint {
      * Combine Structure report
      * @return Generated report
      */
+    @Override
     public Report report() {
         return new Report()
                 .post("SCHEMATIC", getFile().getName())
-                .post("METHOD", method.name)
-                .post("BIOME", biomus.name)
-                .post("LIFT", String.valueOf(lift))
+                .post("METHOD", getMethod().getName())
+                .post("BIOME", getBiomus().getName())
+                .post("LIFT", String.valueOf(getLift()))
                 .post(super.report());
     }
 
-    /**
-     * Inject Structure into specific position in the world
-     * It's not a transaction
-     * @param uWorld World instance
-     * @param posture Transformation state
-     * @param seed Projection seed
-     * @param isInsecure Projection will be insecure
-     * @throws IOException If blueprint failed to project
-     */
     @Override
-    void project(UWorld uWorld, Posture posture, long seed, boolean isInsecure) throws IOException {
+    public void project(UWorld world, Posture posture, long seed, boolean isInsecure) throws IOException {
 
         /* Prepare tiles */
         Random random = new Random(seed);
@@ -370,9 +358,9 @@ public class Structure extends Blueprint {
         /* Iterate over volume and paste blocks */
         for (int index = 0; index < posture.getSize(); ++index) {
             UBlockPos worldPos = posture.getWorldPos(index);
-            UBlockState state = uWorld.getBlockState(worldPos);
-            if (!skin.get(index) && !Classifier.isBlock(PROTECTED, state)) {
-                project(uWorld, posture, index, isInsecure, random);
+            UBlockState state = world.getBlockState(worldPos);
+            if (!getSkin().get(index) && !Classifier.isBlock(PROTECTED, state)) {
+                project(world, posture, index, isInsecure, random);
             }
         }
 
@@ -383,25 +371,25 @@ public class Structure extends Blueprint {
                 continue;
             }
             UBlockPos worldPos = meltPosture.getWorldPos(index);
-            UBlockState state = uWorld.getBlockState(worldPos);
+            UBlockState state = world.getBlockState(worldPos);
             if ((Classifier.isBlock(SOIL, state) || Classifier.isBlock(OVERLOOK, state)) && !Classifier.isBlock(PROTECTED, state)) {
-                uWorld.setBlockState(worldPos, UBlocks.AIR.getState());
+                world.setBlockState(worldPos, UBlocks.AIR.getState());
             }
         }
 
         /* Do liana fix, works only for basic structures */
-        if (method == Method.BASIC) {
-            for (int x = 0; x < width; ++x) {
-                for (int z = 0; z < length; ++z) {
+        if (getMethod() == Method.BASIC) {
+            for (int x = 0; x < getWidth(); ++x) {
+                for (int z = 0; z < getLength(); ++z) {
                     int index = getIndex(x, 0, z);
-                    if (!skin.get(index)) {
+                    if (!getSkin().get(index)) {
                         UBlockPos pos = posture.getWorldPos(x, 0, z);
-                        UBlockState state = uWorld.getBlockState(pos);
+                        UBlockState state = world.getBlockState(pos);
                         if (Classifier.isBlock(SOIL, state)) {
                             for (int y = pos.getY() - 1, count = 0; y >= 0 && count < MELT; --y, ++count) {
                                 UBlockPos nPos = new UBlockPos(pos.getX(), y, pos.getZ());
-                                if (Classifier.isBlock(HEAT_RAY, uWorld.getBlockState(nPos))) {
-                                    uWorld.setBlockState(nPos, state);
+                                if (Classifier.isBlock(HEAT_RAY, world.getBlockState(nPos))) {
+                                    world.setBlockState(nPos, state);
                                 } else {
                                     break;
                                 }
@@ -414,43 +402,43 @@ public class Structure extends Blueprint {
 
         /* Populate generated Structure */
         if (Configurator.SPAWN_MOBS) {
-            populate(uWorld, posture, seed);
+            populate(world, posture, seed);
         }
 
         /* Free Structure memory */
         free();
 
         /* Check light for generated Structure */
-        uWorld.grassFix(meltPosture);
-        uWorld.notifyPosture(meltPosture);
+        world.grassFix(meltPosture);
+        world.notifyPosture(meltPosture);
 
     }
 
     /**
      * Populate Structure with entities
-     * @param uWorld Target world
+     * @param world Target world
      * @param posture Traformation posture
      * @param seed population seed
      */
-    private void populate(UWorld uWorld, Posture posture, long seed) {
+    private void populate(UWorld world, Posture posture, long seed) {
         boolean village = isHostile();
         ArrayList<UEntityClass> mobs = village ? Mobs.village.select() : Mobs.hostile.select(biomus);
         Random random = new Random(seed);
-        int size = width * length;
+        int size = getWidth() * getLength();
         int count = 1 + (size >= 256 ? 2 : 0) + (size >= 1024 ? 2 : 0) + (size >= 8192 ? 2 : 0);
         count = village ? count : count * 2;
         int maxTries = 16 + count * count;
         for (int i = 0; i < maxTries && count > 0; ++i) {
-            int dx = random.nextInt(width), dy = random.nextInt(height), dz = random.nextInt(length);
+            int dx = random.nextInt(getWidth()), dy = random.nextInt(getHeight()), dz = random.nextInt(getLength());
             int index = getIndex(dx, dy, dz);
             UBlockPos blockPosFloor = posture.getWorldPos(dx, dy, dz);
             UBlockPos blockPosTop = new UBlockPos(blockPosFloor.getX(), blockPosFloor.getY() + 1, blockPosFloor.getZ());
-            if (!uWorld.isAirBlock(blockPosFloor) || !uWorld.isAirBlock(blockPosTop) || skin.get(index)) {
+            if (!world.isAirBlock(blockPosFloor) || !world.isAirBlock(blockPosTop) || getSkin().get(index)) {
                 continue;
             }
             if (!mobs.isEmpty()) {
                 UEntityClass mob = Utils.select(mobs, random.nextLong());
-                uWorld.spawnEntity(mob, blockPosFloor);
+                world.spawnEntity(mob, blockPosFloor);
             }
             --count;
         }
@@ -462,19 +450,19 @@ public class Structure extends Blueprint {
      * @throws IOException If biome not acceptable
      */
     public void matchBiome(Biomus biomus) throws IOException {
-        if (biomus != Biomus.SNOW && this.biomus == Biomus.SNOW && method != Method.UNDERGROUND) {
+        if (biomus != Biomus.SNOW && getBiomus() == Biomus.SNOW && getMethod() != Method.UNDERGROUND) {
             throw new IOException("Can't calibrate Snow objects not in Snow biome");
         }
-        if (biomus != Biomus.NETHER && this.biomus == Biomus.NETHER && method != Method.SKY && method != Method.UNDERGROUND) {
+        if (biomus != Biomus.NETHER && getBiomus() == Biomus.NETHER && getMethod() != Method.SKY && getMethod() != Method.UNDERGROUND) {
             throw new IOException("Can't calibrate Nether objects not in Nether");
         }
-        if (biomus == Biomus.NETHER && this.biomus != Biomus.NETHER && method != Method.UNDERGROUND && method != Method.UNDERWATER) {
+        if (biomus == Biomus.NETHER && getBiomus() != Biomus.NETHER && getMethod() != Method.UNDERGROUND && getMethod() != Method.UNDERWATER) {
             throw new IOException("Can't calibrate not Nether objects in Nether");
         }
-        if (biomus == Biomus.SNOW && this.biomus == Biomus.SAND && method != Method.UNDERGROUND) {
+        if (biomus == Biomus.SNOW && getBiomus() == Biomus.SAND && getMethod() != Method.UNDERGROUND) {
             throw new IOException("Can't calibrate Desert objects in Snow biome");
         }
-        if (biomus == Biomus.END && this.biomus != Biomus.END && method != Method.SKY) {
+        if (biomus == Biomus.END && getBiomus() != Biomus.END && getMethod() != Method.SKY) {
             throw new IOException("Can't calibrate not End objects in The End");
         }
     }
@@ -488,24 +476,24 @@ public class Structure extends Blueprint {
     public void matchAccuracy(Region surface, Region bottom) throws IOException {
         DecimalFormat decimal = new DecimalFormat("######0.00");
         double liquidHeight = surface.getAverage() - bottom.getAverage();
-        if (method == Method.AFLOAT) {
-            if (surface.getRoughness() > (height / 3.0 + 2) * Configurator.ACCURACY) {
+        if (getMethod() == Method.AFLOAT) {
+            if (surface.getRoughness() > (getHeight() / 3.0 + 2) * Configurator.ACCURACY) {
                 throw new IOException("Rough water: " + decimal.format(surface.getRoughness()));
             }
             if (liquidHeight < 6.0) {
                 throw new IOException("Too shallow: " + decimal.format(liquidHeight));
             }
         }
-        if (method == Method.UNDERWATER) {
-            if (bottom.getRoughness() > (height / 3.0 + 2) * Configurator.ACCURACY) {
+        if (getMethod() == Method.UNDERWATER) {
+            if (bottom.getRoughness() > (getHeight() / 3.0 + 2) * Configurator.ACCURACY) {
                 throw new IOException("Rough bottom: " + decimal.format(bottom.getRoughness()));
             }
-            if (liquidHeight < height * 0.35 && liquidHeight + lift < height) {
+            if (liquidHeight < getHeight() * 0.35 && liquidHeight + lift < getHeight()) {
                 throw new IOException("Too shallow: " + decimal.format(liquidHeight));
             }
         }
-        if (method == Method.BASIC) {
-            if (bottom.getRoughness() > (height / 8.0 + 2) * Configurator.ACCURACY) {
+        if (getMethod() == Method.BASIC) {
+            if (bottom.getRoughness() > (getHeight() / 8.0 + 2) * Configurator.ACCURACY) {
                 throw new IOException("Rough area: " + decimal.format(bottom.getRoughness()));
             }
             if (liquidHeight > 1.5) {
@@ -524,17 +512,17 @@ public class Structure extends Blueprint {
     public int getBestY(Region surface, Region bottom, long seed) {
         Random random = new Random(seed);
         int posY;
-        if (method == Method.AFLOAT) {
+        if (getMethod() == Method.AFLOAT) {
             posY = (int) (surface.getAverage() - surface.getRoughness());
         } else {
             posY = (int) (bottom.getAverage() - bottom.getRoughness());
         }
-        if (method == Method.SKY) {
-            posY += 8 + height + random.nextInt() % (height / 2);
-        } else if (method == Method.UNDERGROUND) {
-            posY = Math.min(posY - height, 30 + random.nextInt() % 25);
+        if (getMethod() == Method.SKY) {
+            posY += 8 + getHeight() + random.nextInt() % (getHeight() / 2);
+        } else if (getMethod() == Method.UNDERGROUND) {
+            posY = Math.min(posY - getHeight(), 30 + random.nextInt() % 25);
         } else {
-            posY -= lift;
+            posY -= getLift();
             posY += Configurator.FORCE_LIFT;
         }
         return Math.max(4, Math.min(posY, 255));
@@ -545,7 +533,7 @@ public class Structure extends Blueprint {
      * @return If Structure is hostile for players
      */
     private boolean isHostile() {
-        return fileStructure.getPath().toLowerCase().contains("village");
+        return getFileStructure().getPath().toLowerCase().contains("village");
     }
 
     public Method getMethod() {
@@ -563,4 +551,65 @@ public class Structure extends Blueprint {
     public File getFile() {
         return fileStructure;
     }
+
+    private File getFileStructure() {
+        return fileStructure;
+    }
+
+    private File getFileFlag() {
+        return fileFlag;
+    }
+
+    private File getFileData() {
+        return fileData;
+    }
+
+    private long getSchemaLen() {
+        return schemaLen;
+    }
+
+    private void setFileStructure(File fileStructure) {
+        this.fileStructure = fileStructure;
+    }
+
+    private void setFileFlag(File fileFlag) {
+        this.fileFlag = fileFlag;
+    }
+
+    private void setFileData(File fileData) {
+        this.fileData = fileData;
+    }
+
+    private void setSchemaLen(long schemaLen) {
+        this.schemaLen = schemaLen;
+    }
+
+    private void setMethod(Method method) {
+        this.method = method;
+    }
+
+    private void setBiomus(Biomus biomus) {
+        this.biomus = biomus;
+    }
+
+    private BitSet getSkin() {
+        return skin;
+    }
+
+    private BitSet getMelt() {
+        return melt;
+    }
+
+    private void setLift(int lift) {
+        this.lift = lift;
+    }
+
+    private void setSkin(BitSet skin) {
+        this.skin = skin;
+    }
+
+    private void setMelt(BitSet melt) {
+        this.melt = melt;
+    }
+
 }

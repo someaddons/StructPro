@@ -77,7 +77,7 @@ public class UBlock {
      * @return Resource path
      */
     public String getPath() {
-        return block.getRegistryName().getResourcePath();
+        return block.getRegistryName() == null ? "" : block.getRegistryName().getResourcePath();
     }
 
     /**

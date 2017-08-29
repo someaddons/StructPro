@@ -3,7 +3,6 @@ package com.ternsip.structpro.universe.entities;
 import com.ternsip.structpro.universe.world.UWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.util.ResourceLocation;
 
 /**
  * Tile entity class wrapper
@@ -43,11 +42,11 @@ public class UEntityClass {
 
     /**
      * Construct entity by class in the world
-     * @param uWorld Target world
+     * @param world Target world
      * @return Spawned entity
      * */
-    public Entity construct(UWorld uWorld) {
-        return EntityList.createEntityByName(getName(), uWorld.getWorld());
+    public Entity construct(UWorld world) {
+        return EntityList.createEntityByName(getName(), world.getWorld());
     }
 
     /** Return minecraft native entity class */

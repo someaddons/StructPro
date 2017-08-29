@@ -13,6 +13,7 @@ import java.util.Set;
  * Helps to determine object limitations
  * @author Ternsip
  */
+@SuppressWarnings({"WeakerAccess"})
 class Limiter {
 
     /**
@@ -27,23 +28,23 @@ class Limiter {
     }
 
     /** Check if the world gives possibility to operate */
-    static boolean isPossibleDimension(UWorld uWorld) {
-        String dimID = String.valueOf(uWorld.getDimensionID());
-        String dimName = uWorld.getDimensionName();
+    static boolean isPossibleDimension(UWorld world) {
+        String dimID = String.valueOf(world.getDimensionID());
+        String dimName = world.getDimensionName();
         Set<String> dims = Configurator.SPAWN_DIMENSIONS;
         return dims.contains(dimID) || dims.contains(dimName);
     }
 
     /** Check if the world gives possibility to operate with villages */
-    static boolean isPossibleDimensionVillage(UWorld uWorld) {
-        String dimID = String.valueOf(uWorld.getDimensionID());
-        String dimName = uWorld.getDimensionName();
+    static boolean isPossibleDimensionVillage(UWorld world) {
+        String dimID = String.valueOf(world.getDimensionID());
+        String dimName = world.getDimensionName();
         Set<String> dims = Configurator.VILLAGE_DIMENSIONS;
         return dims.contains(dimID) || dims.contains(dimName);
     }
 
-    public static void useStructure(UWorld uWorld, Structure structure) {
-        WorldData worldData = uWorld.getWorldData();
+    public static void useStructure(UWorld world, Structure structure) {
+        WorldData worldData = world.getWorldData();
         NBTTagCompound data = worldData.getData();
         NBTTagCompound spawned = data.getCompoundTag("spawned");
         String key = structure.getFile().getPath();
@@ -53,8 +54,8 @@ class Limiter {
         worldData.markDirty();
     }
 
-    public static boolean isStructureLimitExceeded(UWorld uWorld, Structure structure) {
-        return uWorld.getWorldData().getData().getCompoundTag("spawned").getInteger(structure.getFile().getPath()) >= Configurator.STRUCTURE_SPAWN_QUOTA;
+    public static boolean isStructureLimitExceeded(UWorld world, Structure structure) {
+        return world.getWorldData().getData().getCompoundTag("spawned").getInteger(structure.getFile().getPath()) >= Configurator.STRUCTURE_SPAWN_QUOTA;
     }
 
 

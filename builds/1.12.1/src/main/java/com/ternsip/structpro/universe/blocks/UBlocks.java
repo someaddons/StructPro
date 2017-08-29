@@ -557,9 +557,9 @@ public class UBlocks {
         blocks[255] = STRUCTURE_BLOCK;
 
         /* Construct block replaces */
-        for (UBlock uBlock : blocks) {
-            if (uBlock != null && uBlock.isValid()) {
-                selector.add(uBlock.getPath(), uBlock);
+        for (UBlock block : blocks) {
+            if (block != null && block.isValid()) {
+                selector.add(block.getPath(), block);
             }
         }
         selector.add("NULL", null);
@@ -583,8 +583,8 @@ public class UBlocks {
 
         /* Replace configured blocks */
         for (int index = 0; index < blocks.length; ++index) {
-            UBlock ublock = blocks[index];
-            blocks[index] = ublock == null || !replace.containsKey(ublock) ? ublock : replace.get(ublock);
+            UBlock block = blocks[index];
+            blocks[index] = block == null || !replace.containsKey(block) ? block : replace.get(block);
         }
 
     }

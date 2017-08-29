@@ -122,7 +122,6 @@ public class UWorld {
      * @param pos Block position over tile entity
      * @param tile Tile entity NBT tag
      */
-    @SuppressWarnings({"deprecation"})
     public void setTileTag(UBlockPos pos, NBTTagCompound tile) {
         if (tile == null) {
             return;
