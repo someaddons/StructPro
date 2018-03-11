@@ -20,21 +20,29 @@ import java.util.regex.Pattern;
  * Structure static storage
  * Holds all loaded structures in selectors
  * Are able to load structures on fly
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 public class Structures {
 
-    /** Selector for structures */
+    /**
+     * Selector for structures
+     */
     public static final Selector<Structure> structures = new Selector<>();
 
-    /** Selector for villages */
+    /**
+     * Selector for villages
+     */
     public static final Selector<ArrayList<Structure>> villages = new Selector<>();
 
-    /** Selector for savings */
+    /**
+     * Selector for savings
+     */
     public static final Selector<Structure> saves = new Selector<>();
 
     /**
      * Register Structure to storage
+     *
      * @param structure Structure instance
      */
     private static void load(final Structure structure) {
@@ -52,7 +60,9 @@ public class Structures {
             Pattern pPattern = Pattern.compile(Pattern.quote(parent), Pattern.CASE_INSENSITIVE);
             ArrayList<ArrayList<Structure>> village = villages.select(pPattern);
             if (village.isEmpty()) {
-                villages.add(parent, new ArrayList<Structure>(){{add(structure);}});
+                villages.add(parent, new ArrayList<Structure>() {{
+                    add(structure);
+                }});
             } else {
                 village.get(0).add(structure);
             }
@@ -62,6 +72,7 @@ public class Structures {
     /**
      * Load all structures from folder or from file
      * Works in parallel threads
+     *
      * @param folder Folder with structures or Structure File to load
      */
     public static void load(File folder) {

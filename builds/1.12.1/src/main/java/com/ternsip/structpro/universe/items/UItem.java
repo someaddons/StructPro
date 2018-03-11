@@ -12,21 +12,27 @@ import java.util.Collection;
 
 /**
  * Item wrapper
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess", "deprecation"})
 public class UItem {
 
-    /** Minecraft native item */
+    /**
+     * Minecraft native item
+     */
     private Item item;
 
-    /** Construct from minecraft native item */
+    /**
+     * Construct from minecraft native item
+     */
     public UItem(Item item) {
         this.item = item;
     }
 
     /**
      * Resolve item state validity
+     *
      * @param meta Item metadata
      * @return Is item state valid
      */
@@ -35,6 +41,9 @@ public class UItem {
         if (!isValid()) {
             return false;
         }
+        if (Configurator.ONLY_VANILLA_LOOT) {
+            return true;
+        }
         try {
             ItemModelMesher models = Minecraft.getMinecraft().getRenderItem().getItemModelMesher();
             TextureAtlasSprite sprite = models.getParticleIcon(item, meta);
@@ -42,6 +51,8 @@ public class UItem {
                     sprite.getIconName() != null &&
                     !sprite.getIconName().equalsIgnoreCase("") &&
                     !sprite.getIconName().equalsIgnoreCase("missingno");
+        } catch (NoClassDefFoundError ndf) {
+            return true;
         } catch (Throwable ignored) {
             return false;
         }
@@ -49,6 +60,7 @@ public class UItem {
 
     /**
      * Get all possible items
+     *
      * @return An array with all possible items
      */
     public static Collection<UItem> getItems() {
@@ -61,6 +73,7 @@ public class UItem {
 
     /**
      * Resolve item validity
+     *
      * @return Is item valid
      */
     public boolean isValid() {
@@ -69,14 +82,16 @@ public class UItem {
 
     /**
      * Get item path
+     *
      * @return Item resource path
-     * */
+     */
     public String getPath() {
         return item.getRegistryName() == null ? "" : item.getRegistryName().getResourcePath();
     }
 
     /**
      * Get item id
+     *
      * @return Item global index
      */
     public int getId() {
@@ -85,21 +100,25 @@ public class UItem {
 
     /**
      * Get Item max metadata/stack value
+     *
      * @return Max damage
-     * */
+     */
     public int getMaxDamage() {
         return item.getMaxDamage();
     }
 
     /**
      * Get item max stack size
+     *
      * @return Item max stack size
      */
     public int getMaxStack() {
         return item.getItemStackLimit();
     }
 
-    /** Return minecraft native item */
+    /**
+     * Return minecraft native item
+     */
     public Item getItem() {
         return item;
     }

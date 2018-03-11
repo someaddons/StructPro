@@ -9,28 +9,40 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Commands class implements default command.
  * It takes effect when someone sends game command.
  * Handlers works both for client and server.
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 @SuppressWarnings({"NullableProblems"})
 public class Commands implements ICommand {
 
-    /** General command name */
+    /**
+     * General command name
+     */
     private static final String name = "structpro";
 
-    /** Main hint for usage */
+    /**
+     * Main hint for usage
+     */
     private static final String usage = "/structpro <help|paste|save|undo|gen>";
 
-    /** Command can be invoked using any of this aliases */
-    private static final ArrayList<String> aliases = new ArrayList<String>(){{add("structpro");add("spro");}};
+    /**
+     * Command can be invoked using any of this aliases
+     */
+    private static final ArrayList<String> aliases = new ArrayList<String>() {{
+        add("structpro");
+        add("spro");
+    }};
 
     /**
      * Check if the given ICommandSender has permission to execute this command
+     *
      * @param server The server instance
      * @param sender The ICommandSender to check permissions on
      * @return access is permitted
@@ -44,7 +56,8 @@ public class Commands implements ICommand {
 
     /**
      * Returns whether the specified command parameter index is a username parameter
-     * @param args The arguments of the command invocation
+     *
+     * @param args  The arguments of the command invocation
      * @param index The index
      * @return index is a username parameter
      */
@@ -55,10 +68,11 @@ public class Commands implements ICommand {
 
     /**
      * Returns tab completions
+     *
      * @param server The server instance
      * @param sender The sender for getting tab completions
-     * @param args command arguments
-     * @param pos target position
+     * @param args   command arguments
+     * @param pos    target position
      * @return tab completions
      */
     @Override
@@ -68,6 +82,7 @@ public class Commands implements ICommand {
 
     /**
      * Gets the name of the command
+     *
      * @return Command name
      */
     @Override
@@ -77,6 +92,7 @@ public class Commands implements ICommand {
 
     /**
      * Gets the usage string for the command.
+     *
      * @param sender The ICommandSender who is requesting usage details
      * @return command usage
      */
@@ -87,6 +103,7 @@ public class Commands implements ICommand {
 
     /**
      * Command can be invoked using any of this aliases
+     *
      * @return array of aliases
      */
     @Override
@@ -94,7 +111,9 @@ public class Commands implements ICommand {
         return aliases;
     }
 
-    /** Overrides default comparator */
+    /**
+     * Overrides default comparator
+     */
     @Override
     public int compareTo(ICommand command) {
         return 0;
@@ -104,9 +123,10 @@ public class Commands implements ICommand {
      * Callback for when the command is executed
      * Primary argument expected as command method
      * Secondary arguments can go in mixed order
+     *
      * @param server The server instance
      * @param sender The sender who executed the command
-     * @param args The arguments that were passed
+     * @param args   The arguments that were passed
      * @throws CommandException If execution failed
      */
     @Override

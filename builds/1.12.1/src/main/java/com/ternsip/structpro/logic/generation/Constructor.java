@@ -18,19 +18,21 @@ import static com.ternsip.structpro.universe.blocks.Classifier.OVERLOOK;
 
 /**
  * Provides ways to control object constructing in the world
+ *
  * @author Ternsip
  */
 public abstract class Constructor {
 
     /**
      * Calibrate candidate in certain position in the world
-     * @param world Target world object
-     * @param worldX World block X starting coordinate
-     * @param worldZ World block Z starting coordinate
-     * @param seed calibrate seed
+     *
+     * @param world     Target world object
+     * @param worldX    World block X starting coordinate
+     * @param worldZ    World block Z starting coordinate
+     * @param seed      calibrate seed
      * @param candidate Desired structure to construct
-     * @throws IOException Structure can't calibrate due conditions
      * @return Calibrated projection
+     * @throws IOException Structure can't calibrate due conditions
      */
     @SuppressWarnings({"ConstantConditions"})
     public static Projection calibrate(UWorld world, int worldX, int worldZ, long seed, Structure candidate) throws IOException {
@@ -50,10 +52,11 @@ public abstract class Constructor {
     /**
      * Construct projection in the world in specific position
      * In case Structure can not be constructed null will be returned
-     * @param world Target world object
-     * @param worldX World block X starting coordinate
-     * @param worldZ World block Z starting coordinate
-     * @param seed Constructing seed
+     *
+     * @param world     Target world object
+     * @param worldX    World block X starting coordinate
+     * @param worldZ    World block Z starting coordinate
+     * @param seed      Constructing seed
      * @param structure Structure to construct
      * @return Constructed projection or null
      */

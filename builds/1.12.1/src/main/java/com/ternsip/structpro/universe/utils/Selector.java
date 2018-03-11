@@ -10,35 +10,47 @@ import java.util.regex.Pattern;
 
 /**
  * Object selection relative parameters
+ *
  * @author Ternsip
  */
 public class Selector<T> {
 
-    /** Used objects */
+    /**
+     * Used objects
+     */
     private HashSet<T> used = new HashSet<>();
 
-    /** All possible objects */
+    /**
+     * All possible objects
+     */
     private ArrayList<T> all = new ArrayList<>();
 
-    /** All possible objects for each type of method */
-    private HashMap<Method, ArrayList<T>> methodFilter = new HashMap<Method, ArrayList<T>>(){{
+    /**
+     * All possible objects for each type of method
+     */
+    private HashMap<Method, ArrayList<T>> methodFilter = new HashMap<Method, ArrayList<T>>() {{
         for (Method method : Method.values()) {
             put(method, new ArrayList<>());
         }
     }};
 
-    /** All possible objects for each type of biome */
-    private HashMap<Biomus, ArrayList<T>> biomeFilter = new HashMap<Biomus, ArrayList<T>>(){{
+    /**
+     * All possible objects for each type of biome
+     */
+    private HashMap<Biomus, ArrayList<T>> biomeFilter = new HashMap<Biomus, ArrayList<T>>() {{
         for (Biomus biomus : Biomus.values()) {
             put(biomus, new ArrayList<>());
         }
     }};
 
-    /** Name (lowercase) -> object mapping */
+    /**
+     * Name (lowercase) -> object mapping
+     */
     private HashMap<String, T> nameFilter = new HashMap<>();
 
     /**
      * Select all objects, O(1)
+     *
      * @return All objects
      */
     public ArrayList<T> select() {
@@ -47,6 +59,7 @@ public class Selector<T> {
 
     /**
      * Select all objects that matches biome, O(1)
+     *
      * @param biomus Target biome
      * @return Objects by biome
      */
@@ -56,6 +69,7 @@ public class Selector<T> {
 
     /**
      * Select all objects that matches method, O(1)
+     *
      * @param method Target method
      * @return Objects by method
      */
@@ -65,6 +79,7 @@ public class Selector<T> {
 
     /**
      * Select all objects that matches pattern, O(n)
+     *
      * @param pattern Target pattern
      * @return Array of objects which name matches pattern
      */
@@ -78,6 +93,7 @@ public class Selector<T> {
 
     /**
      * Select structures that matches any method, O(n)
+     *
      * @param methods Array of methods to select
      * @return Objects that matches any method
      */
@@ -91,6 +107,7 @@ public class Selector<T> {
 
     /**
      * Select structures that matches any biome, O(n)
+     *
      * @param biomes Array of biomes to select
      * @return Objects that matches any biome
      */
@@ -104,8 +121,9 @@ public class Selector<T> {
 
     /**
      * Select structures that matches any biome or any method, O(n * log(n))
+     *
      * @param methods Array of methods to select
-     * @param biomes Array of biomes to select
+     * @param biomes  Array of biomes to select
      * @return Objects that matches any biomus or any method
      */
     public ArrayList<T> select(final Biomus[] biomes, final Method[] methods) {
@@ -121,6 +139,7 @@ public class Selector<T> {
 
     /**
      * Add object without bias just by reference
+     *
      * @param target Object instance
      */
     public void add(T target) {
@@ -132,6 +151,7 @@ public class Selector<T> {
 
     /**
      * Add targets for specific method
+     *
      * @param method Method signature
      * @param target Object instance
      */
@@ -142,6 +162,7 @@ public class Selector<T> {
 
     /**
      * Add targets for specific biome
+     *
      * @param biomus Biomus signature
      * @param target Object instance
      */
@@ -152,7 +173,8 @@ public class Selector<T> {
 
     /**
      * Add targets for specific biome
-     * @param name Name signature
+     *
+     * @param name   Name signature
      * @param target Object instance
      */
     public void add(String name, T target) {

@@ -13,6 +13,7 @@ import java.util.regex.PatternSyntaxException;
 
 /**
  * Blocks wrapper
+ *
  * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess"})
@@ -273,14 +274,19 @@ public class UBlocks {
     public static final UBlock CONCRETE_POWDER = new UBlock(Blocks.CONCRETE_POWDER);
     public static final UBlock STRUCTURE_BLOCK = new UBlock(Blocks.STRUCTURE_BLOCK);
 
-    /** Default vanilla blocks by classical indices */
+    /**
+     * Default vanilla blocks by classical indices
+     */
     private static final UBlock[] blocks = new UBlock[256];
 
-    /** Block selector */
+    /**
+     * Block selector
+     */
     final static Selector<UBlock> selector = new Selector<>();
 
     /**
      * Check if the block have vanilla index
+     *
      * @param blockID Block index
      * @return True if block has vanilla ID
      */
@@ -290,6 +296,7 @@ public class UBlocks {
 
     /**
      * Vanilla block from block id
+     *
      * @param blockID Block index
      * @return Minecraft native block or null
      */

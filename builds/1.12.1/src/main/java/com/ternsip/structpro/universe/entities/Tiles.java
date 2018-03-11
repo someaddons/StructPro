@@ -25,15 +25,17 @@ import java.util.regex.Pattern;
 
 /**
  * Tile entities controller
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 @SuppressWarnings("unused")
 public class Tiles {
 
     /**
      * Load tile entity data from NBT tag
+     *
      * @param tile Target tile
-     * @param tag Tag to load
+     * @param tag  Tag to load
      * @param seed Loading seed
      */
     public static void load(TileEntity tile, NBTTagCompound tag, long seed) {
@@ -41,46 +43,47 @@ public class Tiles {
             return;
         }
         if (tile instanceof TileEntityChest) {
-            load((TileEntityChest)tile, tag, seed);
+            load((TileEntityChest) tile, tag, seed);
             return;
         }
         if (tile instanceof TileEntityMobSpawner) {
-            load((TileEntityMobSpawner)tile, tag, seed);
+            load((TileEntityMobSpawner) tile, tag, seed);
         }
         if (tile instanceof TileEntitySign) {
-            load((TileEntitySign)tile, tag, seed);
+            load((TileEntitySign) tile, tag, seed);
             return;
         }
         if (tile instanceof TileEntityCommandBlock) {
-            load((TileEntityCommandBlock)tile, tag, seed);
+            load((TileEntityCommandBlock) tile, tag, seed);
             return;
         }
         if (tile instanceof IInventory) {
-            load((IInventory)tile, tag, seed);
+            load((IInventory) tile, tag, seed);
             return;
         }
         if (tile instanceof TileEntityBanner) {
-            load((TileEntityBanner)tile, tag, seed);
+            load((TileEntityBanner) tile, tag, seed);
             return;
         }
         if (tile instanceof TileEntityComparator) {
-            load((TileEntityComparator)tile, tag, seed);
+            load((TileEntityComparator) tile, tag, seed);
             return;
         }
         if (tile instanceof TileEntityFlowerPot) {
-            load((TileEntityFlowerPot)tile, tag, seed);
+            load((TileEntityFlowerPot) tile, tag, seed);
             return;
         }
         if (tile instanceof TileEntityNote) {
-            load((TileEntityNote)tile, tag, seed);
+            load((TileEntityNote) tile, tag, seed);
         }
     }
 
     /**
      * Load chest data from NBT tag
+     *
      * @param chest Target chest
-     * @param tag tag to load
-     * @param seed Loading seed
+     * @param tag   tag to load
+     * @param seed  Loading seed
      */
     private static void load(TileEntityChest chest, NBTTagCompound tag, long seed) {
         Random random = new Random(seed);
@@ -133,9 +136,10 @@ public class Tiles {
 
     /**
      * Load mob-spawner data from NBT tag
+     *
      * @param spawner Target spawner
-     * @param tag tag to load
-     * @param seed Loading seed
+     * @param tag     tag to load
+     * @param seed    Loading seed
      */
     private static void load(TileEntityMobSpawner spawner, NBTTagCompound tag, long seed) {
         Random random = new Random(seed);
@@ -158,8 +162,9 @@ public class Tiles {
 
     /**
      * Load sign data from NBT tag
+     *
      * @param sign Target sign
-     * 0@param tag tag to load
+     *             0@param tag tag to load
      * @param seed Loading seed
      */
     private static void load(TileEntitySign sign, NBTTagCompound tag, long seed) {
@@ -174,15 +179,17 @@ public class Tiles {
                     continue;
                 }
                 sign.signText[i] = new TextComponentString(tc.getUnformattedComponentText());
-            } catch (Throwable ignored) {}
+            } catch (Throwable ignored) {
+            }
         }
     }
 
     /**
      * Load inventory data from NBT tag
+     *
      * @param inventory Target inventory
-     * @param tag tag to load
-     * @param seed Loading seed
+     * @param tag       tag to load
+     * @param seed      Loading seed
      */
     private static void load(IInventory inventory, NBTTagCompound tag, long seed) {
         if (tag == null || !Configurator.NATIVE_LOOT) {
@@ -208,9 +215,10 @@ public class Tiles {
 
     /**
      * Load command data from NBT tag
+     *
      * @param commandBlock Target command block
-     * @param tag tag to load
-     * @param seed Loading seed
+     * @param tag          tag to load
+     * @param seed         Loading seed
      */
     private static void load(TileEntityCommandBlock commandBlock, NBTTagCompound tag, long seed) {
         if (tag == null) {
@@ -234,9 +242,10 @@ public class Tiles {
 
     /**
      * Load banner data from NBT tag
+     *
      * @param banner Target banner
-     * @param tag tag to load
-     * @param seed Loading seed
+     * @param tag    tag to load
+     * @param seed   Loading seed
      */
     private static void load(TileEntityBanner banner, NBTTagCompound tag, long seed) {
         Random random = new Random(seed);
@@ -245,9 +254,10 @@ public class Tiles {
 
     /**
      * Load comparator data from NBT tag
+     *
      * @param comparator Target comparator
-     * @param tag tag to load
-     * @param seed Loading seed
+     * @param tag        tag to load
+     * @param seed       Loading seed
      */
     private static void load(TileEntityComparator comparator, NBTTagCompound tag, long seed) {
         if (tag == null) {
@@ -259,8 +269,9 @@ public class Tiles {
 
     /**
      * Load pot data from NBT tag
-     * @param pot Target pot
-     * @param tag tag to load
+     *
+     * @param pot  Target pot
+     * @param tag  tag to load
      * @param seed Loading seed
      */
     private static void load(TileEntityFlowerPot pot, NBTTagCompound tag, long seed) {
@@ -281,8 +292,9 @@ public class Tiles {
 
     /**
      * Load note data from NBT tag
+     *
      * @param note Target note
-     * @param tag tag to load
+     * @param tag  tag to load
      * @param seed Loading seed
      */
     private static void load(TileEntityNote note, NBTTagCompound tag, long seed) {

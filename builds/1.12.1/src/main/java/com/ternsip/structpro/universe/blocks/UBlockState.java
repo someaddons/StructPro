@@ -4,12 +4,15 @@ import net.minecraft.block.state.IBlockState;
 
 /**
  * Block state wrapper
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 @SuppressWarnings({"deprecation"})
 public class UBlockState {
 
-    /** Native minecraft block state */
+    /**
+     * Native minecraft block state
+     */
     private IBlockState state;
 
     public UBlockState(IBlockState state) {
@@ -18,6 +21,7 @@ public class UBlockState {
 
     /**
      * Get block
+     *
      * @return Extracted block
      */
     public UBlock getBlock() {
@@ -33,6 +37,7 @@ public class UBlockState {
 
     /**
      * Get block id
+     *
      * @return Block index
      */
     public int getID() {
@@ -41,6 +46,7 @@ public class UBlockState {
 
     /**
      * Get light level that emits block state
+     *
      * @return block light value
      */
     public int getLight() {
@@ -49,13 +55,16 @@ public class UBlockState {
 
     /**
      * Get opacity of block state
+     *
      * @return Block opacity level
      */
     public int getOpacity() {
         return state.getLightOpacity();
     }
 
-    /** Get minecraft native block state */
+    /**
+     * Get minecraft native block state
+     */
     public IBlockState getState() {
         return state;
     }

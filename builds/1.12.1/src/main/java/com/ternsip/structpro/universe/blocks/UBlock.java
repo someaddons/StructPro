@@ -4,21 +4,27 @@ import net.minecraft.block.Block;
 
 /**
  * Block wrapper
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess", "unused", "deprecation"})
 public class UBlock {
 
-    /** Native minecraft block */
+    /**
+     * Native minecraft block
+     */
     private Block block;
 
-    /** Construct block from native minecraft block */
+    /**
+     * Construct block from native minecraft block
+     */
     public UBlock(Block block) {
         this.block = block;
     }
 
     /**
      * Get block from block id
+     *
      * @param blockID Block index
      * @return Converted block
      */
@@ -28,6 +34,7 @@ public class UBlock {
 
     /**
      * Get Block state from block
+     *
      * @return Block state
      */
     public final UBlockState getState() {
@@ -36,6 +43,7 @@ public class UBlock {
 
     /**
      * Get Block state from block and metadata
+     *
      * @param meta Block metadata
      * @return Converted block state
      */
@@ -43,12 +51,14 @@ public class UBlock {
         UBlockState result = getState();
         try {
             result = getStateFromMeta(meta);
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
         return result;
     }
 
     /**
      * Get block state from metadata
+     *
      * @param meta Block metadata
      * @return Block state
      */
@@ -58,6 +68,7 @@ public class UBlock {
 
     /**
      * Block id from block
+     *
      * @return Block index
      */
     public int getID() {
@@ -66,6 +77,7 @@ public class UBlock {
 
     /**
      * Check if current block valid
+     *
      * @return is block valid
      */
     public boolean isValid() {
@@ -74,6 +86,7 @@ public class UBlock {
 
     /**
      * Get resource path
+     *
      * @return Resource path
      */
     public String getPath() {
@@ -82,6 +95,7 @@ public class UBlock {
 
     /**
      * Get light level that emits block
+     *
      * @return block light value
      */
     public int getLight() {
@@ -90,6 +104,7 @@ public class UBlock {
 
     /**
      * Get light level that emits block
+     *
      * @return Block opacity level
      */
     public int getOpacity() {
@@ -98,6 +113,7 @@ public class UBlock {
 
     /**
      * Get native minecraft block
+     *
      * @return Native block
      */
     public Block getBlock() {

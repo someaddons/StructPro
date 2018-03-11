@@ -15,18 +15,20 @@ import java.util.Random;
  * Overrides default world generator
  * Basically fires when chunk populates
  * Decorate chunk generation process
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 public class Decorator implements IWorldGenerator {
 
     /**
      * Chunk population band method
-     * @param random the chunk specific {@link Random}
-     * @param chunkX the chunk X coordinate of this chunk
-     * @param chunkZ the chunk Z coordinate of this chunk
-     * @param world The minecraft world we're generating for
+     *
+     * @param random    the chunk specific {@link Random}
+     * @param chunkX    the chunk X coordinate of this chunk
+     * @param chunkZ    the chunk Z coordinate of this chunk
+     * @param world     The minecraft world we're generating for
      * @param generator Generating rig
-     * @param provider Requesting the world generation rig
+     * @param provider  Requesting the world generation rig
      */
     @Override
     public void generate(Random random,

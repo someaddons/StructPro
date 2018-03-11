@@ -24,36 +24,55 @@ import static com.ternsip.structpro.universe.blocks.Classifier.*;
 
 /**
  * Holds schematic-extended information and can load, calibrate, project it
+ *
  * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess"})
 public class Structure extends Blueprint {
 
-    /** Structure version */
+    /**
+     * Structure version
+     */
     private static final int VERSION = 110;
 
-    /** Directory for dump files */
+    /**
+     * Directory for dump files
+     */
     private static final File DUMP_DIR = new File("sprodump", "structures");
 
-    /** Melting distance measured in blocks */
+    /**
+     * Melting distance measured in blocks
+     */
     public static final int MELT = 5;
 
-    /** Structure file */
+    /**
+     * Structure file
+     */
     private File fileStructure;
 
-    /** Flag file */
+    /**
+     * Flag file
+     */
     private File fileFlag;
 
-    /** Data file */
+    /**
+     * Data file
+     */
     private File fileData;
 
-    /** Structure file size in bytes */
+    /**
+     * Structure file size in bytes
+     */
     private long schemaLen;
 
-    /** Spawning method */
+    /**
+     * Spawning method
+     */
     private Method method;
 
-    /** Biome belonging */
+    /**
+     * Biome belonging
+     */
     private Biomus biomus;
 
     /**
@@ -79,19 +98,21 @@ public class Structure extends Blueprint {
 
     /**
      * Construct Structure based on Structure file
+     *
      * @param file Target file
      * @throws IOException If Structure failed to construct
      */
     public Structure(File file) throws IOException {
-        this(  file,
+        this(file,
                 new File(DUMP_DIR.getPath(), file.getPath().hashCode() + ".dmp"),
                 new File(DUMP_DIR.getPath(), file.getPath().hashCode() + ".flg"));
     }
 
     /**
      * Construct Structure based on blueprint file, data and flags
-     * @param file Target file
-     * @param data Data file
+     *
+     * @param file  Target file
+     * @param data  Data file
      * @param flags Flag file
      * @throws IOException If Structure failed to construct
      */
@@ -120,6 +141,7 @@ public class Structure extends Blueprint {
 
     /**
      * Load flags from flags-file
+     *
      * @throws IOException If flags failed to read
      */
     private void loadFlags() throws IOException {
@@ -142,6 +164,7 @@ public class Structure extends Blueprint {
 
     /**
      * Load data from data-file and schematic-file
+     *
      * @throws IOException If data failed to load
      */
     private void loadData() throws IOException {
@@ -153,14 +176,15 @@ public class Structure extends Blueprint {
 
     /**
      * Save flags to file
+     *
      * @throws IOException If flags failed to save
      */
     private void saveFlags() throws IOException {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setInteger("Version", VERSION);
-        tag.setShort("Width", (short)getWidth());
-        tag.setShort("Height", (short)getHeight());
-        tag.setShort("Length", (short)getLength());
+        tag.setShort("Width", (short) getWidth());
+        tag.setShort("Height", (short) getHeight());
+        tag.setShort("Length", (short) getLength());
         tag.setLong("SchemaLen", getSchemaLen());
         tag.setInteger("Lift", getLift());
         tag.setInteger("Method", getMethod().getValue());
@@ -170,8 +194,9 @@ public class Structure extends Blueprint {
 
     /**
      * Save file to file
+     *
      * @throws IOException If data failed to save
-     * */
+     */
     private void saveData() throws IOException {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setByteArray("Skin", Utils.toByteArray(getSkin()));
@@ -179,7 +204,9 @@ public class Structure extends Blueprint {
         Utils.writeTags(getFileData(), tag);
     }
 
-    /** Free internal memory */
+    /**
+     * Free internal memory
+     */
     private void free() {
         setBlocks(null);
         setMetas(null);
@@ -190,6 +217,7 @@ public class Structure extends Blueprint {
 
     /**
      * Get Structure ground level to dig it down
+     *
      * @return Lift level
      */
     private int calcLift() {
@@ -213,11 +241,12 @@ public class Structure extends Blueprint {
         }
         int borderLevel = (int) Math.round(borders / ((getWidth() + getLength()) * 2.0));
         int wholeLevel = Math.round(totals / (getWidth() * getLength()));
-        return  Math.max(borderLevel, wholeLevel);
+        return Math.max(borderLevel, wholeLevel);
     }
 
     /**
      * Generate schematic skin as BitSet of possible(0) and restricted(1) to calibrate blocks
+     *
      * @return Skin mask
      */
     private BitSet calcSkin() {
@@ -288,6 +317,7 @@ public class Structure extends Blueprint {
     /**
      * Returns Structure melts
      * Requires calculated sky
+     *
      * @return Melt mask
      */
     private BitSet calcMelt() {
@@ -334,6 +364,7 @@ public class Structure extends Blueprint {
 
     /**
      * Combine Structure report
+     *
      * @return Generated report
      */
     @Override
@@ -416,9 +447,10 @@ public class Structure extends Blueprint {
 
     /**
      * Populate Structure with entities
-     * @param world Target world
+     *
+     * @param world   Target world
      * @param posture Traformation posture
-     * @param seed population seed
+     * @param seed    population seed
      */
     private void populate(UWorld world, Posture posture, long seed) {
         boolean village = isHostile();
@@ -446,6 +478,7 @@ public class Structure extends Blueprint {
 
     /**
      * Match biome acceptability
+     *
      * @param biomus Biome to match
      * @throws IOException If biome not acceptable
      */
@@ -469,8 +502,9 @@ public class Structure extends Blueprint {
 
     /**
      * Match roughness acceptability
+     *
      * @param surface Region characterizes surface
-     * @param bottom Region characterizes bottom
+     * @param bottom  Region characterizes bottom
      * @throws IOException If regions are not acceptable
      */
     public void matchAccuracy(Region surface, Region bottom) throws IOException {
@@ -504,9 +538,10 @@ public class Structure extends Blueprint {
 
     /**
      * Returns best paste height in region
+     *
      * @param surface Region characterizes surface
-     * @param bottom Region characterizes bottom
-     * @param seed Calibrating seed
+     * @param bottom  Region characterizes bottom
+     * @param seed    Calibrating seed
      * @return Best height
      */
     public int getBestY(Region surface, Region bottom, long seed) {
@@ -530,6 +565,7 @@ public class Structure extends Blueprint {
 
     /**
      * Check Structure hostile for players
+     *
      * @return If Structure is hostile for players
      */
     private boolean isHostile() {

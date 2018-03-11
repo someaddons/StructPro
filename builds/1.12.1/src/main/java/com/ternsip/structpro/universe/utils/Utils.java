@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 /**
  * Utilities providing small abstract and independent universal methods
+ *
  * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -23,7 +24,8 @@ public class Utils {
 
     /**
      * Join tokens into one string, separated with delimiter
-     * @param args String tokens to join
+     *
+     * @param args      String tokens to join
      * @param delimiter Separator
      * @return Resulting string
      */
@@ -41,7 +43,8 @@ public class Utils {
 
     /**
      * Split string into tokens using delimiter
-     * @param array Monotone string
+     *
+     * @param array     Monotone string
      * @param delimiter String separator
      * @return Array of tokens
      */
@@ -58,6 +61,7 @@ public class Utils {
 
     /**
      * Convert short array to byte array
+     *
      * @param arr Array of shorts
      * @return Array of bytes
      */
@@ -69,6 +73,7 @@ public class Utils {
 
     /**
      * Convert byte array to short array
+     *
      * @param arr Array of bytes
      * @return Array of shorts
      */
@@ -80,6 +85,7 @@ public class Utils {
 
     /**
      * Convert BitSet to byte array
+     *
      * @param bits Array of bits
      * @return Array of bytes
      */
@@ -95,6 +101,7 @@ public class Utils {
 
     /**
      * Convert byte array to BitSet
+     *
      * @param bytes Array of bytes
      * @return Array of bits
      */
@@ -110,6 +117,7 @@ public class Utils {
 
     /**
      * Convert HashSet to array
+     *
      * @param set Set of strings
      * @return Array of unique strings
      */
@@ -119,17 +127,19 @@ public class Utils {
 
     /**
      * Convert collection to HashSet
+     *
      * @param array Array of objects
      * @return Set of objects
      */
     public static <T> HashSet<T> toHashSet(final List<T> array) {
-       return new HashSet<>(array);
+        return new HashSet<>(array);
     }
 
     /**
      * Select random element
+     *
      * @param array Array of objects
-     * @param seed Selector seed
+     * @param seed  Selector seed
      * @return Selected object or null
      */
     public static <TYPE> TYPE select(ArrayList<TYPE> array, long seed) {
@@ -138,6 +148,7 @@ public class Utils {
 
     /**
      * Select random element
+     *
      * @param array Array of objects
      * @return Selected object or null
      */
@@ -147,8 +158,9 @@ public class Utils {
 
     /**
      * Get all unique strings from iterable, that matches pattern name
+     *
      * @param iterable Collection to iterate
-     * @param pattern Pattern
+     * @param pattern  Pattern
      * @return Set of strings
      */
     public static HashSet<String> match(Iterable<String> iterable, Pattern pattern) {
@@ -163,6 +175,7 @@ public class Utils {
 
     /**
      * Get all correct configuration fields
+     *
      * @param clazz Class to scan
      * @return Set of strings
      */
@@ -176,8 +189,9 @@ public class Utils {
 
     /**
      * Set class field value, returns success status
-     * @param clazz Class to scan
-     * @param target Instance
+     *
+     * @param clazz     Class to scan
+     * @param target    Instance
      * @param fieldName Name of field
      * @return Field value
      */
@@ -193,8 +207,9 @@ public class Utils {
 
     /**
      * Set class field value, returns success status
-     * @param clazz Class to scan
-     * @param target Instance
+     *
+     * @param clazz     Class to scan
+     * @param target    Instance
      * @param fieldName Name of field
      */
     public static void setFieldValue(Class clazz, Object target, String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
@@ -209,8 +224,9 @@ public class Utils {
 
     /**
      * Write tags to file
+     *
      * @param file File to write
-     * @param tag NBT tag to write
+     * @param tag  NBT tag to write
      * @throws IOException If writing failed
      */
     public static void writeTags(File file, NBTTagCompound tag) throws IOException {
@@ -226,6 +242,7 @@ public class Utils {
 
     /**
      * Load map tag from file
+     *
      * @param file File to read
      * @return NBT tag from file
      * @throws IOException If reading failed
@@ -238,6 +255,7 @@ public class Utils {
 
     /**
      * Get complete list of files in folder
+     *
      * @param file File or Folder to scan
      * @return Array of files
      */

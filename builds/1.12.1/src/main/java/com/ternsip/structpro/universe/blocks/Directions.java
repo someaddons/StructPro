@@ -10,12 +10,15 @@ import java.util.Map;
  * Transforms block metadata
  * Are able to rotate n times and flip
  * Directions can be combined with each other using pipe
+ *
  * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess"})
 public class Directions {
 
-    /** Block rotation type enumeration */
+    /**
+     * Block rotation type enumeration
+     */
     public enum BlockType {
         LOG, BED, RAIL_NORMAL, RAIL_CURVE, RAIL_ASC, RAIL_POWERED, RAIL_POWERED_ASC, TORCH, STAIR, CHEST, SIGNPOST,
         DOOR, LEVER, BUTTON, REDSTONE_REPEATER, TRAPDOOR, VINE, ANVIL,
@@ -30,18 +33,25 @@ public class Directions {
     public static final int UP = 0x10;
     public static final int DOWN = 0x20;
 
-    /** Mapping block rotation type to it meta to direction map */
+    /**
+     * Mapping block rotation type to it meta to direction map
+     */
     private static final Map<BlockType, HashMap<Integer, Integer>> metaToDirection = new HashMap<>();
 
-    /** Mapping block rotation type to it direction to metadata map */
+    /**
+     * Mapping block rotation type to it direction to metadata map
+     */
     private static final Map<BlockType, HashMap<Integer, Integer>> directionToMeta = new HashMap<>();
 
-    /** Masks for each block rotation type */
+    /**
+     * Masks for each block rotation type
+     */
     private static final Map<BlockType, Integer> masks = new HashMap<>();
 
     /**
      * Detect if block type is double directed
      * Double directed blocks have two directions for example south-west
+     *
      * @return Block double directed
      */
     public static boolean isDoubleDirected(BlockType blockType) {
@@ -50,7 +60,8 @@ public class Directions {
 
     /**
      * Get block direction by meta and block type
-     * @param meta Block metadaa
+     *
+     * @param meta      Block metadaa
      * @param blockType Block rotation type
      * @return Block direction
      */
@@ -66,9 +77,10 @@ public class Directions {
 
     /**
      * Get metadata by block and direction
+     *
      * @param defaultMeta Metadata that will be returned in unefined case
-     * @param direction Block direction
-     * @param blockType block rotation type
+     * @param direction   Block direction
+     * @param blockType   block rotation type
      */
     public static Integer getMeta(int defaultMeta, int direction, BlockType blockType) {
         if (directionToMeta.containsKey(blockType)) {
@@ -82,13 +94,14 @@ public class Directions {
 
     /**
      * Get block type by block state
+     *
      * @param uBlock Target block
-     * @param meta Block metadata value
+     * @param meta   Block metadata value
      * @return Block rotation type
      */
     public static BlockType getBlockType(UBlock uBlock, int meta) {
         Block block = uBlock.getBlock();
-        if (    block instanceof BlockBed ||
+        if (block instanceof BlockBed ||
                 block instanceof BlockPumpkin ||
                 block instanceof BlockFenceGate ||
                 block instanceof BlockEndPortalFrame ||
@@ -105,7 +118,7 @@ public class Directions {
         if (block instanceof BlockStairs) {
             return BlockType.STAIR;
         }
-        if (    block instanceof BlockChest ||
+        if (block instanceof BlockChest ||
                 block instanceof BlockEnderChest ||
                 block instanceof BlockFurnace ||
                 block instanceof BlockLadder ||
@@ -126,7 +139,7 @@ public class Directions {
         if (block instanceof BlockButton) {
             return BlockType.BUTTON;
         }
-        if (    block instanceof BlockRedstoneRepeater ||
+        if (block instanceof BlockRedstoneRepeater ||
                 block instanceof BlockRedstoneComparator) {
             return BlockType.REDSTONE_REPEATER;
         }
@@ -156,6 +169,7 @@ public class Directions {
 
     /**
      * Get metadata mask that covers rotations
+     *
      * @param blockType block rotation type
      * @return Mask that covers rotations
      */
@@ -166,9 +180,10 @@ public class Directions {
     /**
      * Add mappings from meta to direction map and block type and mask
      * In case the opposite direction not exists it will be added automatically
+     *
      * @param metaToDir Metadata to direction map
      * @param blockType Block rotation type
-     * @param mask Metadata mask that covers rotations
+     * @param mask      Metadata mask that covers rotations
      */
     private static void addMappings(HashMap<Integer, Integer> metaToDir, BlockType blockType, int mask) {
         HashMap<Integer, Integer> dirToMeta = new HashMap<>();
@@ -189,13 +204,13 @@ public class Directions {
 
     static {
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, UP);
             put(0x4, EAST);
             put(0x8, SOUTH);
         }}, BlockType.LOG, 0xC);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, DOWN);
             put(0x1, UP);
             put(0x2, NORTH);
@@ -204,66 +219,66 @@ public class Directions {
             put(0x5, EAST);
         }}, BlockType.CHEST, 0x7);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, SOUTH);
             put(0x1, NORTH);
             put(0x2, EAST);
             put(0x3, WEST);
         }}, BlockType.TRAPDOOR, 0x3);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, SOUTH);
             put(0x1, WEST);
             put(0x2, NORTH);
             put(0x3, EAST);
         }}, BlockType.BED, 0x3);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x1, SOUTH);
             put(0x2, WEST);
             put(0x4, NORTH);
             put(0x8, EAST);
         }}, BlockType.VINE, 0xF);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, NORTH);
             put(0x1, EAST);
         }}, BlockType.RAIL_NORMAL, 0xF);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x2, EAST);
             put(0x3, WEST);
             put(0x4, NORTH);
             put(0x5, SOUTH);
         }}, BlockType.RAIL_ASC, 0xF);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x6, EAST);
             put(0x7, SOUTH);
             put(0x8, WEST);
             put(0x9, NORTH);
         }}, BlockType.RAIL_CURVE, 0xF);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, NORTH);
             put(0x1, EAST);
         }}, BlockType.RAIL_POWERED, 0x7);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x2, EAST);
             put(0x3, WEST);
             put(0x4, NORTH);
             put(0x5, SOUTH);
         }}, BlockType.RAIL_POWERED_ASC, 0x7);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, EAST);
             put(0x1, WEST);
             put(0x2, SOUTH);
             put(0x3, NORTH);
         }}, BlockType.STAIR, 0x3);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x1, EAST);
             put(0x2, WEST);
             put(0x3, SOUTH);
@@ -271,7 +286,7 @@ public class Directions {
             put(0x5, UP);
         }}, BlockType.TORCH, 0xF);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, DOWN);
             put(0x1, EAST);
             put(0x2, WEST);
@@ -280,7 +295,7 @@ public class Directions {
             put(0x5, UP);
         }}, BlockType.BUTTON, 0x7);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, DOWN);
             put(0x1, EAST);
             put(0x2, WEST);
@@ -291,35 +306,36 @@ public class Directions {
             put(0x7, DOWN);
         }}, BlockType.LEVER, 0x7);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, WEST);
             put(0x1, NORTH);
             put(0x2, EAST);
             put(0x3, SOUTH);
         }}, BlockType.DOOR, 0x3);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, NORTH);
             put(0x1, EAST);
             put(0x2, SOUTH);
             put(0x3, WEST);
         }}, BlockType.REDSTONE_REPEATER, 0x3);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x0, SOUTH);
             put(0x1, EAST);
         }}, BlockType.ANVIL, 0x1);
 
-        addMappings(new HashMap<Integer, Integer>(){{}}, BlockType.MUSHROOM, 0xF);
+        addMappings(new HashMap<Integer, Integer>() {{
+        }}, BlockType.MUSHROOM, 0xF);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x1, WEST);
             put(0x3, NORTH);
             put(0x7, SOUTH);
             put(0x9, EAST);
         }}, BlockType.MUSHROOM_CAP_CORNER, 0xF);
 
-        addMappings(new HashMap<Integer, Integer>(){{
+        addMappings(new HashMap<Integer, Integer>() {{
             put(0x2, NORTH);
             put(0x4, WEST);
             put(0x6, EAST);

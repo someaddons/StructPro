@@ -16,21 +16,30 @@ import java.util.Map;
 
 /**
  * Mobs control class
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess"})
 public class Mobs {
 
-    /** Selector for all eggs mobs */
+    /**
+     * Selector for all eggs mobs
+     */
     public static final Selector<UEntityClass> eggs = new Selector<>();
 
-    /** Selector for all eggs mobs */
+    /**
+     * Selector for all eggs mobs
+     */
     public static final Selector<UEntityClass> mobs = new Selector<>();
 
-    /** Selector for hostile mobs */
+    /**
+     * Selector for hostile mobs
+     */
     public static final Selector<UEntityClass> hostile = new Selector<>();
 
-    /** Selector for village mobs */
+    /**
+     * Selector for village mobs
+     */
     public static final Selector<UEntityClass> village = new Selector<>();
 
     static {

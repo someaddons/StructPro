@@ -11,6 +11,7 @@ import java.util.Set;
 
 /**
  * Helps to determine object limitations
+ *
  * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess"})
@@ -18,16 +19,19 @@ class Limiter {
 
     /**
      * Check if a chunk is outside of the border
+     *
      * @param chunkX Chunk X coordinate
      * @param chunkZ Chunk Z coordinate
      * @return chunk is outside of a border
      */
     static boolean isChunkOutsideBorder(int chunkX, int chunkZ) {
-        return  chunkX > Configurator.WORLD_CHUNK_BORDER || chunkX < -Configurator.WORLD_CHUNK_BORDER ||
+        return chunkX > Configurator.WORLD_CHUNK_BORDER || chunkX < -Configurator.WORLD_CHUNK_BORDER ||
                 chunkZ > Configurator.WORLD_CHUNK_BORDER || chunkZ < -Configurator.WORLD_CHUNK_BORDER;
     }
 
-    /** Check if the world gives possibility to operate */
+    /**
+     * Check if the world gives possibility to operate
+     */
     static boolean isPossibleDimension(UWorld world) {
         String dimID = String.valueOf(world.getDimensionID());
         String dimName = world.getDimensionName();
@@ -35,7 +39,9 @@ class Limiter {
         return dims.contains(dimID) || dims.contains(dimName);
     }
 
-    /** Check if the world gives possibility to operate with villages */
+    /**
+     * Check if the world gives possibility to operate with villages
+     */
     static boolean isPossibleDimensionVillage(UWorld world) {
         String dimID = String.valueOf(world.getDimensionID());
         String dimName = world.getDimensionName();

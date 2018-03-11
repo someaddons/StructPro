@@ -9,16 +9,23 @@ import com.ternsip.structpro.universe.utils.Report;
  */
 public class Volume implements Cuboid, Reportable {
 
-    /** Amount of cells over x-axis */
+    /**
+     * Amount of cells over x-axis
+     */
     private int width;
 
-    /** Amount of cells over y-axis */
+    /**
+     * Amount of cells over y-axis
+     */
     private int height;
 
-    /** Amount of cells over z-axis */
+    /**
+     * Amount of cells over z-axis
+     */
     private int length;
 
-    Volume() {}
+    Volume() {
+    }
 
     Volume(Cuboid cuboid) {
         setWidth(cuboid.getWidth());
@@ -89,7 +96,7 @@ public class Volume implements Cuboid, Reportable {
 
     @Override
     public boolean isInside(int x, int y, int z) {
-        return  x >= 0 && x < width && y >= 0 && y < height && z >= 0 && z < length;
+        return x >= 0 && x < width && y >= 0 && y < height && z >= 0 && z < length;
     }
 
     @Override
@@ -102,13 +109,16 @@ public class Volume implements Cuboid, Reportable {
         return new Report().post("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]");
     }
 
-    /** Returns posture over the volume */
+    /**
+     * Returns posture over the volume
+     */
     public Posture getPosture(int x, int y, int z, int rotX, int rotY, int rotZ, boolean flipX, boolean flipY, boolean flipZ) {
         return new Posture(x, y, z, rotX, rotY, rotZ, flipX, flipY, flipZ, width, height, length);
     }
 
     /**
      * Extend volume on X, Y, Z axis in both directions
+     *
      * @param x Extension on X axis
      * @param y Extension on Y axis
      * @param z Extension on Z axis

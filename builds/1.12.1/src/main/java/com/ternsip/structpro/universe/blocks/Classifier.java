@@ -17,16 +17,17 @@ import java.util.regex.PatternSyntaxException;
  * GAS - Air, gases, etc.
  * SOP - GAS + LIQUID
  * TRANSPARENT - non solid blocks
+ *
  * @author Ternsip
  */
 @SuppressWarnings({"unused"})
 public enum Classifier {
 
-    SOIL (0x00),
-    OVERLOOK (0x01),
+    SOIL(0x00),
+    OVERLOOK(0x01),
     CARDINAL(0x02),
-    LIQUID (0x03),
-    LIGHT (0x04),
+    LIQUID(0x03),
+    LIGHT(0x04),
     HEAT_RAY(0x05),
     GAS(0x06),
     SOP(0x07),
@@ -39,12 +40,15 @@ public enum Classifier {
         this.value = value;
     }
 
-    /** Ground soil blocks */
+    /**
+     * Ground soil blocks
+     */
     private static final boolean[][] blocks = new boolean[Classifier.values().length][256];
 
     /**
      * Check if block of specific class by ID
-     * @param type Classifier type
+     *
+     * @param type    Classifier type
      * @param blockID Target block ID
      * @return If class block of type
      */
@@ -54,7 +58,8 @@ public enum Classifier {
 
     /**
      * Check if block of specific class by ID
-     * @param type Classifier type
+     *
+     * @param type  Classifier type
      * @param block Target block
      * @return If class block of type
      */
@@ -64,7 +69,8 @@ public enum Classifier {
 
     /**
      * Check if block of specific class by ID
-     * @param type Classifier type
+     *
+     * @param type  Classifier type
      * @param state Target block state
      * @return If class block of type
      */
@@ -74,7 +80,8 @@ public enum Classifier {
 
     /**
      * Set block class by block state
-     * @param type Classifier type
+     *
+     * @param type  Classifier type
      * @param state Target block state
      */
     private static void setBlock(Classifier type, UBlockState state) {
@@ -83,7 +90,8 @@ public enum Classifier {
 
     /**
      * Set block class by block
-     * @param type Classifier type
+     *
+     * @param type  Classifier type
      * @param block Target block
      */
     private static void setBlock(Classifier type, UBlock block) {
@@ -92,7 +100,8 @@ public enum Classifier {
 
     /**
      * Set block class by block ID
-     * @param type Classifier type
+     *
+     * @param type    Classifier type
      * @param blockID Target block ID
      */
     private static void setBlock(Classifier type, int blockID) {

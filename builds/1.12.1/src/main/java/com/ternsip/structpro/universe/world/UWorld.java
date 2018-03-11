@@ -7,6 +7,8 @@ import com.ternsip.structpro.universe.biomes.UBiome;
 import com.ternsip.structpro.universe.blocks.*;
 import com.ternsip.structpro.universe.entities.Tiles;
 import com.ternsip.structpro.universe.entities.UEntityClass;
+import com.ternsip.structpro.universe.general.network.Network;
+import com.ternsip.structpro.universe.general.network.Packet;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -16,12 +18,14 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -33,6 +37,7 @@ import static com.ternsip.structpro.universe.blocks.Classifier.SOIL;
 /**
  * World wrapper
  * Fast universal accessor for world-based interaction
+ *
  * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess"})
@@ -46,6 +51,7 @@ public class UWorld {
 
     /**
      * Call decoration manually at chunk position
+     *
      * @param chunkX Chunk X position
      * @param chunkZ Chunk Z position
      */
@@ -61,6 +67,7 @@ public class UWorld {
 
     /**
      * Check if the chunk was already decorated
+     *
      * @param chunkX Chunk X position
      * @param chunkZ Chunk Z position
      * @return Is chunk decorated
@@ -71,6 +78,7 @@ public class UWorld {
 
     /**
      * Get block biome in the world
+     *
      * @param pos Block position
      * @return Minecraft native biome
      */
@@ -80,6 +88,7 @@ public class UWorld {
 
     /**
      * Spawn entity in the world
+     *
      * @param mob Mob class to spawn
      * @param pos Block position where entity going to spawn
      * @return Spawned entity
@@ -93,6 +102,7 @@ public class UWorld {
 
     /**
      * Remove tile entity in the world
+     *
      * @param pos Block position over tile entity
      */
     public void removeTileEntity(UBlockPos pos) {
@@ -101,6 +111,7 @@ public class UWorld {
 
     /**
      * Get tile entity from the world
+     *
      * @param pos Block position over tile entity
      * @return Tile entity on the block
      */
@@ -110,7 +121,8 @@ public class UWorld {
 
     /**
      * Set tile entity from the world
-     * @param pos Block position over tile entity
+     *
+     * @param pos  Block position over tile entity
      * @param tile Tile entity to set
      */
     public void setTileEntity(UBlockPos pos, TileEntity tile) {
@@ -119,7 +131,8 @@ public class UWorld {
 
     /**
      * Set tile entity as NBT tag
-     * @param pos Block position over tile entity
+     *
+     * @param pos  Block position over tile entity
      * @param tile Tile entity NBT tag
      */
     public void setTileTag(UBlockPos pos, NBTTagCompound tile) {
@@ -141,6 +154,7 @@ public class UWorld {
 
     /**
      * Get tile entity as NBT tag
+     *
      * @param pos Block position over tile entity
      * @return Serialized to NBT tag tile entity
      */
@@ -151,7 +165,8 @@ public class UWorld {
 
     /**
      * Set block state in the world
-     * @param pos Block position
+     *
+     * @param pos   Block position
      * @param state Block state to set
      */
     public void setBlockState(UBlockPos pos, UBlockState state) {
@@ -164,6 +179,7 @@ public class UWorld {
 
     /**
      * Get block state from the world
+     *
      * @param pos Block position
      * @return Block state
      */
@@ -177,9 +193,10 @@ public class UWorld {
 
     /**
      * Set light for block
-     * @param pos Block position
+     *
+     * @param pos   Block position
      * @param light Block light value
-     * @param sky Set for sky
+     * @param sky   Set for sky
      */
     public void setLight(UBlockPos pos, int light, boolean sky) {
         ExtendedBlockStorage storage = getStorage(world.getChunkFromBlockCoords(pos.getBlockPos()), pos.getY());
@@ -196,9 +213,10 @@ public class UWorld {
 
     /**
      * Get height passed by classifier
+     *
      * @param classifier Skip block of this class
-     * @param x X-block position
-     * @param z Z-block position
+     * @param x          X-block position
+     * @param z          Z-block position
      * @return Height level
      */
     public int getHeight(Classifier classifier, int x, int z) {
@@ -214,10 +232,11 @@ public class UWorld {
 
     /**
      * Play sound at the world
-     * @param pos Block position to play
-     * @param event Sound event
+     *
+     * @param pos      Block position to play
+     * @param event    Sound event
      * @param category Sound category
-     * @param volume volume level
+     * @param volume   volume level
      */
     public void sound(UBlockPos pos, SoundEvent event, SoundCategory category, float volume) {
         Random random = new Random(System.currentTimeMillis());
@@ -226,6 +245,7 @@ public class UWorld {
 
     /**
      * Updates queued data
+     *
      * @param pos Block position to update
      */
     public void updateBlock(UBlockPos pos) {
@@ -237,20 +257,21 @@ public class UWorld {
                 world.notifyNeighborsOfStateChange(pos.getBlockPos(), block.getBlock(), true);
                 world.immediateBlockTick(pos.getBlockPos(), state.getState(), new Random());
                 world.notifyLightSet(pos.getBlockPos());
-            } catch (Throwable ignored) {}
+            } catch (Throwable ignored) {
+            }
         }
     }
 
     /**
      * Notify all nearby players about chunk changes
+     *
      * @param chunk Chunk to notify
      */
     public void notifyChunk(Chunk chunk) {
         for (EntityPlayer player : world.playerEntities) {
             if (player instanceof EntityPlayerMP) {
                 EntityPlayerMP playerMP = (EntityPlayerMP) player;
-                if (    Math.abs(playerMP.chunkCoordX - chunk.x) <= 32 &&
-                        Math.abs(playerMP.chunkCoordZ - chunk.z) <= 32) {
+                if (Math.abs(playerMP.chunkCoordX - chunk.x) <= 32 && Math.abs(playerMP.chunkCoordZ - chunk.z) <= 32) {
                     playerMP.connection.sendPacket(new SPacketChunkData(chunk, 65535));
                 }
             }
@@ -258,7 +279,16 @@ public class UWorld {
     }
 
     /**
+     * Notify all nearby players about huge block changes
+     */
+    public void notifyReload(BlockPos pos, double range) {
+        NetworkRegistry.TargetPoint targetPoint = new NetworkRegistry.TargetPoint(getDimensionID(), pos.getX(), pos.getY(), pos.getZ(), range);
+        Network.sendToAllAround(new Packet(Packet.Type.RELOAD_CHUNKS, null), targetPoint);
+    }
+
+    /**
      * Recalculate height map and precipitations map for chunk
+     *
      * @param chunk Chunk to process
      */
     public void generateHeightMap(Chunk chunk) {
@@ -284,6 +314,7 @@ public class UWorld {
 
     /**
      * Updates queued data. Includes light updates
+     *
      * @param posture Posture area going to update
      */
     public void notifyPosture(Posture posture) {
@@ -329,6 +360,7 @@ public class UWorld {
 
     /**
      * Get dimension name of the world
+     *
      * @return Dimension name
      */
     public String getDimensionName() {
@@ -337,6 +369,7 @@ public class UWorld {
 
     /**
      * Get dimension id from the world
+     *
      * @return Dimension index
      */
     public int getDimensionID() {
@@ -345,6 +378,7 @@ public class UWorld {
 
     /**
      * Fix grass and dirt
+     *
      * @param posture Posture area going to fix
      */
     public void grassFix(Posture posture) {
@@ -371,6 +405,7 @@ public class UWorld {
 
     /**
      * Recheck world light in region
+     *
      * @param posture Posture area going to update light
      */
     public void updateLight(Posture posture) {
@@ -437,6 +472,7 @@ public class UWorld {
 
     /**
      * Get world instance by dimension name or id, case insensitive
+     *
      * @param dimension Dimension name or id
      * @return World instance
      */
@@ -458,8 +494,9 @@ public class UWorld {
     /**
      * Get block storage array for y-coordinate
      * Returns null in case block is outside
+     *
      * @param chunk Target chunk
-     * @param y Block height inside chunk
+     * @param y     Block height inside chunk
      * @return Block storage or null
      */
     private static ExtendedBlockStorage getStorage(Chunk chunk, int y) {
@@ -477,6 +514,7 @@ public class UWorld {
 
     /**
      * Get world seed
+     *
      * @return Actual seed
      */
     public long getSeed() {
@@ -485,6 +523,7 @@ public class UWorld {
 
     /**
      * Get world name
+     *
      * @return Actual name
      */
     public String getWorldName() {
@@ -493,19 +532,23 @@ public class UWorld {
 
     /**
      * Check if block in given position is air
+     *
      * @return Is block air
      */
     public boolean isAirBlock(UBlockPos pos) {
         return world.isAirBlock(pos.getBlockPos());
     }
 
-    /** Get minecraft native world */
+    /**
+     * Get minecraft native world
+     */
     public World getWorld() {
         return world;
     }
 
     /**
      * Get world data
+     *
      * @return World saved data
      */
     public WorldData getWorldData() {

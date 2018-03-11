@@ -7,20 +7,26 @@ import java.util.concurrent.TimeUnit;
 /**
  * Simple thread pool class
  * Provide control over asynchronous runnable tasks
+ *
  * @author Ternsip
  */
 public class Pool {
 
-    /** General executor service */
+    /**
+     * General executor service
+     */
     private final ExecutorService executor;
 
-    /** Construct new thread pool */
+    /**
+     * Construct new thread pool
+     */
     public Pool() {
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
     }
 
     /**
      * Add remain process
+     *
      * @param runnable Runnable task
      */
     public void add(Runnable runnable) {
@@ -29,6 +35,7 @@ public class Pool {
 
     /**
      * Wait for finishing all threads limited by time measured in seconds
+     *
      * @param seconds Seconds limit for waiting
      */
     public void wait(int seconds) {

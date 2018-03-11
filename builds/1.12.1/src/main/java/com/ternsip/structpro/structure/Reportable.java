@@ -7,6 +7,7 @@ public interface Reportable {
 
     /**
      * Get report
+     *
      * @return Generated report
      */
     Report report();

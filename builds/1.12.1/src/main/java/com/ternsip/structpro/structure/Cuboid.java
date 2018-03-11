@@ -5,6 +5,7 @@ public interface Cuboid {
 
     /**
      * Get index using relative position
+     *
      * @param x Internal X coordinate
      * @param y Internal Y coordinate
      * @param z Internal Z coordinate
@@ -14,6 +15,7 @@ public interface Cuboid {
 
     /**
      * Get X position using index
+     *
      * @param index Volume cell index
      * @return Internal X coordinate
      */
@@ -21,6 +23,7 @@ public interface Cuboid {
 
     /**
      * Get Y position using index
+     *
      * @param index Volume cell index
      * @return Internal Y coordinate
      */
@@ -28,34 +31,50 @@ public interface Cuboid {
 
     /**
      * Get Z position using index
+     *
      * @param index Volume cell index
      * @return Internal Z coordinate
      */
     int getZ(int index);
 
-    /** Get cuboid width */
+    /**
+     * Get cuboid width
+     */
     int getWidth();
 
-    /** Get cuboid length */
+    /**
+     * Get cuboid length
+     */
     int getLength();
 
-    /** Get cuboid height */
+    /**
+     * Get cuboid height
+     */
     int getHeight();
 
-    /** Get cuboid inner volume - amount of cells inside */
+    /**
+     * Get cuboid inner volume - amount of cells inside
+     */
     int getSize();
 
-    /** Set cuboid width */
+    /**
+     * Set cuboid width
+     */
     void setWidth(int width);
 
-    /** Set cuboid height */
+    /**
+     * Set cuboid height
+     */
     void setHeight(int height);
 
-    /** Set cuboid length */
+    /**
+     * Set cuboid length
+     */
     void setLength(int length);
 
     /**
      * Check cell with coordinates x, y, z is inside
+     *
      * @param x Internal X coordinate
      * @param y Internal Y coordinate
      * @param z Internal Z coordinate
@@ -65,6 +84,7 @@ public interface Cuboid {
 
     /**
      * Check cell with index is inside
+     *
      * @return Is cell inside
      */
     boolean isInside(int index);

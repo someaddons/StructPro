@@ -2,3 +2,6 @@
 
 !/builds/*/bin
 !/builds/*/src
+
+!/builds/*/build.gradle
+!/builds/*/pom.xml

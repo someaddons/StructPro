@@ -4,16 +4,20 @@ import com.ternsip.structpro.Structpro;
 
 /**
  * Console message reporter [key = value]
+ *
  * @author Ternsip
  */
 public class Report {
 
-    /** Report resulting storage */
+    /**
+     * Report resulting storage
+     */
     private String result = "";
 
     /**
      * Add new word mapping
-     * @param key Posting key
+     *
+     * @param key   Posting key
      * @param value Posting value
      * @return Self instance
      */
@@ -24,7 +28,8 @@ public class Report {
 
     /**
      * Add new word mapping
-     * @param key Prefixing key
+     *
+     * @param key   Prefixing key
      * @param value Prefixing value
      * @return Self instance
      */
@@ -35,6 +40,7 @@ public class Report {
 
     /**
      * Post another report to the end
+     *
      * @param report Report to post
      * @return Self instance
      */
@@ -45,6 +51,7 @@ public class Report {
 
     /**
      * Prefix another report to start
+     *
      * @param report Report to prefix
      * @return Self instance
      */
@@ -55,23 +62,27 @@ public class Report {
 
     /**
      * Combine into one
-     * @param key Combining key
+     *
+     * @param key   Combining key
      * @param value Combining value
      * @return Combined key-value
      */
     private String combine(String key, String value) {
         String k = key == null ? "NULL" : key.replace("\n", "");
         String v = value == null ? "NULL" : value.replace("\n", "");
-        return  "[" + k + " = " + v + "]";
+        return "[" + k + " = " + v + "]";
     }
 
-    /** Print report to console */
+    /**
+     * Print report to console
+     */
     public void print() {
         System.out.println(toString());
     }
 
     /**
      * Convert report to string with mod sign
+     *
      * @return Converted result
      */
     @Override

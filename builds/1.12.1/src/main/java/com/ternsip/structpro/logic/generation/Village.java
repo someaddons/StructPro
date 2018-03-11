@@ -13,14 +13,16 @@ import java.util.Random;
 
 /**
  * Village constructor
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess"})
 public class Village extends Constructor {
 
     /**
      * Obtain array of village projections calibrated inside chunk
-     * @param world Target world object
+     *
+     * @param world  Target world object
      * @param chunkX Chunk X coordinate
      * @param chunkZ Chunk Z coordinate
      * @return Array of spawned projections
@@ -39,11 +41,12 @@ public class Village extends Constructor {
 
     /**
      * Generate projection set combined from village that spawned in specific position
-     * @param world Target world object
+     *
+     * @param world   Target world object
      * @param village Village structures
-     * @param chunkX Chunk X coordinate
-     * @param chunkZ Chunk Z coordinate
-     * @param seed Combination seed
+     * @param chunkX  Chunk X coordinate
+     * @param chunkZ  Chunk Z coordinate
+     * @param seed    Combination seed
      * @return Array of spawned projections
      */
     public static ArrayList<Projection> combine(final UWorld world, final ArrayList<Structure> village, final int chunkX, final int chunkZ, final long seed) {
@@ -78,7 +81,8 @@ public class Village extends Constructor {
 
     /**
      * Get drops in certain chunk in the world
-     * @param world Target world object
+     *
+     * @param world  Target world object
      * @param chunkX Chunk X coordinate
      * @param chunkZ Chunk Z coordinate
      * @return Amount of villages spawned in chunk
@@ -94,14 +98,15 @@ public class Village extends Constructor {
 
     /**
      * Get random for world chunk
-     * @param world Target world object
+     *
+     * @param world  Target world object
      * @param chunkX Chunk X coordinate
      * @param chunkZ Chunk Z coordinate
      * @return Random generator
      */
     private static Random getRandom(UWorld world, int chunkX, int chunkZ) {
         long seed = world.getSeed();
-        long chunkIndex = (long)chunkX << 32 | chunkZ & 0xFFFFFFFFL;
+        long chunkIndex = (long) chunkX << 32 | chunkZ & 0xFFFFFFFFL;
         Random random = new Random(chunkIndex);
         random.setSeed(random.nextLong());
         random.setSeed(random.nextLong() ^ chunkIndex);

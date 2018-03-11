@@ -18,30 +18,43 @@ import java.util.Random;
 /**
  * Schematic - Classical Minecraft schematic storage
  * Provide controls for schematic
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess"})
 public class Blueprint extends Volume implements Schema {
 
-    /** Tag file size limit in bytes */
+    /**
+     * Tag file size limit in bytes
+     */
     private static final long TAG_FILE_SIZE_LIMIT = 1024 * 1024 * 16;
 
-    /** Block ID array */
+    /**
+     * Block ID array
+     */
     private short[] blocks;
 
-    /** Block metadata array */
+    /**
+     * Block metadata array
+     */
     private byte[] metas;
 
-    /** Tag array */
+    /**
+     * Tag array
+     */
     private NBTTagCompound[] tiles;
 
-    /** Empty constructor */
-    Blueprint() {}
+    /**
+     * Empty constructor
+     */
+    Blueprint() {
+    }
 
     /**
      * Construct from extracted world part
-     * @param world World instance
-     * @param start Starting position
+     *
+     * @param world  World instance
+     * @param start  Starting position
      * @param volume Volume dimensions
      */
     public Blueprint(UWorld world, UBlockPos start, Volume volume) {
@@ -73,6 +86,7 @@ public class Blueprint extends Volume implements Schema {
 
     /**
      * Load schematic from file
+     *
      * @param file File to load
      * @throws IOException If schematic can not be loaded
      */
@@ -85,6 +99,7 @@ public class Blueprint extends Volume implements Schema {
 
     /**
      * Save as schematic to file
+     *
      * @param file Destination file
      * @throws IOException If schematic can not be saved
      */
@@ -94,6 +109,7 @@ public class Blueprint extends Volume implements Schema {
 
     /**
      * Read from schematic tag
+     *
      * @param tag Control tag
      * @throws IOException If schematic tag can not be read
      */
@@ -129,7 +145,7 @@ public class Blueprint extends Volume implements Schema {
         }
         setTiles(new NBTTagCompound[size]);
         NBTTagList tileEntities = tag.getTagList("TileEntities", Constants.NBT.TAG_COMPOUND);
-        for(int i = 0; i < tileEntities.tagCount(); i++) {
+        for (int i = 0; i < tileEntities.tagCount(); i++) {
             NBTTagCompound tile = tileEntities.getCompoundTagAt(i);
             int x = tile.getInteger("x");
             int y = tile.getInteger("y");
@@ -143,6 +159,7 @@ public class Blueprint extends Volume implements Schema {
 
     /**
      * Write to schematic tags
+     *
      * @return Control tag
      */
     private NBTTagCompound getSchematic() {
@@ -151,7 +168,6 @@ public class Blueprint extends Volume implements Schema {
         tag.setShort("Width", (short) getWidth());
         tag.setShort("Height", (short) getHeight());
         tag.setShort("Length", (short) getLength());
-        tag.setByteArray("AddBlocks", new byte[0]);
         byte[] blocksID = new byte[getBlocks().length];
         for (int i = 0; i < getBlocks().length; ++i) {
             blocksID[i] = (byte) getBlock(i);
@@ -171,7 +187,8 @@ public class Blueprint extends Volume implements Schema {
 
     /**
      * Combine all 8b-blocksID and 8b-addBlocks to 16b-block
-     * @param blocksID Vanilla block array
+     *
+     * @param blocksID  Vanilla block array
      * @param addBlocks Additional postfix array
      * @return Combined array of vanilla and additional blocks
      */
@@ -193,6 +210,7 @@ public class Blueprint extends Volume implements Schema {
 
     /**
      * Decompose to 8b-addBlocks from 16b-block id
+     *
      * @param blocksID Blocks id array
      * @return Decomposed array to AddBlocks
      */

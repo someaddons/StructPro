@@ -7,21 +7,27 @@ import net.minecraft.util.ResourceLocation;
 
 /**
  * Tile entity class wrapper
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class UEntityClass {
 
-    /** Native minecraft entity class */
+    /**
+     * Native minecraft entity class
+     */
     private Class<? extends Entity> entityClass;
 
-    /** Construct entity class from native minecraft entity class */
+    /**
+     * Construct entity class from native minecraft entity class
+     */
     public UEntityClass(Class<? extends Entity> entityClass) {
         this.entityClass = entityClass;
     }
 
     /**
      * Transform entity class to path
+     *
      * @return Name
      */
     public String getPath() {
@@ -31,6 +37,7 @@ public class UEntityClass {
 
     /**
      * Transform entity class to name
+     *
      * @return Name
      */
     public ResourceLocation getName() {
@@ -39,14 +46,17 @@ public class UEntityClass {
 
     /**
      * Construct entity by class in the world
+     *
      * @param world Target world
      * @return Spawned entity
-     * */
+     */
     public Entity construct(UWorld world) {
         return EntityList.newEntity(entityClass, world.getWorld());
     }
 
-    /** Return minecraft native entity class */
+    /**
+     * Return minecraft native entity class
+     */
     public Class<? extends Entity> getEntityClass() {
         return entityClass;
     }

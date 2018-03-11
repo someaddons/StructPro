@@ -4,38 +4,52 @@ import com.ternsip.structpro.universe.blocks.Directions;
 import com.ternsip.structpro.universe.blocks.UBlock;
 import com.ternsip.structpro.universe.blocks.UBlockPos;
 import com.ternsip.structpro.universe.utils.Report;
+import lombok.Getter;
 
 /**
  * Reflects information about cuboid stereo-metric state in the world
+ *
  * @author Ternsip
  */
 @SuppressWarnings({"unused"})
+@Getter
 public class Posture extends Volume {
 
-    /** Starting block position */
+    /**
+     * Starting block position
+     */
     private int posX, posY, posZ;
 
-    /** Rotation around X, Y, Z axis */
+    /**
+     * Rotation around X, Y, Z axis
+     */
     private int rotateX, rotateY, rotateZ;
 
-    /** Mirror flip towards X, Y, Z axis */
+    /**
+     * Mirror flip towards X, Y, Z axis
+     */
     private boolean flipX, flipY, flipZ;
 
-    /** Size towards X, Y, Z axis according to all transformations */
+    /**
+     * Size towards X, Y, Z axis according to all transformations
+     */
     private int sizeX, sizeY, sizeZ;
 
-    /** Ending block position according to all transformations */
+    /**
+     * Ending block position according to all transformations
+     */
     private int endX, endY, endZ;
 
     /**
      * Construct from Starting point, transformations and size
-     * @param posX Starting X position
-     * @param posY Starting Y position
-     * @param posZ Starting Z position
-     * @param flipX Flipping toward X axis
-     * @param flipY Flipping toward Y axis
-     * @param flipZ Flipping toward Z axis
-     * @param width Volume width
+     *
+     * @param posX   Starting X position
+     * @param posY   Starting Y position
+     * @param posZ   Starting Z position
+     * @param flipX  Flipping toward X axis
+     * @param flipY  Flipping toward Y axis
+     * @param flipZ  Flipping toward Z axis
+     * @param width  Volume width
      * @param height Volume height
      * @param length Volume length
      */
@@ -60,7 +74,9 @@ public class Posture extends Volume {
         this.sizeY = height;
         this.sizeZ = length;
         if (rotateY % 2 > 0) {
-            int tmp = sizeX; sizeX = sizeZ; sizeZ = tmp;
+            int tmp = sizeX;
+            sizeX = sizeZ;
+            sizeZ = tmp;
         }
         /*
         if (rotateX % 2 > 0) { int tmp = sizeY; sizeY = sizeZ; sizeZ = tmp;}
@@ -73,6 +89,7 @@ public class Posture extends Volume {
 
     /**
      * Get world position of volume index block
+     *
      * @param index Volume cell index
      * @return World block position
      */
@@ -82,6 +99,7 @@ public class Posture extends Volume {
 
     /**
      * Get world position of volume x, y, z block
+     *
      * @param x Volume x position
      * @param y Volume y position
      * @param z Volume z position
@@ -95,13 +113,19 @@ public class Posture extends Volume {
         /* ADD X rotations */
         /* ADD Z rotations */
         for (int i = 0; i < rotateY; ++i) {
-            int tmp = wz; wz = w - wx - 1; wx = tmp; tmp = w; w = l; l = tmp;
+            int tmp = wz;
+            wz = w - wx - 1;
+            wx = tmp;
+            tmp = w;
+            w = l;
+            l = tmp;
         }
         return new UBlockPos(wx + posX, wy + posY, wz + posZ);
     }
 
     /**
      * Get volume position of world (wx, wy, wz) block
+     *
      * @param wx World X position
      * @param wy World Y position
      * @param wz World Z position
@@ -113,10 +137,17 @@ public class Posture extends Volume {
         int z = wz - posZ;
         int w = getWidth(), h = getHeight(), l = getLength();
         if (rotateY % 2 > 0) {
-            int tmp = w; w = l; l = tmp;
+            int tmp = w;
+            w = l;
+            l = tmp;
         }
         for (int i = 0; i < rotateY; ++i) {
-            int tmp = x; x = l - z - 1; z = tmp; tmp = w; w = l; l = tmp;
+            int tmp = x;
+            x = l - z - 1;
+            z = tmp;
+            tmp = w;
+            w = l;
+            l = tmp;
         }
         /* ADD Z rotations */
         /* ADD X rotations */
@@ -128,8 +159,9 @@ public class Posture extends Volume {
 
     /**
      * Get world metadata of block state
+     *
      * @param block Target block
-     * @param meta Block metadata
+     * @param meta  Block metadata
      * @return transformed metadata
      */
     int getWorldMeta(UBlock block, byte meta) {
@@ -175,6 +207,7 @@ public class Posture extends Volume {
 
     /**
      * Extend posture towards and backwards X, Y, Z axis
+     *
      * @param x X-axis extension delta
      * @param y Y-axis extension delta
      * @param z Z-axis extension delta
@@ -187,6 +220,7 @@ public class Posture extends Volume {
 
     /**
      * Combine posture report
+     *
      * @return Generated report
      */
     @Override
@@ -197,40 +231,16 @@ public class Posture extends Volume {
                 .post("FLIP", "[X=" + flipX + ";Y=" + flipY + ";Z=" + flipZ + "]");
     }
 
-    public int getPosX() {
-        return posX;
+    public int getMidX() {
+        return (posX + endX) / 2;
     }
 
-    public int getPosY() {
-        return posY;
+    public int getMidY() {
+        return (posY + endY) / 2;
     }
 
-    public int getPosZ() {
-        return posZ;
-    }
-
-    public int getEndX() {
-        return endX;
-    }
-
-    public int getEndY() {
-        return endY;
-    }
-
-    public int getEndZ() {
-        return endZ;
-    }
-
-    public int getSizeX() {
-        return sizeX;
-    }
-
-    public int getSizeY() {
-        return sizeY;
-    }
-
-    public int getSizeZ() {
-        return sizeZ;
+    public int getMidZ() {
+        return (posZ + endZ) / 2;
     }
 
 }

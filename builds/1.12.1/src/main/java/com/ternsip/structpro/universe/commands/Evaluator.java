@@ -7,6 +7,8 @@ import com.ternsip.structpro.logic.generation.Pregen;
 import com.ternsip.structpro.logic.generation.Village;
 import com.ternsip.structpro.structure.*;
 import com.ternsip.structpro.universe.blocks.UBlockPos;
+import com.ternsip.structpro.universe.items.UItem;
+import com.ternsip.structpro.universe.items.UItems;
 import com.ternsip.structpro.universe.utils.Report;
 import com.ternsip.structpro.universe.utils.Utils;
 import com.ternsip.structpro.universe.utils.Variables;
@@ -14,31 +16,40 @@ import com.ternsip.structpro.universe.world.UWorld;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
  * Commands evaluator
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 public class Evaluator {
 
-    /** Undo projections */
-    private static final ArrayList<Projection> undo = new ArrayList<>();
+    /**
+     * Undo projections
+     */
+    private static final HashMap<UUID, ArrayList<Projection>> undo = new HashMap<>();
 
-    /** Wand cuboid block selections for each player */
-    private static final HashMap<EntityPlayer, AbstractMap.SimpleEntry<UBlockPos, UBlockPos>> wand = new HashMap<>();
+    /**
+     * Wand cuboid block selections for each player
+     */
+    private static final HashMap<UUID, AbstractMap.SimpleEntry<UBlockPos, UBlockPos>> wand = new HashMap<>();
 
-    /** Showing warning message about unknown command
-     * @param vars Variables to parse arguments
+    /**
+     * Showing warning message about unknown command
+     *
+     * @param vars   Variables to parse arguments
      * @param sender Who sends the command
      */
     static void execUnknown(Variables vars, ICommandSender sender) {
@@ -46,8 +57,10 @@ public class Evaluator {
         feedback(sender, "§4Unknown command§2 " + cmd);
     }
 
-    /** Displaying meta information for target command
-     * @param vars Variables to parse arguments
+    /**
+     * Displaying meta information for target command
+     *
+     * @param vars   Variables to parse arguments
      * @param sender Who sends the command
      */
     static void execHelp(Variables vars, ICommandSender sender) {
@@ -55,8 +68,10 @@ public class Evaluator {
         feedback(sender, Evaluator.cmdHelp(cmd));
     }
 
-    /** Paste something to the world
-     * @param vars Variables to parse arguments
+    /**
+     * Paste something to the world
+     *
+     * @param vars   Variables to parse arguments
      * @param sender Who sends the command
      */
     static void execPaste(Variables vars, ICommandSender sender) {
@@ -68,15 +83,18 @@ public class Evaluator {
         int rotateX = vars.get(new String[]{"rotatex", "rotx", "rx"}, 0);
         int rotateY = vars.get(new String[]{"rotatey", "roty", "ry"}, random.nextInt() % 4);
         int rotateZ = vars.get(new String[]{"rotatez", "rotz", "rz"}, 0);
-        boolean flipX = vars.get(new String[]{"flipx", "fx"},  random.nextBoolean());
+        boolean flipX = vars.get(new String[]{"flipx", "fx"}, random.nextBoolean());
         boolean flipY = vars.get(new String[]{"flipy", "fy"}, false);
         boolean flipZ = vars.get(new String[]{"flipz", "fz"}, random.nextBoolean());
         boolean isVillage = vars.get(new String[]{"village", "town", "city"}, false);
         boolean isInsecure = vars.get(new String[]{"insecure"}, false);
         posY = vars.get(new String[]{"auto"}, false) ? 0 : posY;
-        if (vars.get(new String[]{"wand"}, false) && sender instanceof EntityPlayer && wand.containsKey(sender)) {
-            UBlockPos pos = wand.get(sender).getValue();
-            posX = pos.getX(); posY = pos.getY(); posZ = pos.getZ();
+        UUID senderID = getSenderId(sender);
+        if (vars.get(new String[]{"wand"}, false) && sender instanceof EntityPlayer && wand.containsKey(senderID)) {
+            UBlockPos pos = wand.get(senderID).getValue();
+            posX = pos.getX();
+            posY = pos.getY();
+            posZ = pos.getZ();
         }
         String worldName = vars.get(new String[]{"world"});
         UWorld world = worldName == null ? new UWorld(sender.getEntityWorld()) : UWorld.getWorld(worldName);
@@ -84,11 +102,13 @@ public class Evaluator {
             feedback(sender, "No matching world");
             return;
         }
-        feedback(sender, Evaluator.cmdPaste(world, name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, isVillage, isInsecure));
+        feedback(sender, Evaluator.cmdPaste(world, name, posX, posY, posZ, rotateX, rotateY, rotateZ, flipX, flipY, flipZ, isVillage, isInsecure, senderID));
     }
 
-    /** Saves fragment from the world to schematic
-     * @param vars Variables to parse arguments
+    /**
+     * Saves fragment from the world to schematic
+     *
+     * @param vars   Variables to parse arguments
      * @param sender Who sends the command
      */
     static void execSave(Variables vars, ICommandSender sender) {
@@ -99,9 +119,10 @@ public class Evaluator {
         int width = vars.get(new String[]{"width", "w"}, 64);
         int height = vars.get(new String[]{"height", "h"}, 64);
         int length = vars.get(new String[]{"length", "l"}, 64);
-        if (vars.get(new String[]{"wand"}, false) && sender instanceof EntityPlayer && wand.containsKey(sender)) {
-            UBlockPos posK = wand.get(sender).getKey();
-            UBlockPos posV = wand.get(sender).getValue();
+        UUID senderId = getSenderId(sender);
+        if (vars.get(new String[]{"wand"}, false) && sender instanceof EntityPlayer && wand.containsKey(senderId)) {
+            UBlockPos posK = wand.get(senderId).getKey();
+            UBlockPos posV = wand.get(senderId).getValue();
             posX = Math.min(posK.getX(), posV.getX());
             posY = Math.min(posK.getY(), posV.getY());
             posZ = Math.min(posK.getZ(), posV.getZ());
@@ -118,17 +139,22 @@ public class Evaluator {
         feedback(sender, Evaluator.cmdSave(world, name, posX, posY, posZ, width, height, length));
     }
 
-    /** Undo previous paste command
-     * @param vars Variables to parse arguments
+    /**
+     * Undo previous paste command
+     *
+     * @param vars   Variables to parse arguments
      * @param sender Who sends the command
      */
     @SuppressWarnings({"unused"})
     static void execUndo(Variables vars, ICommandSender sender) {
-        feedback(sender, Evaluator.cmdUndo());
+        UUID senderId = getSenderId(sender);
+        feedback(sender, Evaluator.cmdUndo(senderId));
     }
 
-    /** Generate world region. Very high-weight for cpu-calculation resources command
-     * @param vars Variables to parse arguments
+    /**
+     * Generate world region. Very high-weight for cpu-calculation resources command
+     *
+     * @param vars   Variables to parse arguments
      * @param sender Who sends the command
      */
     static void execGen(Variables vars, ICommandSender sender) {
@@ -149,38 +175,20 @@ public class Evaluator {
     }
 
     /**
-     * Called when player touches block with wand
-     * @param player Player entity instance that touches block
-     * @param pos Touched block position
-     */
-    public static void touchBlock(EntityPlayer player, UBlockPos pos) {
-        feedback(player, "§ablock §d" + pos.getX() + " " + pos.getY() + " " + pos.getZ() + "§a selected");
-        wand.put(player, new AbstractMap.SimpleEntry<>(wand.containsKey(player) ? wand.get(player).getValue() : pos, pos));
-    }
-
-    /**
-     * Send chat feedback to sender
-     * @param sender The sender that will receive feedback
-     * @param message Text constituent of feedback
-     */
-    private static void feedback(ICommandSender sender, String message) {
-        sender.sendMessage(new TextComponentString(message));
-    }
-
-    /**
      * Paste schematic that has most similar name
-     * @param world Target world
-     * @param name Structure name
-     * @param posX X starting position
-     * @param posY Y starting position
-     * @param posZ Z starting position
-     * @param rotateX X axis rotation
-     * @param rotateY Y axis rotation
-     * @param rotateZ Z axis rotation
-     * @param flipX X axis flip
-     * @param flipY Y axis flip
-     * @param flipZ Z axis flip
-     * @param isVillage Paste entire village
+     *
+     * @param world      Target world
+     * @param name       Structure name
+     * @param posX       X starting position
+     * @param posY       Y starting position
+     * @param posZ       Z starting position
+     * @param rotateX    X axis rotation
+     * @param rotateY    Y axis rotation
+     * @param rotateZ    Z axis rotation
+     * @param flipX      X axis flip
+     * @param flipY      Y axis flip
+     * @param flipZ      Z axis flip
+     * @param isVillage  Paste entire village
      * @param isInsecure Projection will be insecure
      * @return Execution status
      */
@@ -189,7 +197,8 @@ public class Evaluator {
                                    int posX, int posY, int posZ,
                                    int rotateX, int rotateY, int rotateZ,
                                    boolean flipX, boolean flipY, boolean flipZ,
-                                   boolean isVillage, boolean isInsecure) {
+                                   boolean isVillage, boolean isInsecure,
+                                   UUID senderId) {
         final Pattern nPattern = Pattern.compile(".*" + Pattern.quote(name) + ".*", Pattern.CASE_INSENSITIVE);
         undo.clear();
         if (isVillage) {
@@ -199,15 +208,16 @@ public class Evaluator {
             }
             ArrayList<Projection> projections = Village.combine(world, town, posX >> 4, posZ >> 4, System.currentTimeMillis());
             for (Projection projection : projections) {
-                saveUndo(projection);
+                saveUndo(projection, senderId);
             }
             for (Projection projection : projections) {
                 Report report = projection.project(isInsecure);
                 report.print();
             }
+            world.notifyReload(new BlockPos(posX, posY, posZ), 512);
             return "§2Total spawned:§1 " + projections.size();
         } else {
-            ArrayList<Structure> candidates = new ArrayList<Structure>(){{
+            ArrayList<Structure> candidates = new ArrayList<Structure>() {{
                 addAll(Structures.structures.select(nPattern));
                 addAll(Structures.saves.select(nPattern));
             }};
@@ -226,22 +236,24 @@ public class Evaluator {
                     return report.toString();
                 }
             }
-            saveUndo(projection);
+            saveUndo(projection, senderId);
             Report report = projection.project(isInsecure);
             report.print();
             world.sound(new UBlockPos(posX, posY, posZ), SoundEvents.BLOCK_GLASS_PLACE, SoundCategory.BLOCKS, 1.0f);
+            world.notifyReload(new BlockPos(posX, posY, posZ), 512);
             return report.toString();
         }
     }
 
     /**
      * Save schematic
-     * @param world Target world
-     * @param name Structure name
-     * @param posX X starting position
-     * @param posY Y starting position
-     * @param posZ Z starting position
-     * @param width X axis size
+     *
+     * @param world  Target world
+     * @param name   Structure name
+     * @param posX   X starting position
+     * @param posY   Y starting position
+     * @param posZ   Z starting position
+     * @param width  X axis size
      * @param height Y axis size
      * @param length Z axis size
      * @return Execution status
@@ -270,6 +282,7 @@ public class Evaluator {
 
     /**
      * Print command help information
+     *
      * @return Command execution status
      */
     private static String cmdHelp(String chapter) {
@@ -295,7 +308,7 @@ public class Evaluator {
                     "sx=<int> sz=<int> " +
                     "stop=<bool>";
         }
-        return  "§2You can pass arguments by name \n" +
+        return "§2You can pass arguments by name \n" +
                 "§9PASTE SCHEMATIC:§a /spro paste \n" +
                 "§9SAVE SCHEMATIC:§a /spro save \n" +
                 "§9UNDO LAST ACTION:§a /spro undo \n" +
@@ -305,30 +318,33 @@ public class Evaluator {
     /**
      * Undo all session history
      * All projections applied insecure to restore data 1:1
+     *
      * @return Command execution status
      */
-    private static String cmdUndo() {
-        if (undo.isEmpty()) {
+    private static String cmdUndo(UUID senderID) {
+        if (!undo.containsKey(senderID)) {
             return "§4No undo data";
         }
-        for (Projection projection : undo) {
+        ArrayList<Projection> undoProjections = undo.get(senderID);
+        for (Projection projection : undoProjections) {
             projection.project(true).print();
             Posture pst = projection.getPosture();
             projection.getWorld().sound(new UBlockPos(pst.getPosX(), pst.getPosY(), pst.getPosZ()), SoundEvents.ENTITY_ENDERMEN_TELEPORT, SoundCategory.HOSTILE, 1.0f);
         }
-        undo.clear();
+        undo.remove(senderID);
         return "§2Undo done";
     }
 
     /**
      * Start pre-generation routine
-     * @param world Target world
-     * @param startX Starting chunk X coordinate
-     * @param startZ Starting chunk Z coordinate
-     * @param step Number of chunks to process per step
-     * @param size Number of chunks for x and z axis in each direction
-     * @param stop Deactivate generation
-     * @param skip Skip chunks with no structures
+     *
+     * @param world    Target world
+     * @param startX   Starting chunk X coordinate
+     * @param startZ   Starting chunk Z coordinate
+     * @param step     Number of chunks to process per step
+     * @param size     Number of chunks for x and z axis in each direction
+     * @param stop     Deactivate generation
+     * @param skip     Skip chunks with no structures
      * @param progress Start generation progress from given number
      * @return Command execution status
      */
@@ -349,17 +365,66 @@ public class Evaluator {
     }
 
     /**
+     * Called when player touches block with wand
+     *
+     * @param player Player entity instance that touches block
+     * @param pos    Touched block position
+     */
+    public static void touchBlock(EntityPlayer player, UBlockPos pos) {
+        feedback(player, "§ablock §d" + pos.getX() + " " + pos.getY() + " " + pos.getZ() + "§a selected");
+        UUID senderId = getSenderId(player);
+        wand.put(senderId, new AbstractMap.SimpleEntry<>(wand.containsKey(senderId) ? wand.get(senderId).getValue() : pos, pos));
+    }
+
+    /**
+     * Send chat feedback to sender
+     *
+     * @param sender  The sender that will receive feedback
+     * @param message Text constituent of feedback
+     */
+    public static void feedback(ICommandSender sender, String message) {
+        sender.sendMessage(new TextComponentString(message));
+    }
+
+
+    /**
+     * Get minecraft server instance
+     *
+     * @return Minecraft server
+     */
+    public static MinecraftServer getServer() {
+        return FMLCommonHandler.instance().getMinecraftServerInstance();
+    }
+
+    /**
      * Save undo data to history for projection
+     *
      * @param projection Projection to save
      */
-    private static void saveUndo(Projection projection) {
+    private static void saveUndo(Projection projection, UUID senderId) {
         if (projection.getSchema() instanceof Structure) {
             Posture mp = projection.getPosture().extend(Structure.MELT, Structure.MELT, Structure.MELT);
             UBlockPos start = new UBlockPos(mp.getPosX(), mp.getPosY(), mp.getPosZ());
             Volume volume = new Volume(mp.getSizeX(), mp.getSizeY(), mp.getSizeZ());
             Blueprint blueprint = new Blueprint(projection.getWorld(), start, volume);
             Posture posture = blueprint.getPosture(start.getX(), start.getY(), start.getZ(), 0, 0, 0, false, false, false);
-            undo.add(new Projection(projection.getWorld(), blueprint, posture, 0));
+            undo.putIfAbsent(senderId, new ArrayList<>());
+            undo.get(senderId).add(new Projection(projection.getWorld(), blueprint, posture, 0));
+        }
+    }
+
+    private static UUID getSenderId(ICommandSender sender) {
+        return sender.getCommandSenderEntity() == null ? new UUID(0, 0) : sender.getCommandSenderEntity().getPersistentID();
+    }
+
+    @SubscribeEvent
+    @SuppressWarnings({"ConstantConditions"})
+    public void onBlockBreak(BlockEvent.BreakEvent event) {
+        if (event.getPlayer().getHeldItemMainhand() != null &&
+                new UItem(event.getPlayer().getHeldItemMainhand().getItem()).getId() == UItems.WOODEN_HOE.getId() &&
+                event.getPlayer().isCreative()) {
+            event.setCanceled(true);
+            touchBlock(event.getPlayer(), new UBlockPos(event.getPos()));
         }
     }
 

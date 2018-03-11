@@ -12,7 +12,8 @@ import java.util.regex.PatternSyntaxException;
 
 /**
  * Items wrapper
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class UItems {
@@ -228,14 +229,19 @@ public class UItems {
     public static final UItem IRON_NUGGET = new UItem(Items.IRON_NUGGET);
     public static final UItem KNOWLEDGE_BOOK = new UItem(Items.KNOWLEDGE_BOOK);
 
-    /** Cache mapping for all possible metadata values for each item */
+    /**
+     * Cache mapping for all possible metadata values for each item
+     */
     private static final HashMap<UItem, ArrayList<Integer>> possibleMeta = new HashMap<>();
 
-    /** All possible items */
+    /**
+     * All possible items
+     */
     public static final Selector<UItem> items = new Selector<>();
 
     /**
      * Get item possible states
+     *
      * @param item Target item
      * @return Possible item metadata array
      */
@@ -273,7 +279,7 @@ public class UItems {
         }
 
         /* Add acceptable items */
-        for (UItem item: acceptable) {
+        for (UItem item : acceptable) {
             items.add(item.getPath(), item);
             items.add(String.valueOf(item.getId()), item);
         }

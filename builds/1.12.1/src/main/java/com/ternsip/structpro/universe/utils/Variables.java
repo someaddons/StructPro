@@ -7,23 +7,27 @@ import java.util.regex.Pattern;
 /**
  * Variables holds mapping variable name -> value
  * Providing easy access to variables
+ *
  * @author Ternsip
  */
 public class Variables {
 
-    /** Variables mapping */
+    /**
+     * Variables mapping
+     */
     private final HashMap<String, String> values = new HashMap<>();
 
     /**
      * Construct variables extracted from string
+     *
      * @param string Origin string for parsing
      */
     public Variables(String string) {
-        Pattern varPattern = Pattern.compile("[\\S]+[\\s]*=[\\s]*[\\S]+");
+        Pattern varPattern = Pattern.compile("[\\S]+[\\s]*=[\\s]*(([^\\s\"]+)|(\"[^\"]*\"))");
         Matcher m = varPattern.matcher(string);
         while (m.find()) {
-            String[] tokens = m.group().split("[ =]+");
-            values.put(tokens[0].toLowerCase(), tokens[1]);
+            String[] tokens = m.group().split("[=]+");
+            values.put(tokens[0].toLowerCase().trim(), tokens[1].replace("\"", "").trim());
         }
         for (String token : string.replaceAll("[\\S]+[\\s]*=[\\s]*[\\S]+", "").split(" ")) {
             if (token.length() > 0 && !values.containsKey(token)) {
@@ -34,7 +38,8 @@ public class Variables {
 
     /**
      * Get Integer variable if it exists, default value otherwise
-     * @param keys Array of keys for matching
+     *
+     * @param keys         Array of keys for matching
      * @param defaultValue Value as default
      * @return Variable value or default if not exists
      */
@@ -48,7 +53,8 @@ public class Variables {
 
     /**
      * Get Boolean variable if it exists, default value otherwise
-     * @param keys Array of keys for matching
+     *
+     * @param keys         Array of keys for matching
      * @param defaultValue Value as default
      * @return Variable value or default if not exists
      */
@@ -58,7 +64,8 @@ public class Variables {
 
     /**
      * Get String variable if it exists, default value otherwise
-     * @param keys Array of keys for matching
+     *
+     * @param keys         Array of keys for matching
      * @param defaultValue Value as default
      * @return Variable value or default if not exists
      */
@@ -68,6 +75,7 @@ public class Variables {
 
     /**
      * Get String variable if it exists, null otherwise
+     *
      * @param keys Array of keys for matching
      * @return Variable value or null if not exists
      */
@@ -80,8 +88,10 @@ public class Variables {
         return null;
     }
 
-    /** Manually add key variable with value
-     * @param key Variable name
+    /**
+     * Manually add key variable with value
+     *
+     * @param key   Variable name
      * @param value Variable value
      */
     public void put(String key, String value) {

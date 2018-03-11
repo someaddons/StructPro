@@ -8,23 +8,34 @@ import java.text.DecimalFormat;
 
 /**
  * Construct projection that determines blueprint state in the world
+ *
  * @author Ternsip
  */
 public class Projection implements Reportable {
 
-    /** Target world */
+    /**
+     * Target world
+     */
     private final UWorld world;
 
-    /** Target blueprint */
+    /**
+     * Target blueprint
+     */
     private final Schema schema;
 
-    /** Posture transformation */
+    /**
+     * Posture transformation
+     */
     private final Posture posture;
 
-    /** Generation seed */
+    /**
+     * Generation seed
+     */
     private final long seed;
 
-    /** Default constructor */
+    /**
+     * Default constructor
+     */
     public Projection(UWorld world, Schema schema, Posture posture, long seed) {
         this.world = world;
         this.schema = schema;
@@ -34,6 +45,7 @@ public class Projection implements Reportable {
 
     /**
      * Combine projection report
+     *
      * @return Generated report
      */
     @Override
@@ -46,6 +58,7 @@ public class Projection implements Reportable {
 
     /**
      * Project blueprint into the world according it posture and flags
+     *
      * @param isInsecure Projection will be insecure
      * @return Result report
      */

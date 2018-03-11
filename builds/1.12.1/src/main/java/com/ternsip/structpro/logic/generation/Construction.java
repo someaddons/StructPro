@@ -19,12 +19,15 @@ import java.util.Random;
 /**
  * Single Structure distributor
  * Unequivocally determine Structure positions
- * @author  Ternsip
+ *
+ * @author Ternsip
  */
 @SuppressWarnings({"WeakerAccess"})
 public class Construction extends Constructor {
 
-    /** Structures calibrate sets in attempting order */
+    /**
+     * Structures calibrate sets in attempting order
+     */
     private static final ArrayList<ArrayList<Structure>> spawnOrder = new ArrayList<ArrayList<Structure>>() {{
         add(Structures.structures.select());
         add(Structures.structures.select(new Method[]{Method.BASIC}));
@@ -37,7 +40,9 @@ public class Construction extends Constructor {
         add(Structures.structures.select(new Method[]{Method.SKY, Method.HILL, Method.UNDERGROUND}));
     }};
 
-    /** Structures calibrate sets in attempting order for each biomus */
+    /**
+     * Structures calibrate sets in attempting order for each biomus
+     */
     private static final HashMap<Biomus, ArrayList<ArrayList<Structure>>> bioOrder = new HashMap<Biomus, ArrayList<ArrayList<Structure>>>() {{
         for (Biomus biomus : Biomus.values()) {
             ArrayList<ArrayList<Structure>> order = new ArrayList<>();
@@ -58,7 +63,8 @@ public class Construction extends Constructor {
 
     /**
      * Obtain array of construction projections calibrated inside chunk
-     * @param world Target world object
+     *
+     * @param world  Target world object
      * @param chunkX Chunk X coordinate
      * @param chunkZ Chunk Z coordinate
      * @return Array of spawned projections
@@ -101,14 +107,15 @@ public class Construction extends Constructor {
 
     /**
      * Get random generator for specific world chunk
-     * @param world Target world object
+     *
+     * @param world  Target world object
      * @param chunkX Chunk X coordinate
      * @param chunkZ Chunk Z coordinate
      * @return Random generator
      */
     private static Random getRandom(UWorld world, int chunkX, int chunkZ) {
         long seed = world.getSeed();
-        long chunkIndex = (long)chunkX << 32 | chunkZ & 0xFFFFFFFFL;
+        long chunkIndex = (long) chunkX << 32 | chunkZ & 0xFFFFFFFFL;
         Random random = new Random(chunkIndex);
         random.setSeed(random.nextLong() ^ seed);
         random.setSeed(random.nextLong() ^ chunkIndex);
